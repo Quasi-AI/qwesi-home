@@ -1,0 +1,176 @@
+/* stylelint-disable at-rule-no-unknown */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* stylelint-enable at-rule-no-unknown */
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+    /* Prevent zoom on iOS */
+    -webkit-text-size-adjust: 100%;
+    /* Support for safe areas */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    font-family: "Poppins", Arial, Helvetica, sans-serif;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 font-sans antialiased;
+    /* Prevent overscroll bounce on iOS */
+    overscroll-behavior: none;
+  }
+
+  /* Responsive font scaling */
+  @media (max-width: 319px) {
+    html { font-size: 12px; }
+  }
+  
+  @media (min-width: 320px) and (max-width: 639px) {
+    html { font-size: 14px; }
+  }
+}
+
+@layer components {
+  /* Responsive button system */
+  .btn {
+    @apply font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+    @apply watch:px-2 watch:py-1 watch:text-xxs watch:rounded;
+    @apply mobile:px-3 mobile:py-2 mobile:text-sm mobile:rounded-md;
+    @apply sm:px-4 sm:py-2 sm:text-base sm:rounded-lg;
+    @apply md:px-6 md:py-3 md:text-base md:rounded-lg;
+  }
+
+  .btn-sm {
+    @apply watch:px-1 watch:py-0.5 watch:text-xxs;
+    @apply mobile:px-2 mobile:py-1 mobile:text-xs;
+    @apply sm:px-3 sm:py-1.5 sm:text-sm;
+  }
+
+  .btn-lg {
+    @apply watch:px-3 watch:py-2 watch:text-xs;
+    @apply mobile:px-4 mobile:py-3 mobile:text-base;
+    @apply sm:px-8 sm:py-4 sm:text-lg;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 border border-blue-600;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-gray-800 hover:bg-gray-100 border border-gray-300;
+  }
+
+  .btn-success {
+    @apply bg-green-600 text-white hover:bg-green-700 border border-green-600;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700 border border-red-600;
+  }
+
+  .btn-warning {
+    @apply bg-orange-500 text-white hover:bg-orange-600 border border-orange-500;
+  }
+
+  /* Responsive card system */
+  .card {
+    @apply bg-white rounded-xl border border-gray-200 mb-6;
+    @apply watch:p-2 watch:rounded-lg watch:mb-2;
+    @apply mobile:p-3 mobile:rounded-lg mobile:mb-3;
+    @apply sm:p-4 sm:mb-4;
+    @apply md:p-6 md:mb-6;
+    @apply lg:p-8;
+  }
+
+  .card-sm {
+    @apply watch:p-1 watch:mb-1;
+    @apply mobile:p-2 mobile:mb-2;
+    @apply sm:p-3 sm:mb-3;
+  }
+
+  /* Responsive input system */
+  .input {
+    @apply w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-150;
+    @apply watch:h-8 watch:px-2 watch:text-xs watch:rounded;
+    @apply mobile:h-10 mobile:px-3 mobile:text-sm mobile:rounded-md;
+    @apply sm:h-12 sm:px-4 sm:text-base sm:rounded-lg;
+    @apply md:h-[50px] md:px-5;
+  }
+
+  /* Responsive text utilities */
+  .text-responsive-xs {
+    @apply watch:text-xxs mobile:text-xs sm:text-sm md:text-base;
+  }
+
+  .text-responsive-sm {
+    @apply watch:text-xs mobile:text-sm sm:text-base md:text-lg;
+  }
+
+  .text-responsive-base {
+    @apply watch:text-xs mobile:text-base sm:text-lg md:text-xl;
+  }
+
+  .text-responsive-lg {
+    @apply watch:text-sm mobile:text-lg sm:text-xl md:text-2xl;
+  }
+
+  .text-responsive-xl {
+    @apply watch:text-base mobile:text-xl sm:text-2xl md:text-3xl;
+  }
+
+  .text-responsive-2xl {
+    @apply watch:text-lg mobile:text-2xl sm:text-3xl md:text-4xl;
+  }
+
+  /* Responsive spacing utilities */
+  .space-responsive {
+    @apply watch:space-y-1 mobile:space-y-2 sm:space-y-3 md:space-y-4 lg:space-y-6;
+  }
+
+  .gap-responsive {
+    @apply watch:gap-1 mobile:gap-2 sm:gap-3 md:gap-4 lg:gap-6;
+  }
+
+  .p-responsive {
+    @apply watch:p-1 mobile:p-2 sm:p-3 md:p-4 lg:p-6;
+  }
+
+  .m-responsive {
+    @apply watch:m-1 mobile:m-2 sm:m-3 md:m-4 lg:m-6;
+  }
+
+  /* Touch-friendly interactive elements */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+
+  /* Smartwatch optimized components */
+  .watch-card {
+    @apply watch:p-1 watch:rounded watch:text-xxs watch:space-y-0.5;
+  }
+
+  .watch-button {
+    @apply watch:h-8 watch:px-2 watch:text-xxs watch:rounded;
+  }
+
+  /* Mobile-first grid system */
+  .grid-responsive {
+    @apply grid watch:grid-cols-1 mobile:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+
+  .grid-responsive-2 {
+    @apply grid watch:grid-cols-1 mobile:grid-cols-1 sm:grid-cols-2;
+  }
+
+  /* Responsive container */
+  .container-responsive {
+    @apply w-full mx-auto;
+    @apply watch:px-1 watch:max-w-watch;
+    @apply mobile:px-2 mobile:max-w-sm;
+    @apply sm:px-4 sm:max-w-2xl;
+    @apply md:px-6 md:max-w-4xl;
+    @apply lg:px-8 lg:max-w-6xl;
+    @apply xl:px-12 xl:max-w-7xl;
+  }
+}
