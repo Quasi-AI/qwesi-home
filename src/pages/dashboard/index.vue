@@ -6,15 +6,15 @@
         <!-- Main Content -->
         <div class="flex-1 flex flex-col">
             <!-- Top Navigation -->
-            <header class="bg-white border-b border-gray-200 px-6 py-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <header class="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                    <div class="text-center sm:text-left">
+                        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
                         <p class="text-sm text-gray-600">Welcome back, {{ displayName }}</p>
                     </div>
 
                     <!-- Profile Dropdown -->
-                    <div class="relative">
+                    <div class="relative flex justify-center sm:justify-end">
                         <button @click="profileMenuOpen = !profileMenuOpen"
                             class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors">
                             <div v-if="user.profileImage"
@@ -34,7 +34,7 @@
 
                         <!-- Profile Menu -->
                         <div v-if="profileMenuOpen"
-                            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
+                            class="absolute right-0 sm:right-0 left-0 sm:left-auto mt-2 w-full sm:w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
                             <button @click="editProfile"
                                 class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Edit Profile

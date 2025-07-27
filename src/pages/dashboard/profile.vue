@@ -63,7 +63,7 @@
 
                                     <input ref="fileInput" type="file" accept="image/*" @change="handleImageUpload"
                                         class="hidden" />
-                                    <div class="flex space-x-2">
+                                    <div class="flex justify-center sm:justify-start space-x-2">
                                         <button @click="triggerFileInput" :disabled="uploading"
                                             class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                                             {{ uploading ? 'Uploading...' : 'Choose Image' }}

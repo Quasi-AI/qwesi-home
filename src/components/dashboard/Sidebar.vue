@@ -81,7 +81,7 @@ const props = defineProps({
     }
 })
 
-const isCollapsed = ref(false)
+const isCollapsed = ref(true)
 
 
 
