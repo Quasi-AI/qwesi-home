@@ -23,6 +23,18 @@ export const useAuthStore = defineStore("auth", {
   },
 
   actions: {
+    // Initialize auth state from localStorage
+    initializeAuth() {
+      if (process.client) {
+        const storedToken = localStorage.getItem("auth_token");
+        if (storedToken) {
+          this.token = storedToken;
+          this.isAuthenticated = true;
+          // Note: user will be fetched by checkAuth if needed
+        }
+      }
+    },
+
     async login(data: LoginData) {
       this.loading = true;
       try {
@@ -88,10 +100,10 @@ export const useAuthStore = defineStore("auth", {
         }
       } catch (error: any) {
         console.error("Signup error in auth store:", error);
-        
+
         // Try to extract error message
         let errorMessage = "Signup failed. Please try again.";
-        
+
         if (error.data) {
           errorMessage = error.data.message || error.data.error || errorMessage;
         } else if (error.statusMessage) {
@@ -99,7 +111,7 @@ export const useAuthStore = defineStore("auth", {
         } else if (error.message) {
           errorMessage = error.message;
         }
-        
+
         return { success: false, error: errorMessage };
       } finally {
         this.loading = false;
@@ -107,28 +119,12 @@ export const useAuthStore = defineStore("auth", {
     },
 
     async logout() {
-      try {
-        // Optional: Call logout API endpoint
-        if (this.token) {
-          await $fetch("/api/auth/logout", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${this.token}`,
-            },
-          });
-        }
-      } catch (error: any) {
-        console.error("Logout error:", error);
-      } finally {
-        // Clear local state
-        this.user = null;
-        this.token = null;
-        this.isAuthenticated = false;
+      this.user = null;
+      this.token = null;
+      this.isAuthenticated = false;
 
-        // Clear stored token
-        if (process.client) {
-          localStorage.removeItem("auth_token");
-        }
+      if (process.client) {
+        localStorage.removeItem("auth_token");
       }
     },
 

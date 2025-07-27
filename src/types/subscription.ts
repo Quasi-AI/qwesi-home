@@ -38,6 +38,7 @@ export interface SubscriptionResponse {
   success: boolean;
   subscription?: Subscription;
   plans?: SubscriptionPlan[];
+  checkoutUrl?: string;
   message?: string;
 }
 
@@ -48,4 +49,12 @@ export interface CreateSubscriptionData {
 
 export interface UpdatePaymentMethodData {
   paymentMethodId: string;
+}
+
+export interface CheckoutData {
+  email: string;
+}
+
+export interface CancelSubscriptionData {
+  email: string;
 }

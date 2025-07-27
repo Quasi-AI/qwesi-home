@@ -84,7 +84,7 @@
         </div>
 
         <!-- Pro Modal -->
-        <ProModal v-model="showProModal" mode="upgrade" :loading="upgrading" @submit="handleProUpgrade" />
+        <ProModal v-model="showProModal" mode="upgrade" />
     </div>
 </template>
 
@@ -104,9 +104,6 @@ const authStore = useAuthStore()
 const user = computed(() => authStore.getUser || {})
 const profileMenuOpen = ref(false)
 const showProModal = ref(false)
-const upgrading = ref(false)
-
-
 
 // Stats data
 const stats = ref({
@@ -164,26 +161,6 @@ const editProfile = () => {
 const handleLogout = async () => {
     await authStore.logout()
     router.push('/')
-}
-
-const handleProUpgrade = async (formData) => {
-    upgrading.value = true
-
-    try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000))
-
-        // Store payment info (in real app, this would be sent to payment processor)
-        localStorage.setItem('paymentInfo', JSON.stringify(formData))
-        localStorage.setItem('proSubscription', 'true')
-
-        showProModal.value = false
-        alert('Pro subscription activated! Welcome to Qwesi AI Pro.')
-    } catch (error) {
-        console.error('Upgrade error:', error)
-    } finally {
-        upgrading.value = false
-    }
 }
 
 // Lifecycle

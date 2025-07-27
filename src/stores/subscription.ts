@@ -6,6 +6,8 @@ import type {
   Subscription,
   CreateSubscriptionData,
   UpdatePaymentMethodData,
+  CheckoutData,
+  CancelSubscriptionData,
 } from "~/types/subscription";
 
 export const useSubscriptionStore = defineStore("subscription", {
@@ -35,6 +37,9 @@ export const useSubscriptionStore = defineStore("subscription", {
           "/api/subscription",
           {
             method: "GET",
+            headers: {
+              Authorization: `Bearer ${this.getAuthToken()}`,
+            },
           }
         );
 
@@ -63,6 +68,9 @@ export const useSubscriptionStore = defineStore("subscription", {
           "/api/subscription/plans",
           {
             method: "GET",
+            headers: {
+              Authorization: `Bearer ${this.getAuthToken()}`,
+            },
           }
         );
 
@@ -82,6 +90,37 @@ export const useSubscriptionStore = defineStore("subscription", {
       }
     },
 
+    async createCheckoutSession(data: CheckoutData) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const response = await $fetch<SubscriptionResponse>(
+          "/api/subscription/checkout",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${this.getAuthToken()}`,
+            },
+            body: data,
+          }
+        );
+
+        if (response.success && response.checkoutUrl) {
+          return { success: true, checkoutUrl: response.checkoutUrl };
+        } else {
+          this.error = response.message || "Failed to create checkout session";
+          return { success: false, error: this.error };
+        }
+      } catch (error) {
+        console.error("Create checkout session error:", error);
+        this.error = "Failed to create checkout session";
+        return { success: false, error: this.error };
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async createSubscription(data: CreateSubscriptionData) {
       this.loading = true;
       this.error = null;
@@ -91,6 +130,9 @@ export const useSubscriptionStore = defineStore("subscription", {
           "/api/subscription",
           {
             method: "POST",
+            headers: {
+              Authorization: `Bearer ${this.getAuthToken()}`,
+            },
             body: data,
           }
         );
@@ -111,7 +153,7 @@ export const useSubscriptionStore = defineStore("subscription", {
       }
     },
 
-    async cancelSubscription() {
+    async cancelSubscription(data: CancelSubscriptionData) {
       this.loading = true;
       this.error = null;
 
@@ -120,12 +162,20 @@ export const useSubscriptionStore = defineStore("subscription", {
           "/api/subscription/cancel",
           {
             method: "POST",
+            headers: {
+              Authorization: `Bearer ${this.getAuthToken()}`,
+            },
+            body: data,
           }
         );
 
-        if (response.success && response.subscription) {
-          this.currentSubscription = response.subscription;
-          return { success: true, subscription: response.subscription };
+        if (response.success) {
+          // Update local subscription status
+          if (this.currentSubscription) {
+            this.currentSubscription.status = "canceled";
+            this.currentSubscription.cancelAtPeriodEnd = true;
+          }
+          return { success: true, message: response.message };
         } else {
           this.error = response.message || "Failed to cancel subscription";
           return { success: false, error: this.error };
@@ -148,6 +198,9 @@ export const useSubscriptionStore = defineStore("subscription", {
           "/api/subscription/payment-method",
           {
             method: "PUT",
+            headers: {
+              Authorization: `Bearer ${this.getAuthToken()}`,
+            },
             body: data,
           }
         );
@@ -166,6 +219,14 @@ export const useSubscriptionStore = defineStore("subscription", {
       } finally {
         this.loading = false;
       }
+    },
+
+    getAuthToken() {
+      // Get token from localStorage or auth store
+      if (process.client) {
+        return localStorage.getItem("auth_token") || "";
+      }
+      return "";
     },
 
     clearError() {

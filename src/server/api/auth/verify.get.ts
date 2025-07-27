@@ -11,28 +11,26 @@ export default defineEventHandler(async (event) => {
 
   const token = authHeader.replace("Bearer ", "");
 
-  // Mock token validation - in real app, verify JWT token
-  if (token.startsWith("mock-jwt-token-")) {
-    // Extract user info from token (in real app, decode JWT)
-    const user = {
-      id: "1",
-      email: "user@example.com",
-      firstName: "User",
-      lastName: "Example",
-      profileImage: null,
-      phone: null,
-      isPro: false,
-    };
+  try {
+    // Verify token with external API
+    const response = await $fetch(
+      "https://dark-caldron-448714-u5.appspot.com/qwesi-details",
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
 
     return {
       success: true,
-      user,
+      user: response,
       message: "Token valid",
     };
+  } catch (error: any) {
+    console.error("Token verification error:", error);
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Invalid token",
+    });
   }
-
-  throw createError({
-    statusCode: 401,
-    statusMessage: "Invalid token",
-  });
 });

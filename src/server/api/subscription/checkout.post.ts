@@ -20,24 +20,22 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const response = await $fetch(
-      "https://dark-caldron-448714-u5.appspot.com/api/cancel-subscription",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: { email },
-      }
-    );
+    const response = await $fetch('https://dark-caldron-448714-u5.appspot.com/api/create-checkout-session', {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: { email }
+    });
 
     return {
       success: true,
-      message: "Subscription cancelled successfully",
+      checkoutUrl: response.checkoutUrl,
+      message: "Checkout session created successfully"
     };
   } catch (error: any) {
-    console.error("Stripe cancel subscription error:", error);
+    console.error('Stripe checkout error:', error);
     throw createError({
       statusCode: 500,
-      statusMessage: "Failed to cancel subscription",
+      statusMessage: "Failed to create checkout session",
     });
   }
-});
+}); 

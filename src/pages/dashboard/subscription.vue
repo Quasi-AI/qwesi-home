@@ -97,7 +97,7 @@
                                     <div>
                                         <div class="flex items-center space-x-2 mb-1">
                                             <span class="font-medium text-gray-900">Visa ending in {{ maskedCardNumber
-                                            }}</span>
+                                                }}</span>
                                             <span
                                                 class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                 Default
@@ -213,7 +213,7 @@
                                 30-day free trial
                             </li>
                         </ul>
-                        <button v-if="isPro" @click="cancelSubscription"
+                        <button v-if="isPro" @click="showCancelModal = true"
                             class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors">
                             Cancel Subscription
                         </button>
@@ -227,8 +227,10 @@
         </div>
 
         <!-- Upgrade Modal -->
-        <ProModal v-model="showUpgradeModal" mode="upgrade" :loading="subscriptionStore.isLoading"
-            @submit="handleUpgrade" />
+        <ProModal v-model="showUpgradeModal" mode="upgrade" :loading="subscriptionStore.isLoading" />
+
+        <!-- Cancel Subscription Modal -->
+        <ProModal v-model="showCancelModal" mode="cancel" :loading="subscriptionStore.isLoading" />
 
         <!-- Update Payment Modal -->
         <ProModal v-model="showUpdatePaymentModal" mode="update" :loading="subscriptionStore.isLoading"
@@ -251,9 +253,8 @@ const subscriptionStore = useSubscriptionStore()
 // User state
 const user = computed(() => authStore.getUser || {})
 const showUpgradeModal = ref(false)
+const showCancelModal = ref(false)
 const showUpdatePaymentModal = ref(false)
-
-
 
 // Computed subscription data
 const isPro = computed(() => subscriptionStore.isPro)
@@ -270,25 +271,6 @@ const maskedCardNumber = computed(() => {
 })
 
 // Methods
-const handleUpgrade = async (formData) => {
-    try {
-        const result = await subscriptionStore.createSubscription({
-            planId: 'pro_monthly',
-            paymentMethodId: 'pm_' + Date.now() // Mock payment method ID
-        })
-
-        if (result.success) {
-            showUpgradeModal.value = false
-            alert('Pro subscription activated! Welcome to Qwesi AI Pro.')
-        } else {
-            alert(result.error || 'Failed to create subscription')
-        }
-    } catch (error) {
-        console.error('Upgrade error:', error)
-        alert('An unexpected error occurred')
-    }
-}
-
 const handleUpdatePayment = async (formData) => {
     try {
         const result = await subscriptionStore.updatePaymentMethod({
@@ -304,23 +286,6 @@ const handleUpdatePayment = async (formData) => {
     } catch (error) {
         console.error('Update payment error:', error)
         alert('An unexpected error occurred')
-    }
-}
-
-const cancelSubscription = async () => {
-    if (confirm('Are you sure you want to cancel your Pro subscription?')) {
-        try {
-            const result = await subscriptionStore.cancelSubscription()
-
-            if (result.success) {
-                alert('Subscription cancelled. You can upgrade again anytime.')
-            } else {
-                alert(result.error || 'Failed to cancel subscription')
-            }
-        } catch (error) {
-            console.error('Cancel subscription error:', error)
-            alert('An unexpected error occurred')
-        }
     }
 }
 

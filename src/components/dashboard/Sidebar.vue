@@ -37,6 +37,21 @@
                     </NuxtLink>
                 </li>
                 <li>
+                    <NuxtLink to="/dashboard/profile"
+                        class="flex items-center text-sm font-medium rounded-lg transition-colors" :class="[
+                            $route.path === '/dashboard/profile'
+                                ? 'bg-blue-50 text-blue-700'
+                                : 'text-gray-700 hover:bg-gray-50',
+                            isCollapsed ? 'justify-center p-2' : 'px-3 py-2'
+                        ]" :title="isCollapsed ? 'Profile' : ''">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <span v-if="!isCollapsed" class="ml-3">Profile</span>
+                    </NuxtLink>
+                </li>
+                <li>
                     <NuxtLink to="/dashboard/subscription"
                         class="flex items-center text-sm font-medium rounded-lg transition-colors" :class="[
                             $route.path === '/dashboard/subscription'
