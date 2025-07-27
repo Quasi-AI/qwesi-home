@@ -1,7 +1,7 @@
 <template>
     <div class="min-h-screen bg-white">
         <!-- Header/Navigation -->
-        <header class="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <header class="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-50 shadow-sm">
             <div class="px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16">
                     <!-- Logo -->
@@ -15,18 +15,18 @@
                             activeSection === 'home'
                                 ? 'text-green-600 font-medium'
                                 : 'text-gray-600 hover:text-gray-900'
-                        ]" class="cursor-pointer">Home</a>
+                        ]" class="cursor-pointer transition-colors duration-200">Home</a>
                         <a href="#features" @click="scrollToFeatures" :class="[
                             activeSection === 'features'
                                 ? 'text-green-600 font-medium'
                                 : 'text-gray-600 hover:text-gray-900'
-                        ]" class="cursor-pointer">How I work</a>
+                        ]" class="cursor-pointer transition-colors duration-200">How I work</a>
                     </nav>
 
                     <!-- Desktop CTA Buttons -->
                     <div class="hidden md:flex items-center space-x-3">
                         <a href="tel:+12019790148"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors">
+                            class="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors shadow-sm">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path
                                     d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
@@ -58,7 +58,7 @@
 
                     <!-- Mobile Menu Button -->
                     <button @click="toggleMobileMenu"
-                        class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        class="md:hidden p-2 rounded-lg hover:bg-gray-100/50 transition-colors">
                         <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path v-if="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 6h16M4 12h16M4 18h16" />
@@ -69,49 +69,48 @@
                 </div>
 
                 <!-- Mobile Menu -->
-                <div v-if="mobileMenuOpen" class="md:hidden border-t border-gray-200 bg-white">
+                <div v-if="mobileMenuOpen" class="md:hidden border-t border-gray-200/50 bg-white/90 backdrop-blur-md">
                     <div class="px-2 pt-2 pb-3 space-y-1">
                         <a href="#" @click="scrollToTop" :class="[
                             activeSection === 'home'
-                                ? 'block px-3 py-2 text-green-600 font-medium hover:bg-gray-50 rounded'
-                                : 'block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded'
-                        ]" class="cursor-pointer">Home</a>
+                                ? 'block px-3 py-2 text-green-600 font-medium hover:bg-gray-50/50 rounded'
+                                : 'block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50/50 rounded'
+                        ]" class="cursor-pointer transition-colors duration-200">Home</a>
                         <a href="#features" @click="scrollToFeatures" :class="[
                             activeSection === 'features'
-                                ? 'block px-3 py-2 text-green-600 font-medium hover:bg-gray-50 rounded'
-                                : 'block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded'
-                        ]" class="cursor-pointer">How I work</a>
-                        <div class="pt-4 space-y-2">
-                            <a href="tel:+12019790148"
-                                class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-700 transition-colors">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                                </svg>
-                                <span>Call Me</span>
-                            </a>
-                            <NuxtLink v-if="!authStore.isLoggedIn" to="/auth/login"
-                                class="w-full bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow-md flex items-center justify-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1">
-                                    </path>
-                                </svg>
-                                <span>Login</span>
-                            </NuxtLink>
-                            <NuxtLink v-else to="/dashboard"
-                                class="w-full bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow-md flex items-center justify-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z">
-                                    </path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z">
-                                    </path>
-                                </svg>
-                                <span>Dashboard</span>
-                            </NuxtLink>
-                        </div>
+                                ? 'block px-3 py-2 text-green-600 font-medium hover:bg-gray-50/50 rounded'
+                                : 'block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50/50 rounded'
+                        ]" class="cursor-pointer transition-colors duration-200">How I work</a>
+
+                        <a href="tel:+12019790148"
+                            class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-700 transition-colors shadow-sm">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                            </svg>
+                            <span>Call Me</span>
+                        </a>
+                        <NuxtLink v-if="!authStore.isLoggedIn" to="/auth/login"
+                            class="w-full bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow-md flex items-center justify-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1">
+                                </path>
+                            </svg>
+                            <span>Login</span>
+                        </NuxtLink>
+                        <NuxtLink v-else to="/dashboard"
+                            class="w-full bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow-md flex items-center justify-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z">
+                                </path>
+                            </svg>
+                            <span>Dashboard</span>
+                        </NuxtLink>
                     </div>
                 </div>
             </div>
@@ -123,7 +122,7 @@
                 <div class="grid lg:grid-cols-2 gap-12 items-center">
                     <!-- Left Content -->
                     <div class="space-y-8">
-                        <h1 class="text-lg lg:text-xl font-medium text-gray-900 leading-tight">
+                        <h1 class="text-3xl lg:text-xl font-medium text-gray-900 leading-tight">
                             Qwesi - Your 24/7 Career & Recruitment Assistant
                             <span class="inline-block w-3 h-3 bg-green-500 rounded-full ml-2"></span>
                         </h1>
@@ -152,14 +151,29 @@
                                 </button>
                             </div>
 
-                            <div class="flex items-center space-x-3">
-                                <button @click="openDemoModal"
-                                    class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M8 5v10l8-5-8-5z" />
-                                    </svg>
-                                </button>
-                                <span class="text-gray-900 font-medium">Watch demo Video</span>
+                            <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-all duration-300 cursor-pointer group"
+                                @click="openDemoModal">
+                                <div class="relative">
+                                    <button
+                                        class="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-110 group-hover:scale-110">
+                                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M8 5v10l8-5-8-5z" />
+                                        </svg>
+                                    </button>
+                                    <div class="absolute inset-0 bg-blue-600 rounded-full animate-ping opacity-20">
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <span
+                                        class="text-gray-900 font-semibold text-lg group-hover:text-blue-600 transition-colors duration-300">Watch
+                                        Demo Video</span>
+                                    <p class="text-gray-600 text-sm mt-1">See Qwesi in action</p>
+                                </div>
+                                <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors duration-300"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7"></path>
+                                </svg>
                             </div>
                         </div>
                     </div>
