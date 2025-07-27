@@ -12,28 +12,54 @@ export default defineEventHandler(async (event) => {
   const token = authHeader.replace("Bearer ", "");
   const body = await readBody(event);
 
-  // Mock token validation - in real app, verify JWT token
-  if (token.startsWith("mock-jwt-token-")) {
-    // Update user data (in real app, update in database)
-    const updatedUser = {
-      id: "1",
-      email: body.email || "user@example.com",
-      firstName: body.firstName || "User",
-      lastName: body.lastName || "Example",
-      profileImage: body.profileImage || null,
-      phone: body.phone || null,
-      isPro: false,
-    };
+  // Map the data to match external API expectations
+  const apiPayload = {
+    name: body.name,
+    email: body.email,
+    dob: body.dob,
+  };
+
+  try {
+    const response = await $fetch(
+      "https://dark-caldron-448714-u5.appspot.com/qwesi-edit-profile",
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: apiPayload,
+      }
+    );
 
     return {
       success: true,
-      user: updatedUser,
-      message: "Profile updated successfully",
+      user: (response as any).user || (response as any).data,
+      message: (response as any).message || "Profile updated successfully",
     };
-  }
+  } catch (error: any) {
+    console.error("Profile update error:", error);
 
-  throw createError({
-    statusCode: 401,
-    statusMessage: "Invalid token",
-  });
+    if (error.statusCode === 401) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized - Invalid or expired token",
+      });
+    }
+
+    if (error.statusCode === 400) {
+      throw createError({
+        statusCode: 400,
+        statusMessage:
+          error.data?.message ||
+          error.statusMessage ||
+          "Bad request - check your data format",
+      });
+    }
+
+    throw createError({
+      statusCode: error.statusCode || 500,
+      statusMessage: error.statusMessage || "Failed to update profile",
+    });
+  }
 });

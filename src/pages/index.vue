@@ -123,7 +123,7 @@
                 <div class="grid lg:grid-cols-2 gap-12 items-center">
                     <!-- Left Content -->
                     <div class="space-y-8">
-                        <h1 class="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+                        <h1 class="text-lg lg:text-xl font-medium text-gray-900 leading-tight">
                             Qwesi - Your 24/7 Career & Recruitment Assistant
                             <span class="inline-block w-3 h-3 bg-green-500 rounded-full ml-2"></span>
                         </h1>
@@ -168,7 +168,7 @@
                     <div class="flex justify-center lg:justify-end">
                         <div class="relative">
                             <img src="@/assets/images/qwesi-image.png" alt="Professional AI Assistant"
-                                class="w-80 h-auto object-contain rounded-2xl animate-breathing" />
+                                class="w-64 h-auto object-contain rounded-2xl animate-breathing" />
                         </div>
                     </div>
                 </div>

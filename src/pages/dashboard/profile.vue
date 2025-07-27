@@ -77,36 +77,24 @@
                     <h2 class="text-lg font-semibold text-gray-900 mb-6">Personal Information</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                                Full Name
-                            </label>
-                            <input id="name" v-model="form.name" type="text"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter your full name" />
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                            <input id="name" v-model="form.name" type="text" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                         </div>
                         <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                                Email Address
-                            </label>
-                            <input id="email" v-model="form.email" type="email"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter your email" />
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email
+                                Address</label>
+                            <input id="email" v-model="form.email" type="email" readonly required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 text-gray-500 cursor-not-allowed" />
                         </div>
                         <div>
-                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
-                                Phone Number
-                            </label>
-                            <input id="phone" v-model="form.phone" type="tel" readonly
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
-                                placeholder="Phone number cannot be changed" />
-                            <p class="text-xs text-gray-500 mt-1">Phone number cannot be modified for security reasons
-                            </p>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                            <input id="phone" v-model="form.phone" type="tel" readonly required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 text-gray-500 cursor-not-allowed" />
                         </div>
                         <div>
-                            <label for="dob" class="block text-sm font-medium text-gray-700 mb-2">
-                                Date of Birth
-                            </label>
-                            <input id="dob" v-model="form.dob" type="date"
+                            <label for="dob" class="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+                            <input id="dob" v-model="form.dob" type="date" required
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                         </div>
                     </div>
@@ -214,12 +202,14 @@ const saveProfile = async () => {
     success.value = ''
 
     try {
-        const result = await authStore.updateProfile({
+        const profileData = {
             name: form.value.name,
-            email: form.value.email,
+            email: form.value.email, // Include email since API requires it
             dob: formatDateForAPI(form.value.dob),
             profileImage: profileImage.value
-        })
+        };
+
+        const result = await authStore.updateProfile(profileData)
 
         if (result.success) {
             success.value = 'Profile updated successfully!'
