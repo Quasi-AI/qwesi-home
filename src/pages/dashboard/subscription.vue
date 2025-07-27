@@ -22,47 +22,16 @@
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-xl font-semibold text-gray-900">Subscription Status</h2>
-                            <span :class="isPro ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                            <span :class="isSubscribe ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
                                 class="px-3 py-1 text-sm font-medium rounded-full">
-                                {{ isPro ? 'Pro' : 'Free' }}
+                                {{ isSubscribe ? 'Pro' : 'Free' }}
                             </span>
                         </div>
                         <p class="text-gray-600 mb-4">
                             {{ subscriptionMessage }}
                         </p>
-                        <div v-if="isPro && subscriptionEndDate" class="text-sm text-gray-500">
+                        <div v-if="isSubscribe && subscriptionEndDate" class="text-sm text-gray-500">
                             Next billing date: {{ subscriptionEndDate }}
-                        </div>
-                    </div>
-
-                    <!-- Payment Information -->
-                    <div v-if="isPro" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Payment Information</h3>
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                            <path
-                                                d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-900">{{ cardDisplayText }}</p>
-                                        <p class="text-sm text-gray-500">Expires 12/25</p>
-                                    </div>
-                                </div>
-                                <div class="flex space-x-2">
-                                    <button @click="showUpdatePaymentModal = true"
-                                        class="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                                        Update
-                                    </button>
-                                    <button @click="removeCard"
-                                        class="text-red-600 hover:text-red-700 text-sm font-medium">
-                                        Remove
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -95,7 +64,7 @@
                                 30-day free trial
                             </li>
                         </ul>
-                        <button v-if="isPro" @click="showCancelModal = true"
+                        <button v-if="isSubscribe" @click="showCancelModal = true"
                             class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors mt-6">
                             Cancel Subscription
                         </button>
@@ -145,7 +114,9 @@ const showCancelModal = ref(false)
 const showUpdatePaymentModal = ref(false)
 
 // Computed subscription data
-const isPro = computed(() => subscriptionStore.isPro)
+const isSubscribe = computed(() => {
+    return !!(user.value && user.value.isSubscribe)
+})
 const subscription = computed(() => subscriptionStore.getCurrentSubscription)
 const subscriptionEndDate = computed(() => subscription.value?.currentPeriodEnd || '')
 const paymentInfo = computed(() => subscription.value?.paymentMethod || {})
@@ -159,7 +130,7 @@ const maskedCardNumber = computed(() => {
 })
 
 const subscriptionMessage = computed(() => {
-    return isPro.value
+    return isSubscribe.value
         ? 'You are currently on a Pro subscription.'
         : 'Upgrade to Pro for advanced features.'
 })

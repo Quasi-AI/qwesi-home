@@ -1,16 +1,7 @@
 <template>
     <div class="min-h-screen flex">
         <!-- Back Button -->
-        <div class="absolute top-6 left-6 z-10">
-            <NuxtLink to="/"
-                class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
-                Back to Home
-            </NuxtLink>
-        </div>
+        <BackButton class="absolute top-6 left-6 z-10" />
 
         <!-- Left Side - Forgot Password Form -->
         <div class="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
@@ -90,8 +81,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '~/stores/auth'
+import BackButton from '@/components/BackButton.vue'
 
 
 const authStore = useAuthStore()
@@ -122,6 +114,9 @@ const handleForgotPassword = async () => {
         loading.value = false
     }
 }
+
+const router = useRouter()
+const goBack = () => router.back()
 
 // Check if user is already logged in
 onMounted(() => {

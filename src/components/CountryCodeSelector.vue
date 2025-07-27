@@ -1,42 +1,46 @@
 <template>
     <div class="relative">
         <div class="relative">
-            <button type="button" @click="toggleDropdown" :disabled="disabled"
-                class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed bg-white text-left h-[2.58rem]"
+            <button ref="buttonRef" type="button" @click="toggleDropdown" :disabled="disabled"
+                class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed bg-white text-left h-[2.58rem] text-base sm:text-sm"
                 :class="{ 'ring-2 ring-blue-500 border-transparent': isOpen }">
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2 min-w-0">
                     <img v-if="selectedCountry" :src="selectedCountry.flag" :alt="selectedCountry.name"
                         class="w-6 h-4 mr-2 rounded-sm object-cover" />
-                    <span v-if="selectedCountry" class="text-sm font-medium text-gray-900">
+                    <span v-if="selectedCountry" class="text-sm font-medium text-gray-900 truncate">
                         +{{ selectedCountry.callingCodes[0] }}
                     </span>
                     <span v-else class="text-gray-500">Country</span>
                 </div>
-                <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': isOpen }" fill="none"
-                    stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-gray-400 transition-transform flex-shrink-0" :class="{ 'rotate-180': isOpen }"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
             </button>
 
             <!-- Dropdown -->
-            <div v-if="isOpen"
-                class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            <div v-if="isOpen" ref="dropdownRef" :class="[
+                'absolute z-50 w-full min-w-0 max-w-full bg-white border border-gray-300 rounded-lg shadow-lg overflow-y-auto',
+                openUpward ? 'bottom-full mb-1 max-h-[60vh]' : 'mt-1 max-h-[60vh]'
+            ]">
                 <!-- Search input -->
                 <div class="sticky top-0 bg-white border-b border-gray-200 p-2">
                     <input v-model="searchQuery" type="text" placeholder="Search countries..."
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                        class="w-full px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                 </div>
 
                 <!-- Country list -->
                 <div class="py-1 overflow-x-hidden">
                     <button v-for="country in filteredCountries" :key="country.alpha2Code"
                         @click="selectCountry(country)"
-                        class="w-full flex items-center px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none">
+                        class="w-full flex items-center px-3 py-3 sm:py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none min-h-[44px]">
                         <img :src="country.flag" :alt="country.name"
                             class="w-6 h-4 mr-3 flex-shrink-0 rounded-sm object-cover" />
                         <div class="flex-1 min-w-0">
-                            <div class="text-sm font-medium text-gray-900">{{ country.name }}</div>
-                            <div class="text-xs text-gray-500">+{{ country.callingCodes[0] }} ({{ country.alpha2Code }})
+                            <div class="text-base sm:text-sm font-medium text-gray-900 truncate">{{ country.name }}
+                            </div>
+                            <div class="text-xs text-gray-500 truncate">+{{ country.callingCodes[0] }} ({{
+                                country.alpha2Code }})
                             </div>
                         </div>
                     </button>
@@ -57,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue'
 
 const props = defineProps({
     modelValue: {
@@ -77,6 +81,9 @@ const loading = ref(false)
 const countries = ref([])
 const searchQuery = ref('')
 const selectedCountry = ref(null)
+const openUpward = ref(false)
+const dropdownRef = ref(null)
+const buttonRef = ref(null)
 
 // Filter countries based on search query
 const filteredCountries = computed(() => {
@@ -192,10 +199,26 @@ const selectCountry = (country) => {
 }
 
 // Toggle dropdown
-const toggleDropdown = () => {
+const toggleDropdown = async () => {
     if (!props.disabled) {
         isOpen.value = !isOpen.value
+        if (isOpen.value) {
+            await nextTick()
+            adjustDropdownDirection()
+        }
     }
+}
+
+// Adjust dropdown direction based on available space
+const adjustDropdownDirection = () => {
+    const button = buttonRef.value
+    const dropdown = dropdownRef.value
+    if (!button || !dropdown) return
+    const buttonRect = button.getBoundingClientRect()
+    const dropdownHeight = dropdown.offsetHeight
+    const spaceBelow = window.innerHeight - buttonRect.bottom
+    const spaceAbove = buttonRect.top
+    openUpward.value = spaceBelow < dropdownHeight && spaceAbove > dropdownHeight
 }
 
 // Close dropdown when clicking outside
@@ -221,10 +244,12 @@ watch(() => props.modelValue, (newValue) => {
 onMounted(() => {
     fetchCountries()
     document.addEventListener('click', handleClickOutside)
+    window.addEventListener('resize', adjustDropdownDirection)
 })
 
 // Cleanup
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside)
+    window.removeEventListener('resize', adjustDropdownDirection)
 })
 </script>

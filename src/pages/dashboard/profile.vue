@@ -42,7 +42,7 @@
                                     <div v-else
                                         class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-gray-200 bg-blue-100 flex items-center justify-center relative">
                                         <span class="text-blue-600 font-bold text-xl sm:text-2xl">{{ userInitials
-                                            }}</span>
+                                        }}</span>
                                     </div>
                                 </div>
                                 <div class="flex-1 text-center sm:text-left">
@@ -119,13 +119,13 @@
                                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                     <div>
                                         <h3 class="text-sm font-medium text-gray-900">Account Status</h3>
-                                        <p class="text-sm text-gray-600">{{ user?.isPro ? 'Pro Account' : 'Free Account'
+                                        <p class="text-sm text-gray-600">{{ isSubscribe ? 'Pro Account' : 'Free Account'
                                             }}</p>
                                     </div>
                                     <span
-                                        :class="user?.isPro ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                                        :class="isSubscribe ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
                                         class="px-2 py-1 text-xs font-medium rounded-full">
-                                        {{ user?.isPro ? 'Pro' : 'Free' }}
+                                        {{ isSubscribe ? 'Pro' : 'Free' }}
                                     </span>
                                 </div>
                                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -226,10 +226,17 @@ const userInitials = computed(() => {
 })
 
 const memberSince = computed(() => {
-    if (!user.value?.id) return 'N/A'
-    // This would typically come from the user data, but for now we'll show a placeholder
-    return 'Recently joined'
+    if (!user.value || !user.value.date_joined) return 'N/A'
+    // Format ISO date string to readable format (e.g., July 27, 2025)
+    const date = new Date(user.value.date_joined)
+    return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
 })
+console.log('Member Since:', memberSince.value)
+
+const isSubscribe = computed(() => {
+    return !!(user.value && user.value.isSubscribe)
+})
+console.log('isSubscribe:', isSubscribe.value)
 
 // Format date for display (convert from DD/MM/YYYY to YYYY-MM-DD)
 const formatDateForInput = (dateString) => {

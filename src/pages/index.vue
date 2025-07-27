@@ -139,40 +139,30 @@
                                     </svg>
                                     <span>Get Started on WhatsApp</span>
                                 </a>
-
-                                <button
-                                    class="w-full sm:w-auto bg-blue-500 text-white px-6 py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-600 transition-colors">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path
-                                            d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                                    </svg>
-                                    <span>Get Started on here</span>
-                                </button>
-                            </div>
-
-                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-300 cursor-pointer group max-w-sm"
-                                @click="openDemoModal">
-                                <div class="relative">
-                                    <button
-                                        class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 group-hover:scale-105">
-                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M8 5v10l8-5-8-5z" />
-                                        </svg>
-                                    </button>
-                                    <div class="absolute inset-0 bg-blue-600 rounded-full animate-ping opacity-20">
+                                <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-300 cursor-pointer group max-w-sm"
+                                    @click="openDemoModal">
+                                    <div class="relative">
+                                        <button
+                                            class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 group-hover:scale-105">
+                                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M8 5v10l8-5-8-5z" />
+                                            </svg>
+                                        </button>
+                                        <div class="absolute inset-0 bg-blue-600 rounded-full animate-ping opacity-20">
+                                        </div>
                                     </div>
+                                    <div class="flex-1 min-w-0">
+                                        <span
+                                            class="text-gray-900 font-medium text-base group-hover:text-blue-600 transition-colors duration-300">Watch
+                                            Demo Video</span>
+                                        <p class="text-gray-600 text-xs mt-0.5">See Qwesi in action</p>
+                                    </div>
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors duration-300 flex-shrink-0"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7"></path>
+                                    </svg>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <span
-                                        class="text-gray-900 font-medium text-base group-hover:text-blue-600 transition-colors duration-300">Watch
-                                        Demo Video</span>
-                                    <p class="text-gray-600 text-xs mt-0.5">See Qwesi in action</p>
-                                </div>
-                                <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors duration-300 flex-shrink-0"
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5l7 7-7 7"></path>
-                                </svg>
                             </div>
                         </div>
                     </div>
