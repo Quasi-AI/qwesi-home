@@ -100,11 +100,23 @@
                 <!-- Tables Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     <!-- Tasks Table -->
-                    <Table title="Recent Tasks" description="Your latest tasks and their status" :columns="taskColumns"
+                    <div v-if="dashboardLoading" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div class="flex justify-center items-center py-8">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                            <span class="ml-2 text-gray-600">Loading tasks...</span>
+                        </div>
+                    </div>
+                    <Table v-else title="Recent Tasks" description="Your latest tasks and their status" :columns="taskColumns"
                         :data="tasks" />
 
                     <!-- People Table -->
-                    <Table title="Team Members" description="People working on your projects" :columns="peopleColumns"
+                    <div v-if="dashboardLoading" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div class="flex justify-center items-center py-8">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                            <span class="ml-2 text-gray-600">Loading team members...</span>
+                        </div>
+                    </div>
+                    <Table v-else title="Team Members" description="People working on your projects" :columns="peopleColumns"
                         :data="people" />
                 </div>
 
@@ -170,7 +182,7 @@ const stats = computed(() => {
     }
 })
 
-// Table data
+// Table data - now computed from API response
 const taskColumns = [
     { key: 'name', label: 'Task Name' },
     { key: 'assignee', label: 'Assignee', type: 'avatar' },
@@ -178,12 +190,9 @@ const taskColumns = [
     { key: 'dueDate', label: 'Due Date' }
 ]
 
-const tasks = ref([
-    { name: 'Review AI Models', assignee: 'John Doe', status: 'Active', dueDate: '2024-01-15' },
-    { name: 'Update Documentation', assignee: 'Jane Smith', status: 'Completed', dueDate: '2024-01-10' },
-    { name: 'Bug Fixes', assignee: 'Mike Johnson', status: 'In Progress', dueDate: '2024-01-20' },
-    { name: 'Performance Testing', assignee: 'Sarah Wilson', status: 'Pending', dueDate: '2024-01-25' }
-])
+const tasks = computed(() => {
+    return summary.value?.recentTasks || []
+})
 
 const peopleColumns = [
     { key: 'name', label: 'Name', type: 'avatar' },
@@ -192,12 +201,9 @@ const peopleColumns = [
     { key: 'lastActive', label: 'Last Active' }
 ]
 
-const people = ref([
-    { name: 'John Doe', role: 'Developer', status: 'Active', lastActive: '2 hours ago' },
-    { name: 'Jane Smith', role: 'Designer', status: 'Active', lastActive: '1 hour ago' },
-    { name: 'Mike Johnson', role: 'Manager', status: 'Active', lastActive: '30 min ago' },
-    { name: 'Sarah Wilson', role: 'Analyst', status: 'Active', lastActive: '5 min ago' }
-])
+const people = computed(() => {
+    return summary.value?.teamMembers || []
+})
 
 // Computed
 const userInitials = computed(() => {

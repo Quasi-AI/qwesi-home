@@ -9,6 +9,19 @@ export interface DashboardSummary {
     people: { value: number; period: string };
     productivity: { value: number; period: string };
   };
+  recentTasks?: Array<{
+    name: string;
+    assignee: string;
+    status: string;
+    dueDate: string;
+  }>;
+  teamMembers?: Array<{
+    name: string;
+    role: string;
+    status: string;
+    lastActive: string;
+    initials: string;
+  }>;
 }
 
 export interface DashboardStats {
