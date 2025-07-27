@@ -17,22 +17,23 @@
                 <div class="space-y-4">
                     <h3 class="font-bold text-gray-900">Quick Links</h3>
                     <div class="space-y-2">
-                        <a href="#" class="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
+                        <NuxtLink to="/#home" class="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
                             <span class="text-blue-600">></span>
                             <span>Home</span>
-                        </a>
-                        <a href="#" class="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
+                        </NuxtLink>
+                        <NuxtLink to="/#features" class="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
                             <span class="text-blue-600">></span>
                             <span>How I Work</span>
-                        </a>
-                        <a href="#" class="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
+                        </NuxtLink>
+                        <NuxtLink to="/privacy-policy"
+                            class="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
                             <span class="text-blue-600">></span>
                             <span>Privacy Policy</span>
-                        </a>
-                        <a href="#" class="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
+                        </NuxtLink>
+                        <NuxtLink to="/faq" class="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
                             <span class="text-blue-600">></span>
                             <span>Frequently Asked Questions</span>
-                        </a>
+                        </NuxtLink>
                     </div>
                 </div>
 
