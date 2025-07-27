@@ -10,7 +10,7 @@
                     <span v-if="selectedCountry" class="text-sm font-medium text-gray-900">
                         +{{ selectedCountry.callingCodes[0] }}
                     </span>
-                    <span v-else class="text-gray-500">🌍 Country</span>
+                    <span v-else class="text-gray-500">Country</span>
                 </div>
                 <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': isOpen }" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
