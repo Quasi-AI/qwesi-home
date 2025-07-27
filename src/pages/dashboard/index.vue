@@ -51,7 +51,8 @@
             <!-- Main Content Area -->
             <main class="flex-1 p-6 flex flex-col">
                 <!-- Try Pro Banner - Only show if user is not subscribed -->
-                <div v-if="!isSubscribed" class="mb-8 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-4 sm:p-6 text-white">
+                <div v-if="!isSubscribed"
+                    class="mb-8 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-4 sm:p-6 text-white">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                         <div class="flex-1">
                             <h3 class="text-lg font-semibold mb-2">Unlock Premium Features</h3>
@@ -60,7 +61,7 @@
                         </div>
                         <button @click="showProModal = true"
                             class="bg-white text-blue-600 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors text-sm sm:text-base w-full sm:w-auto">
-                            Try Pro for 30 Days
+                            Try Pro for 7 Days
                         </button>
                     </div>
                 </div>
@@ -106,8 +107,8 @@
                             <span class="ml-2 text-gray-600">Loading tasks...</span>
                         </div>
                     </div>
-                    <Table v-else title="Recent Tasks" description="Your latest tasks and their status" :columns="taskColumns"
-                        :data="tasks" />
+                    <Table v-else title="Recent Tasks" description="Your latest tasks and their status"
+                        :columns="taskColumns" :data="tasks" />
 
                     <!-- People Table -->
                     <div v-if="dashboardLoading" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -116,8 +117,8 @@
                             <span class="ml-2 text-gray-600">Loading team members...</span>
                         </div>
                     </div>
-                    <Table v-else title="Team Members" description="People working on your projects" :columns="peopleColumns"
-                        :data="people" />
+                    <Table v-else title="Team Members" description="People working on your projects"
+                        :columns="peopleColumns" :data="people" />
                 </div>
 
                 <!-- Footer -->
@@ -217,10 +218,9 @@ const displayName = computed(() => {
     return user.value.name || 'User'
 })
 
-// Check if user is subscribed
+// Check if user is subscribed - using same logic as subscription page
 const isSubscribed = computed(() => {
-    // Check both user's isSubscribe property and subscription store
-    return !!(user.value && user.value.isSubscribe) || subscriptionStore.isSubscribed
+    return !!(user.value && user.value.isSubscribe)
 })
 
 // Methods
@@ -244,7 +244,7 @@ onMounted(async () => {
 
     // Fetch dashboard summary data
     await fetchDashboardSummary()
-    
+
     // Fetch subscription data to ensure we have the latest status
     await subscriptionStore.fetchSubscription()
 })

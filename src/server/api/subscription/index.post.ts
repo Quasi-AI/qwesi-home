@@ -19,8 +19,8 @@ export default defineEventHandler(async (event) => {
     status: "active",
     currentPeriodStart: new Date().toISOString(),
     currentPeriodEnd: new Date(
-      Date.now() + 30 * 24 * 60 * 60 * 1000
-    ).toISOString(), // 30 days from now
+      Date.now() + 7 * 24 * 60 * 60 * 1000
+    ).toISOString(), // 7 days from now
     cancelAtPeriodEnd: false,
     paymentMethod: {
       id: paymentMethodId,
