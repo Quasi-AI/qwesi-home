@@ -110,7 +110,7 @@
         <div class="hidden lg:block lg:w-1/2 bg-gray-50 border-l">
             <div class="h-full flex items-center justify-center p-8">
                 <img src="@/assets/images/qwesi-image.png" alt="QWESI AI Assistant"
-                    class="max-w-md w-full h-auto object-contain rounded-2xl animate-breathing" />
+                    class="w-64 h-auto object-contain rounded-2xl animate-breathing" />
             </div>
         </div>
     </div>
