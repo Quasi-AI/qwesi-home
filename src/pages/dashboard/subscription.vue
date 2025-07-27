@@ -127,14 +127,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+
 import { useAuthStore } from '~/stores/auth'
 import { useSubscriptionStore } from '~/stores/subscription'
 import Sidebar from '@/components/dashboard/Sidebar.vue'
 import ProModal from '@/components/dashboard/ProModal.vue'
 import Footer from '@/components/Footer.vue'
 
-const router = useRouter()
+
 const authStore = useAuthStore()
 const subscriptionStore = useSubscriptionStore()
 
@@ -202,7 +202,7 @@ const removeCard = () => {
 onMounted(async () => {
     // Check if user is authenticated
     if (!authStore.isAuthenticated) {
-        router.push('/auth/login')
+        navigateTo('/auth/login')
         return
     }
 

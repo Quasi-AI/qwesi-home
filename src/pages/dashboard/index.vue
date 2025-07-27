@@ -95,7 +95,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+
 import { useAuthStore } from '~/stores/auth'
 import Sidebar from '@/components/dashboard/Sidebar.vue'
 import Stats from '@/components/dashboard/Stats.vue'
@@ -103,7 +103,7 @@ import Table from '@/components/dashboard/Table.vue'
 import ProModal from '@/components/dashboard/ProModal.vue'
 import Footer from '@/components/Footer.vue'
 
-const router = useRouter()
+
 const authStore = useAuthStore()
 
 // User state
@@ -161,19 +161,19 @@ const displayName = computed(() => {
 // Methods
 const editProfile = () => {
     profileMenuOpen.value = false
-    router.push('/dashboard/profile')
+    navigateTo('/dashboard/profile')
 }
 
 const handleLogout = async () => {
     await authStore.logout()
-    router.push('/')
+    navigateTo('/')
 }
 
 // Lifecycle
 onMounted(() => {
     // Check if user is authenticated
     if (!authStore.isAuthenticated) {
-        router.push('/auth/login')
+        navigateTo('/auth/login')
     }
 })
 

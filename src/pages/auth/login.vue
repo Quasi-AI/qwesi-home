@@ -107,21 +107,16 @@
         </div>
 
         <!-- Right Side - Cover Image -->
-        <div class="hidden lg:block lg:w-1/2 bg-gray-50 border-l">
-            <div class="h-full flex items-center justify-center p-8">
-                <img src="@/assets/images/qwesi-image.png" alt="QWESI AI Assistant"
-                    class="w-64 h-auto object-contain rounded-2xl animate-breathing" />
-            </div>
-        </div>
+        <AuthSidebar />
     </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+
 import { useAuthStore } from '~/stores/auth'
 
-const router = useRouter()
+
 const authStore = useAuthStore()
 const loading = ref(false)
 const error = ref('')
@@ -162,9 +157,9 @@ const handleLogin = async () => {
             const redirectUrl = localStorage.getItem('redirect_after_login')
             if (redirectUrl) {
                 localStorage.removeItem('redirect_after_login')
-                await router.push(redirectUrl)
+                await navigateTo(redirectUrl)
             } else {
-                await router.push('/dashboard')
+                await navigateTo('/dashboard')
             }
         } else {
             error.value = result.error || 'Login failed'
@@ -183,9 +178,9 @@ onMounted(() => {
         const redirectUrl = localStorage.getItem('redirect_after_login')
         if (redirectUrl) {
             localStorage.removeItem('redirect_after_login')
-            router.push(redirectUrl)
+            navigateTo(redirectUrl)
         } else {
-            router.push('/dashboard')
+            navigateTo('/dashboard')
         }
     }
 })

@@ -33,7 +33,7 @@
                             </svg>
                             <span>Call Me</span>
                         </a>
-                        <NuxtLink v-if="!authStore.isLoggedIn" to="/auth/login"
+                        <NuxtLink v-if="!isLoggedIn" to="/auth/login"
                             class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow-md">
                             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -90,7 +90,7 @@
                             </svg>
                             <span>Call Me</span>
                         </a>
-                        <NuxtLink v-if="!authStore.isLoggedIn" to="/auth/login"
+                        <NuxtLink v-if="!isLoggedIn" to="/auth/login"
                             class="w-full bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow-md flex items-center justify-center space-x-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -103,7 +103,7 @@
                             class="w-full bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow-md flex items-center justify-center space-x-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z">
+                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 00-2-2H5a2 2 0 00-2-2z">
                                 </path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z">
@@ -133,10 +133,9 @@
                                 <a href="https://api.whatsapp.com/send/?phone=12019790148&text&type=phone_number&app_absent=0"
                                     target="_blank" rel="noopener noreferrer"
                                     class="w-full sm:w-auto bg-green-500 text-white px-6 py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-green-600 transition-colors">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                         <path
-                                            d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
                                     </svg>
                                     <span>Get Started on WhatsApp</span>
                                 </a>
@@ -181,8 +180,50 @@
                     <!-- Right Content - Illustration -->
                     <div class="flex justify-center lg:justify-end">
                         <div class="relative">
+                            <!-- Thinking UI Elements -->
+                            <div
+                                class="absolute -top-4 -right-4 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center animate-bounce">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            </div>
+                            <div class="absolute -top-2 -right-12 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center animate-bounce"
+                                style="animation-delay: 0.2s;">
+                                <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                            </div>
+                            <div class="absolute top-8 -right-8 w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center animate-bounce"
+                                style="animation-delay: 0.4s;">
+                                <div class="w-1 h-1 bg-purple-500 rounded-full"></div>
+                            </div>
+
+                            <!-- Floating dots around the image -->
+                            <div
+                                class="absolute -top-6 left-8 w-3 h-3 bg-yellow-400 rounded-full animate-pulse opacity-80">
+                            </div>
+                            <div class="absolute top-4 -left-4 w-2 h-2 bg-pink-400 rounded-full animate-pulse opacity-70"
+                                style="animation-delay: 0.5s;"></div>
+                            <div class="absolute top-16 -left-6 w-2.5 h-2.5 bg-indigo-400 rounded-full animate-pulse opacity-60"
+                                style="animation-delay: 1s;"></div>
+
+                            <!-- Main Image -->
                             <img src="@/assets/images/qwesi-image.png" alt="Professional AI Assistant"
-                                class="w-64 h-auto object-contain rounded-2xl animate-breathing" />
+                                class="w-64 h-auto object-contain rounded-2xl animate-breathing relative z-10" />
+
+                            <!-- Bottom thinking elements -->
+                            <div class="absolute -bottom-4 left-12 w-4 h-4 bg-orange-100 rounded-full flex items-center justify-center animate-bounce"
+                                style="animation-delay: 0.6s;">
+                                <div class="w-1 h-1 bg-orange-500 rounded-full"></div>
+                            </div>
+                            <div class="absolute -bottom-2 right-8 w-3 h-3 bg-teal-100 rounded-full flex items-center justify-center animate-bounce"
+                                style="animation-delay: 0.8s;">
+                                <div class="w-0.5 h-0.5 bg-teal-500 rounded-full"></div>
+                            </div>
+
+                            <!-- Connection lines (subtle) -->
+                            <div
+                                class="absolute top-1/2 -right-2 w-8 h-px bg-gradient-to-r from-blue-200 to-transparent opacity-30">
+                            </div>
+                            <div
+                                class="absolute top-1/3 -left-2 w-6 h-px bg-gradient-to-l from-green-200 to-transparent opacity-30">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -194,52 +235,64 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid md:grid-cols-3 gap-8">
                     <!-- Feature 1 -->
-                    <div class="bg-white p-8 rounded-xl">
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
-                            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <div class="bg-white p-8 rounded-xl hover:shadow-lg hover:border-blue-200 hover:bg-blue-50 transition-all duration-300 ease-in-out transform hover:-translate-y-1 group border border-transparent opacity-0 translate-y-8"
+                        :class="{ 'animate-fade-in-up': featuresAnimated }" style="animation-delay: 0.1s;">
+                        <div
+                            class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6 group-hover:bg-blue-200 transition-colors duration-300">
+                            <svg class="w-6 h-6 text-blue-600 group-hover:scale-110 transition-transform duration-300"
+                                fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                                 <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-4">
+                        <h3
+                            class="text-xl font-bold text-gray-900 mb-4 group-hover:text-blue-900 transition-colors duration-300">
                             Automated Job Alerts
                         </h3>
-                        <p class="text-gray-600">
+                        <p class="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
                             Qwesi finds and emails you job opportunities based on your skills—
                             no more endless searching.
                         </p>
                     </div>
 
                     <!-- Feature 2 -->
-                    <div class="bg-white p-8 rounded-xl">
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
-                            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <div class="bg-white p-8 rounded-xl hover:shadow-lg hover:border-green-200 hover:bg-green-50 transition-all duration-300 ease-in-out transform hover:-translate-y-1 group border border-transparent opacity-0 translate-y-8"
+                        :class="{ 'animate-fade-in-up': featuresAnimated }" style="animation-delay: 0.2s;">
+                        <div
+                            class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6 group-hover:bg-green-200 transition-colors duration-300">
+                            <svg class="w-6 h-6 text-green-600 group-hover:scale-110 transition-transform duration-300"
+                                fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd"
                                     d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
                                     clipRule="evenodd" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-4">
+                        <h3
+                            class="text-xl font-bold text-gray-900 mb-4 group-hover:text-green-900 transition-colors duration-300">
                             Homework & Job Assistant
                         </h3>
-                        <p class="text-gray-600">
+                        <p class="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
                             Stuck with a question or need help preparing for work? Qwesi is
                             always ready to assist you, day or night.
                         </p>
                     </div>
 
                     <!-- Feature 3 -->
-                    <div class="bg-white p-8 rounded-xl">
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
-                            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <div class="bg-white p-8 rounded-xl hover:shadow-lg hover:border-blue-200 hover:bg-blue-50 transition-all duration-300 ease-in-out transform hover:-translate-y-1 group border border-transparent opacity-0 translate-y-8"
+                        :class="{ 'animate-fade-in-up': featuresAnimated }" style="animation-delay: 0.3s;">
+                        <div
+                            class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6 group-hover:bg-blue-200 transition-colors duration-300">
+                            <svg class="w-6 h-6 text-blue-600 group-hover:scale-110 transition-transform duration-300"
+                                fill="currentColor" viewBox="0 0 20 20">
                                 <path
                                     d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-4">
+                        <h3
+                            class="text-xl font-bold text-gray-900 mb-4 group-hover:text-blue-900 transition-colors duration-300">
                             Investor Matchmaking
                         </h3>
-                        <p class="text-gray-600">
+                        <p class="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
                             Qwesi helps you meet the right investors who align with your
                             project, passion, and growth vision.
                         </p>
@@ -548,6 +601,20 @@ const mobileMenuOpen = ref(false);
 const demoModalOpen = ref(false);
 const activeSection = ref('home');
 const statsAnimated = ref(false);
+const featuresAnimated = ref(false);
+
+// Computed property to safely check login status
+const isLoggedIn = computed(() => {
+    try {
+        if (process.client && authStore) {
+            return authStore.isLoggedIn;
+        }
+        return false;
+    } catch (error) {
+        console.warn('Auth store not ready:', error);
+        return false;
+    }
+});
 
 // Testimonials functionality
 const currentTestimonialIndex = ref(0);
@@ -682,6 +749,8 @@ const closeDemoModal = () => {
 };
 
 const handleScroll = () => {
+    if (!process.client) return;
+
     // Detect active section based on scroll position
     const scrollY = window.scrollY;
     const featuresSection = document.getElementById('features');
@@ -751,31 +820,88 @@ const animateStats = () => {
 };
 
 onMounted(() => {
-    window.addEventListener("scroll", handleScroll);
-    window.addEventListener("keydown", handleKeydown);
-    startAutoScroll(); // Start auto-scrolling on mount
+    if (process.client) {
+        window.addEventListener("scroll", handleScroll);
+        window.addEventListener("keydown", handleKeydown);
+        startAutoScroll(); // Start auto-scrolling on mount
 
-    // Set up Intersection Observer for stats animation
-    const statsSection = document.getElementById('stats');
-    if (statsSection) {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !statsAnimated.value) {
-                    animateStats();
-                }
+        // Set up Intersection Observer for stats animation
+        const statsSection = document.getElementById('stats');
+        if (statsSection) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !statsAnimated.value) {
+                        animateStats();
+                    }
+                });
+            }, {
+                threshold: 0.3, // Trigger when 30% of the section is visible
+                rootMargin: '0px 0px -100px 0px' // Trigger 100px before the section comes into view
             });
-        }, {
-            threshold: 0.3, // Trigger when 30% of the section is visible
-            rootMargin: '0px 0px -100px 0px' // Trigger 100px before the section comes into view
-        });
 
-        observer.observe(statsSection);
+            observer.observe(statsSection);
+        }
+
+        // Set up Intersection Observer for features animation
+        const featuresSection = document.getElementById('features');
+        if (featuresSection) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !featuresAnimated.value) {
+                        featuresAnimated.value = true;
+                    }
+                });
+            }, {
+                threshold: 0.2, // Trigger when 20% of the section is visible
+                rootMargin: '0px 0px -50px 0px' // Trigger 50px before the section comes into view
+            });
+
+            observer.observe(featuresSection);
+        }
     }
 });
 
 onUnmounted(() => {
-    window.removeEventListener("scroll", handleScroll);
-    window.removeEventListener("keydown", handleKeydown);
-    stopAutoScroll(); // Stop auto-scrolling on unmount
+    if (process.client) {
+        window.removeEventListener("scroll", handleScroll);
+        window.removeEventListener("keydown", handleKeydown);
+        stopAutoScroll(); // Stop auto-scrolling on unmount
+    }
 });
 </script>
+
+<style scoped>
+/* Fade in up animation for features */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(32px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* Breathing animation for the main image */
+@keyframes breathing {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.animate-breathing {
+    animation: breathing 4s ease-in-out infinite;
+}
+</style>

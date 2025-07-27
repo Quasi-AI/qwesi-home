@@ -42,7 +42,7 @@
                                     <div v-else
                                         class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-gray-200 bg-blue-100 flex items-center justify-center relative">
                                         <span class="text-blue-600 font-bold text-xl sm:text-2xl">{{ userInitials
-                                        }}</span>
+                                            }}</span>
                                     </div>
                                 </div>
                                 <div class="flex-1 text-center sm:text-left">
@@ -120,7 +120,7 @@
                                     <div>
                                         <h3 class="text-sm font-medium text-gray-900">Account Status</h3>
                                         <p class="text-sm text-gray-600">{{ user?.isPro ? 'Pro Account' : 'Free Account'
-                                        }}</p>
+                                            }}</p>
                                     </div>
                                     <span
                                         :class="user?.isPro ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
@@ -150,13 +150,13 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+
 import { useAuthStore } from '~/stores/auth'
 import { useImageUpload } from '~/composables/useImageUpload'
 import Sidebar from '@/components/dashboard/Sidebar.vue'
 import Footer from '@/components/Footer.vue'
 
-const router = useRouter()
+
 const authStore = useAuthStore()
 const { uploadImage, validateImage, compressImage, uploading, uploadProgress } = useImageUpload()
 
