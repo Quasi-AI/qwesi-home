@@ -11,8 +11,9 @@ export default defineEventHandler(async (event) => {
 
   const token = authHeader.replace("Bearer ", "");
 
-  // Mock token validation - in real app, verify JWT token
-  if (token.startsWith("mock-jwt-token-")) {
+  // For now, accept any token and return mock subscription data
+  // In a real app, you would verify the JWT token here
+  if (token) {
     // Mock subscription data
     const subscription = {
       id: "sub_123",

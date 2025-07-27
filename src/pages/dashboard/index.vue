@@ -50,8 +50,8 @@
 
             <!-- Main Content Area -->
             <main class="flex-1 p-6 flex flex-col">
-                <!-- Try Pro Banner -->
-                <div class="mb-8 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-4 sm:p-6 text-white">
+                <!-- Try Pro Banner - Only show if user is not subscribed -->
+                <div v-if="!isSubscribed" class="mb-8 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-4 sm:p-6 text-white">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                         <div class="flex-1">
                             <h3 class="text-lg font-semibold mb-2">Unlock Premium Features</h3>
@@ -136,6 +136,7 @@
 import { ref, computed, onMounted } from 'vue'
 
 import { useAuthStore } from '~/stores/auth'
+import { useSubscriptionStore } from '~/stores/subscription'
 import { useDashboard } from '~/composables/useDashboard'
 import Sidebar from '@/components/dashboard/Sidebar.vue'
 import Stats from '@/components/dashboard/Stats.vue'
@@ -145,6 +146,7 @@ import Footer from '@/components/Footer.vue'
 
 
 const authStore = useAuthStore()
+const subscriptionStore = useSubscriptionStore()
 const { loading: dashboardLoading, error: dashboardError, summary, fetchDashboardSummary } = useDashboard()
 
 // User state
@@ -184,7 +186,7 @@ const stats = computed(() => {
 
 // Table data - now computed from API response
 const taskColumns = [
-    { key: 'name', label: 'Task Name' },
+    { key: 'taskName', label: 'Task Name' },
     { key: 'assignee', label: 'Assignee', type: 'avatar' },
     { key: 'status', label: 'Status', type: 'status' },
     { key: 'dueDate', label: 'Due Date' }
@@ -215,6 +217,12 @@ const displayName = computed(() => {
     return user.value.name || 'User'
 })
 
+// Check if user is subscribed
+const isSubscribed = computed(() => {
+    // Check both user's isSubscribe property and subscription store
+    return !!(user.value && user.value.isSubscribe) || subscriptionStore.isSubscribed
+})
+
 // Methods
 const editProfile = () => {
     profileMenuOpen.value = false
@@ -236,6 +244,9 @@ onMounted(async () => {
 
     // Fetch dashboard summary data
     await fetchDashboardSummary()
+    
+    // Fetch subscription data to ensure we have the latest status
+    await subscriptionStore.fetchSubscription()
 })
 
 // Set page title

@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { useAuthStore } from "~/stores/auth";
 import type {
   SubscriptionState,
   SubscriptionResponse,
@@ -222,11 +223,9 @@ export const useSubscriptionStore = defineStore("subscription", {
     },
 
     getAuthToken() {
-      // Get token from localStorage or auth store
-      if (process.client) {
-        return localStorage.getItem("auth_token") || "";
-      }
-      return "";
+      // Get token from auth store
+      const authStore = useAuthStore();
+      return authStore.getToken || "";
     },
 
     clearError() {

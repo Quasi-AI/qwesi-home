@@ -32,11 +32,12 @@
                             <div v-else-if="column.type === 'avatar'" class="flex items-center">
                                 <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                                     <span class="text-blue-600 font-medium text-sm">
-                                        {{ getInitials(item[column.key]) }}
+                                        {{ getAvatarInitials(item[column.key]) }}
                                     </span>
                                 </div>
                                 <div class="ml-3">
-                                    <p class="text-sm font-medium text-gray-900">{{ item[column.key] }}</p>
+                                    <p class="text-sm font-medium text-gray-900">{{ getDisplayName(item[column.key]) }}
+                                    </p>
                                 </div>
                             </div>
 
@@ -87,12 +88,39 @@ const getStatusClasses = (status) => {
         'Pending': 'bg-yellow-100 text-yellow-800',
         'Completed': 'bg-blue-100 text-blue-800',
         'Cancelled': 'bg-red-100 text-red-800',
-        'In Progress': 'bg-purple-100 text-purple-800'
+        'In Progress': 'bg-purple-100 text-purple-800',
+        'sent': 'bg-gray-100 text-gray-800'
     }
     return classes[status] || 'bg-gray-100 text-gray-800'
 }
 
+const getDisplayName = (value) => {
+    if (typeof value === 'string') {
+        return value
+    }
+    if (value && typeof value === 'object' && value.name) {
+        return value.name
+    }
+    return 'Unknown'
+}
+
+const getAvatarInitials = (value) => {
+    if (typeof value === 'string') {
+        return getInitials(value)
+    }
+    if (value && typeof value === 'object' && value.initials) {
+        return value.initials
+    }
+    if (value && typeof value === 'object' && value.name) {
+        return getInitials(value.name)
+    }
+    return 'U'
+}
+
 const getInitials = (name) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase()
+    if (!name || typeof name !== 'string') {
+        return 'U'
+    }
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 }
 </script>
