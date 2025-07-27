@@ -2,14 +2,15 @@
     <div class="relative">
         <div class="relative">
             <button type="button" @click="toggleDropdown" :disabled="disabled"
-                class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed bg-white text-left h-[2.66rem]"
+                class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed bg-white text-left h-[2.58rem]"
                 :class="{ 'ring-2 ring-blue-500 border-transparent': isOpen }">
                 <div class="flex items-center space-x-2">
-                    <span v-if="selectedCountry" class="text-lg">{{ selectedCountry.flag }}</span>
-                    <span v-if="selectedCountry" class="text-sm text-gray-900">
+                    <img v-if="selectedCountry" :src="selectedCountry.flag" :alt="selectedCountry.name"
+                        class="w-6 h-4 mr-2 rounded-sm object-cover" />
+                    <span v-if="selectedCountry" class="text-sm font-medium text-gray-900">
                         +{{ selectedCountry.callingCodes[0] }}
                     </span>
-                    <span v-else class="text-gray-500">Country</span>
+                    <span v-else class="text-gray-500">🌍 Country</span>
                 </div>
                 <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': isOpen }" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
@@ -31,8 +32,9 @@
                     <button v-for="country in filteredCountries" :key="country.alpha2Code"
                         @click="selectCountry(country)"
                         class="w-full flex items-center px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none">
-                        <span class="text-lg mr-3">{{ country.flag }}</span>
-                        <div class="flex-1">
+                        <img :src="country.flag" :alt="country.name"
+                            class="w-6 h-4 mr-3 flex-shrink-0 rounded-sm object-cover" />
+                        <div class="flex-1 min-w-0">
                             <div class="text-sm font-medium text-gray-900">{{ country.name }}</div>
                             <div class="text-xs text-gray-500">+{{ country.callingCodes[0] }} ({{ country.alpha2Code }})
                             </div>
@@ -92,8 +94,8 @@ const filteredCountries = computed(() => {
 const fetchCountries = async () => {
     loading.value = true
     try {
-        // Specify the fields we need to reduce payload size and fix the API call
-        const response = await fetch('https://restcountries.com/v3.1/all?fields=name,flag,cca2,idd')
+        // Use v2 API which provides SVG flag URLs
+        const response = await fetch('https://restcountries.com/v2/all?fields=name,flag,alpha2Code,callingCodes')
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`)
@@ -101,18 +103,14 @@ const fetchCountries = async () => {
 
         const data = await response.json()
 
-        // Transform data to match our needs
+        // Transform data to match our needs for v2 API with SVG flags
         countries.value = data
-            .filter(country => country.idd?.root && country.idd?.suffixes)
+            .filter(country => country.callingCodes && country.callingCodes.length > 0)
             .map(country => ({
-                name: country.name.common,
-                flag: country.flag,
-                alpha2Code: country.cca2, // This is the shortcode (e.g., "GH", "US", "GB")
-                callingCodes: country.idd.suffixes.map(suffix => {
-                    // Ensure we don't have double plus signs
-                    const root = country.idd.root.replace(/^\+/, '') // Remove leading plus if exists
-                    return root + suffix
-                })
+                name: country.name,
+                flag: country.flag || 'https://flagcdn.com/xx.svg', // Use SVG flag URL
+                alpha2Code: country.alpha2Code, // This is the shortcode (e.g., "GH", "US", "GB")
+                callingCodes: country.callingCodes
             }))
             .sort((a, b) => a.name.localeCompare(b.name))
 
@@ -121,6 +119,13 @@ const fetchCountries = async () => {
             const defaultCountry = countries.value.find(c => c.alpha2Code === 'GH') || countries.value[0]
             if (defaultCountry) {
                 selectCountry(defaultCountry)
+            }
+        } else if (props.modelValue && countries.value.length > 0) {
+            // If modelValue is provided, find and set the corresponding country
+            const cleanValue = props.modelValue.replace('+', '')
+            const country = countries.value.find(c => c.callingCodes.includes(cleanValue))
+            if (country) {
+                selectedCountry.value = country
             }
         }
     } catch (error) {
