@@ -1,22 +1,21 @@
+import { API_ROUTES } from "~/constants/api";
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const { phone, password }: { phone: string; password: string } = body;
 
   try {
     // Call the external login API
-    const response: any = await $fetch(
-      "https://dark-caldron-448714-u5.appspot.com/qwesi/login",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: {
-          phone,
-          password,
-        },
-      }
-    );
+    const response: any = await $fetch(API_ROUTES.LOGIN, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: {
+        phone,
+        password,
+      },
+    });
 
     // If login is successful, fetch user details
     if (response) {
@@ -43,7 +42,7 @@ export default defineEventHandler(async (event) => {
           // Try to fetch user details without authentication
           try {
             const userDetails = await $fetch(
-              "https://dark-caldron-448714-u5.appspot.com/qwesi-details",
+              API_ROUTES.USER_DETAILS,
               {
                 method: "GET",
                 headers: {
@@ -70,7 +69,7 @@ export default defineEventHandler(async (event) => {
         }
 
         const userDetails = await $fetch(
-          "https://dark-caldron-448714-u5.appspot.com/qwesi-details",
+          API_ROUTES.USER_DETAILS,
           {
             method: "GET",
             headers: {

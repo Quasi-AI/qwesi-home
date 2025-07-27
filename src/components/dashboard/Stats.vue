@@ -23,8 +23,8 @@
                 </div>
             </div>
             <div class="mt-4">
-                <span class="text-sm text-green-600 font-medium">+12%</span>
-                <span class="text-sm text-gray-500 ml-1">from last month</span>
+                <span class="text-sm text-green-600 font-medium">+{{ stats.changes?.jobs?.value || 12 }}%</span>
+                <span class="text-sm text-gray-500 ml-1">from {{ stats.changes?.jobs?.period || 'last month' }}</span>
             </div>
         </div>
 
@@ -51,8 +51,9 @@
                 </div>
             </div>
             <div class="mt-4">
-                <span class="text-sm text-green-600 font-medium">+8%</span>
-                <span class="text-sm text-gray-500 ml-1">from last week</span>
+                <span class="text-sm text-green-600 font-medium">+{{ stats.changes?.activeTasks?.value || 8 }}%</span>
+                <span class="text-sm text-gray-500 ml-1">from {{ stats.changes?.activeTasks?.period || 'last week'
+                    }}</span>
             </div>
         </div>
 
@@ -78,8 +79,8 @@
                 </div>
             </div>
             <div class="mt-4">
-                <span class="text-sm text-green-600 font-medium">+5%</span>
-                <span class="text-sm text-gray-500 ml-1">from last month</span>
+                <span class="text-sm text-green-600 font-medium">+{{ stats.changes?.people?.value || 5 }}%</span>
+                <span class="text-sm text-gray-500 ml-1">from {{ stats.changes?.people?.period || 'last month' }}</span>
             </div>
         </div>
 
@@ -106,8 +107,9 @@
                 </div>
             </div>
             <div class="mt-4">
-                <span class="text-sm text-green-600 font-medium">+15%</span>
-                <span class="text-sm text-gray-500 ml-1">from last week</span>
+                <span class="text-sm text-green-600 font-medium">+{{ stats.changes?.productivity?.value || 15 }}%</span>
+                <span class="text-sm text-gray-500 ml-1">from {{ stats.changes?.productivity?.period || 'last week'
+                    }}</span>
             </div>
         </div>
     </div>
@@ -121,7 +123,13 @@ const props = defineProps({
             jobs: 0,
             activeTasks: 0,
             people: 0,
-            productivity: 0
+            productivity: 0,
+            changes: {
+                jobs: { value: 0, period: "last month" },
+                activeTasks: { value: 0, period: "last week" },
+                people: { value: 0, period: "last month" },
+                productivity: { value: 0, period: "last week" }
+            }
         })
     }
 })

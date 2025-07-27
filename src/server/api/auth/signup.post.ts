@@ -1,3 +1,5 @@
+import { API_ROUTES } from "~/constants/api";
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const {
@@ -59,22 +61,19 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Call the external signup API
-    const response = await $fetch(
-      "https://dark-caldron-448714-u5.appspot.com/qwesi/signup",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: {
-          phone,
-          name,
-          dob,
-          email,
-          password,
-        },
-      }
-    );
+    const response = await $fetch(API_ROUTES.SIGNUP, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: {
+        phone,
+        name,
+        dob,
+        email,
+        password,
+      },
+    });
 
     // If signup is successful, return success response
     if (response) {

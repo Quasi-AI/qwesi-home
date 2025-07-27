@@ -1,3 +1,5 @@
+import { API_ROUTES } from "~/constants/api";
+
 export default defineEventHandler(async (event) => {
   const headers = getHeaders(event);
   const authHeader = headers.authorization;
@@ -20,17 +22,14 @@ export default defineEventHandler(async (event) => {
   };
 
   try {
-    const response = await $fetch(
-      "https://dark-caldron-448714-u5.appspot.com/qwesi-edit-profile",
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: apiPayload,
-      }
-    );
+    const response = await $fetch(API_ROUTES.EDIT_PROFILE, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: apiPayload,
+    });
 
     return {
       success: true,

@@ -1,3 +1,5 @@
+import { API_ROUTES } from '~/constants/api';
+
 export default defineEventHandler(async (event) => {
   const headers = getHeaders(event);
   const token = headers.authorization?.replace("Bearer ", "");
@@ -12,7 +14,7 @@ export default defineEventHandler(async (event) => {
   try {
     // Call the external user details API
     const userDetails = await $fetch(
-      "https://dark-caldron-448714-u5.appspot.com/qwesi-details",
+      API_ROUTES.USER_DETAILS,
       {
         method: "GET",
         headers: {

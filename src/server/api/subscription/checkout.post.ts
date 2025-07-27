@@ -1,3 +1,5 @@
+import { API_ROUTES } from "~/constants/api";
+
 export default defineEventHandler(async (event) => {
   const headers = getHeaders(event);
   const authHeader = headers.authorization;
@@ -20,22 +22,22 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const response = await $fetch('https://dark-caldron-448714-u5.appspot.com/api/create-checkout-session', {
-      method: 'POST',
+    const response = await $fetch(API_ROUTES.CREATE_CHECKOUT_SESSION, {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: { email }
+      body: { email },
     });
 
     return {
       success: true,
       checkoutUrl: response.checkoutUrl,
-      message: "Checkout session created successfully"
+      message: "Checkout session created successfully",
     };
   } catch (error: any) {
-    console.error('Stripe checkout error:', error);
+    console.error("Stripe checkout error:", error);
     throw createError({
       statusCode: 500,
       statusMessage: "Failed to create checkout session",
     });
   }
-}); 
+});

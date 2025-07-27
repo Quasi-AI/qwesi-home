@@ -67,7 +67,34 @@
 
                 <!-- Stats Grid -->
                 <div class="mb-8">
-                    <Stats :stats="stats" />
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-900">Dashboard Overview</h2>
+                        <button @click="() => fetchDashboardSummary()" :disabled="dashboardLoading"
+                            class="flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            <svg v-if="dashboardLoading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600"
+                                fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                            <svg v-else class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
+                    <div v-if="dashboardLoading" class="flex justify-center items-center py-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <span class="ml-2 text-gray-600">Loading dashboard data...</span>
+                    </div>
+                    <div v-else-if="dashboardError" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                        <p class="text-red-600 text-sm">{{ dashboardError }}</p>
+                    </div>
+                    <Stats v-else :stats="stats" />
                 </div>
 
                 <!-- Tables Grid -->
@@ -97,6 +124,7 @@
 import { ref, computed, onMounted } from 'vue'
 
 import { useAuthStore } from '~/stores/auth'
+import { useDashboard } from '~/composables/useDashboard'
 import Sidebar from '@/components/dashboard/Sidebar.vue'
 import Stats from '@/components/dashboard/Stats.vue'
 import Table from '@/components/dashboard/Table.vue'
@@ -105,18 +133,41 @@ import Footer from '@/components/Footer.vue'
 
 
 const authStore = useAuthStore()
+const { loading: dashboardLoading, error: dashboardError, summary, fetchDashboardSummary } = useDashboard()
 
 // User state
 const user = computed(() => authStore.getUser || {})
 const profileMenuOpen = ref(false)
 const showProModal = ref(false)
 
-// Stats data
-const stats = ref({
-    jobs: 24,
-    activeTasks: 8,
-    people: 12,
-    productivity: 87
+// Stats data - now computed from API response
+const stats = computed(() => {
+    if (!summary.value) {
+        return {
+            jobs: 0,
+            activeTasks: 0,
+            people: 0,
+            productivity: 0,
+            changes: {
+                jobs: { value: 0, period: "last month" },
+                activeTasks: { value: 0, period: "last week" },
+                people: { value: 0, period: "last month" },
+                productivity: { value: 0, period: "last week" }
+            }
+        }
+    }
+    return {
+        jobs: summary.value.jobs,
+        activeTasks: summary.value.activeTasks,
+        people: summary.value.people,
+        productivity: summary.value.productivity,
+        changes: summary.value.changes || {
+            jobs: { value: 0, period: "last month" },
+            activeTasks: { value: 0, period: "last week" },
+            people: { value: 0, period: "last month" },
+            productivity: { value: 0, period: "last week" }
+        }
+    }
 })
 
 // Table data
@@ -170,11 +221,15 @@ const handleLogout = async () => {
 }
 
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
     // Check if user is authenticated
     if (!authStore.isAuthenticated) {
         navigateTo('/auth/login')
+        return
     }
+
+    // Fetch dashboard summary data
+    await fetchDashboardSummary()
 })
 
 // Set page title

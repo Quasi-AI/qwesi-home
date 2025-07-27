@@ -1,3 +1,5 @@
+import { API_ROUTES } from "~/constants/api";
+
 export default defineEventHandler(async (event) => {
   const headers = getHeaders(event);
   const authHeader = headers.authorization;
@@ -13,13 +15,10 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Verify token with external API
-    const response = await $fetch(
-      "https://dark-caldron-448714-u5.appspot.com/qwesi-details",
-      {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const response = await $fetch(API_ROUTES.USER_DETAILS, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
     return {
       success: true,

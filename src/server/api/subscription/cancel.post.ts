@@ -1,3 +1,5 @@
+import { API_ROUTES } from "~/constants/api";
+
 export default defineEventHandler(async (event) => {
   const headers = getHeaders(event);
   const authHeader = headers.authorization;
@@ -20,14 +22,11 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const response = await $fetch(
-      "https://dark-caldron-448714-u5.appspot.com/api/cancel-subscription",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: { email },
-      }
-    );
+    const response = await $fetch(API_ROUTES.CANCEL_SUBSCRIPTION, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: { email },
+    });
 
     return {
       success: true,
