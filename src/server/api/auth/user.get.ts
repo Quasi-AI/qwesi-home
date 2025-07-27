@@ -1,38 +1,35 @@
 export default defineEventHandler(async (event) => {
   const headers = getHeaders(event);
-  const authHeader = headers.authorization;
+  const token = headers.authorization?.replace("Bearer ", "");
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!token) {
     throw createError({
       statusCode: 401,
       statusMessage: "No token provided",
     });
   }
 
-  const token = authHeader.replace("Bearer ", "");
-
-  // Mock token validation - in real app, verify JWT token
-  if (token.startsWith("mock-jwt-token-")) {
-    // Return fake user data (in real app, decode JWT and fetch from database)
-    const user = {
-      id: "1",
-      email: "test@example.com",
-      firstName: "Test",
-      lastName: "User",
-      profileImage: null,
-      phone: "+1234567890",
-      isPro: true,
-    };
+  try {
+    // Call the external user details API
+    const userDetails = await $fetch(
+      "https://dark-caldron-448714-u5.appspot.com/qwesi-details",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     return {
       success: true,
-      user,
-      message: "User data retrieved successfully",
+      user: userDetails,
     };
+  } catch (error) {
+    console.error("Fetch user details error:", error);
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Failed to fetch user details",
+    });
   }
-
-  throw createError({
-    statusCode: 401,
-    statusMessage: "Invalid token",
-  });
 });

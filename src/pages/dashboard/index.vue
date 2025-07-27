@@ -147,23 +147,11 @@ const people = ref([
 
 // Computed
 const userInitials = computed(() => {
-    const firstName = user.value.firstName || ''
-    const lastName = user.value.lastName || ''
-    if (firstName || lastName) {
-        return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase()
-    }
-    // Fallback to the old name format if firstName/lastName not available
     const name = user.value.name || ''
-    return name.split(' ').map(n => n[0]).join('').toUpperCase()
+    return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2)
 })
 
 const displayName = computed(() => {
-    const firstName = user.value.firstName || ''
-    const lastName = user.value.lastName || ''
-    if (firstName || lastName) {
-        return `${firstName} ${lastName}`.trim()
-    }
-    // Fallback to the old name format if firstName/lastName not available
     return user.value.name || 'User'
 })
 

@@ -26,18 +26,37 @@ export const useAuthStore = defineStore("auth", {
     async login(data: LoginData) {
       this.loading = true;
       try {
-        // Simulate API call - replace with actual API endpoint
         const response = await $fetch<AuthResponse>("/api/auth/login", {
           method: "POST",
           body: data,
         });
 
-        if (response.success && response.user && response.token) {
-          this.user = response.user;
+        if (response.success && response.token) {
           this.token = response.token;
           this.isAuthenticated = true;
 
-          // Store token in localStorage or cookie
+          // If user data is provided, set it
+          if (response.user) {
+            this.user = response.user;
+          } else {
+            // If no user data in login response, try to fetch it separately
+            console.log(
+              "No user data in login response, attempting to fetch user details..."
+            );
+            try {
+              const userResult = await this.fetchUser();
+              if (userResult.success && userResult.user) {
+                this.user = userResult.user;
+              }
+            } catch (fetchError) {
+              console.error(
+                "Failed to fetch user details after login:",
+                fetchError
+              );
+            }
+          }
+
+          // Store token in localStorage
           if (process.client) {
             localStorage.setItem("auth_token", response.token);
           }
@@ -46,7 +65,7 @@ export const useAuthStore = defineStore("auth", {
         } else {
           return { success: false, error: response.message || "Login failed" };
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Login error:", error);
         return { success: false, error: "Login failed. Please try again." };
       } finally {
@@ -57,29 +76,31 @@ export const useAuthStore = defineStore("auth", {
     async signup(userData: SignupData) {
       this.loading = true;
       try {
-        // Simulate API call - replace with actual API endpoint
         const response = await $fetch<AuthResponse>("/api/auth/signup", {
           method: "POST",
           body: userData,
         });
 
-        if (response.success && response.user && response.token) {
-          this.user = response.user;
-          this.token = response.token;
-          this.isAuthenticated = true;
-
-          // Store token in localStorage or cookie
-          if (process.client) {
-            localStorage.setItem("auth_token", response.token);
-          }
-
-          return { success: true };
+        if (response.success) {
+          return { success: true, message: response.message };
         } else {
           return { success: false, error: response.message || "Signup failed" };
         }
-      } catch (error) {
-        console.error("Signup error:", error);
-        return { success: false, error: "Signup failed. Please try again." };
+      } catch (error: any) {
+        console.error("Signup error in auth store:", error);
+        
+        // Try to extract error message
+        let errorMessage = "Signup failed. Please try again.";
+        
+        if (error.data) {
+          errorMessage = error.data.message || error.data.error || errorMessage;
+        } else if (error.statusMessage) {
+          errorMessage = error.statusMessage;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        return { success: false, error: errorMessage };
       } finally {
         this.loading = false;
       }
@@ -96,7 +117,7 @@ export const useAuthStore = defineStore("auth", {
             },
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Logout error:", error);
       } finally {
         // Clear local state
@@ -138,7 +159,7 @@ export const useAuthStore = defineStore("auth", {
               // Invalid token, clear it
               localStorage.removeItem("auth_token");
             }
-          } catch (error) {
+          } catch (error: any) {
             console.error("Token verification error:", error);
             localStorage.removeItem("auth_token");
           }
@@ -166,7 +187,7 @@ export const useAuthStore = defineStore("auth", {
             error: response.message || "Failed to fetch user data",
           };
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Fetch user error:", error);
         return {
           success: false,
@@ -194,7 +215,7 @@ export const useAuthStore = defineStore("auth", {
             error: response.message || "Profile update failed",
           };
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Profile update error:", error);
         return {
           success: false,
@@ -214,7 +235,7 @@ export const useAuthStore = defineStore("auth", {
         );
 
         return { success: response.success, message: response.message };
-      } catch (error) {
+      } catch (error: any) {
         console.error("Forgot password error:", error);
         return {
           success: false,
@@ -234,7 +255,7 @@ export const useAuthStore = defineStore("auth", {
         );
 
         return { success: response.success, message: response.message };
-      } catch (error) {
+      } catch (error: any) {
         console.error("Reset password error:", error);
         return {
           success: false,

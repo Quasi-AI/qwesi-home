@@ -1,10 +1,10 @@
 export interface User {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  name: string;
+  phone: string;
+  dob: string;
   profileImage?: string;
-  phone?: string;
   isPro?: boolean;
 }
 
@@ -23,21 +23,29 @@ export interface AuthState {
 }
 
 export interface LoginData {
-  email: string;
+  phone: string;
   password: string;
 }
 
 export interface SignupData {
+  phone: string;
+  name: string;
+  dob: string;
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
 }
 
 export interface ProfileData {
-  firstName?: string;
-  lastName?: string;
+  name?: string;
   email?: string;
   phone?: string;
+  dob?: string;
   profileImage?: string;
+}
+
+export interface CountryCode {
+  code: string;
+  name: string;
+  dialCode: string;
+  flag: string;
 }

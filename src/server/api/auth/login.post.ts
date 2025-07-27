@@ -1,45 +1,114 @@
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const { email, password }: { email: string; password: string } = body;
+  const { phone, password }: { phone: string; password: string } = body;
 
-  // Fake user for testing
-  const fakeUser = {
-    email: "test@example.com",
-    password: "password123",
-    id: "1",
-    firstName: "Test",
-    lastName: "User",
-    profileImage: null,
-    phone: "+1234567890",
-    isPro: true,
-  };
+  try {
+    // Call the external login API
+    const response: any = await $fetch(
+      "https://dark-caldron-448714-u5.appspot.com/qwesi/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: {
+          phone,
+          password,
+        },
+      }
+    );
 
-  // Mock authentication - in real app, validate against database
-  if (email === fakeUser.email && password === fakeUser.password) {
-    // Return user data without password
-    const user = {
-      id: fakeUser.id,
-      email: fakeUser.email,
-      firstName: fakeUser.firstName,
-      lastName: fakeUser.lastName,
-      profileImage: fakeUser.profileImage,
-      phone: fakeUser.phone,
-      isPro: fakeUser.isPro,
-    };
+    // If login is successful, fetch user details
+    if (response) {
+      // First, check if the login response itself contains user data
+      if (response.user || response.data) {
+        return {
+          success: true,
+          user: response.user || response.data,
+          token:
+            response.token ||
+            response.access_token ||
+            response.accessToken ||
+            null,
+          message: "Login successful",
+        };
+      }
 
-    // Mock JWT token
-    const token = "mock-jwt-token-" + Date.now();
+      try {
+        // Check if we have a token
+        const token =
+          response.token || response.access_token || response.accessToken;
 
-    return {
-      success: true,
-      user,
-      token,
-      message: "Login successful",
-    };
+        if (!token) {
+          // Try to fetch user details without authentication
+          try {
+            const userDetails = await $fetch(
+              "https://dark-caldron-448714-u5.appspot.com/qwesi-details",
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+
+            return {
+              success: true,
+              user: userDetails,
+              token: null,
+              message: "Login successful",
+            };
+          } catch (noAuthError: any) {
+            // If no auth also fails, return success without user details
+            return {
+              success: true,
+              user: null,
+              token: null,
+              message: "Login successful but user details not available",
+            };
+          }
+        }
+
+        const userDetails = await $fetch(
+          "https://dark-caldron-448714-u5.appspot.com/qwesi-details",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        return {
+          success: true,
+          user: userDetails,
+          token: token,
+          message: "Login successful",
+        };
+      } catch (userError: any) {
+        console.error("Error fetching user details:", userError);
+
+        return {
+          success: true,
+          user: null,
+          token:
+            response.token || response.access_token || response.accessToken,
+          message: "Login successful but failed to fetch user details",
+        };
+      }
+    }
+
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Invalid credentials",
+    });
+  } catch (error: any) {
+    console.error("Login error:", error);
+
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Login failed. Please check your credentials.",
+    });
   }
-
-  throw createError({
-    statusCode: 401,
-    statusMessage: "Invalid credentials",
-  });
 });

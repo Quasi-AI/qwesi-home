@@ -69,23 +69,20 @@
                         <p class="text-sm text-red-600">{{ error }}</p>
                     </div>
 
+                    <!-- Success Message -->
+                    <div v-if="success" class="mb-6 bg-green-50 border border-green-200 rounded-lg p-3">
+                        <p class="text-sm text-green-600">{{ success }}</p>
+                    </div>
+
                     <h2 class="text-lg font-semibold text-gray-900 mb-6">Personal Information</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">
-                                First Name
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                                Full Name
                             </label>
-                            <input id="firstName" v-model="form.firstName" type="text"
+                            <input id="name" v-model="form.name" type="text"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter your first name" />
-                        </div>
-                        <div>
-                            <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">
-                                Last Name
-                            </label>
-                            <input id="lastName" v-model="form.lastName" type="text"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter your last name" />
+                                placeholder="Enter your full name" />
                         </div>
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
@@ -99,186 +96,41 @@
                             <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
                                 Phone Number
                             </label>
-                            <input id="phone" v-model="form.phone" type="tel"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter your phone number" />
+                            <input id="phone" v-model="form.phone" type="tel" readonly
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                                placeholder="Phone number cannot be changed" />
+                            <p class="text-xs text-gray-500 mt-1">Phone number cannot be modified for security reasons
+                            </p>
                         </div>
                         <div>
-                            <label for="dateOfBirth" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="dob" class="block text-sm font-medium text-gray-700 mb-2">
                                 Date of Birth
                             </label>
-                            <input id="dateOfBirth" v-model="form.dateOfBirth" type="date"
+                            <input id="dob" v-model="form.dob" type="date"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                         </div>
-                        <div>
-                            <label for="gender" class="block text-sm font-medium text-gray-700 mb-2">
-                                Gender
-                            </label>
-                            <select id="gender" v-model="form.gender"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Select gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
-                                <option value="prefer-not-to-say">Prefer not to say</option>
-                            </select>
-                        </div>
                     </div>
                 </div>
 
-                <!-- Professional Information Section -->
-                <div class="p-8 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-6">Professional Information</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="jobTitle" class="block text-sm font-medium text-gray-700 mb-2">
-                                Job Title
-                            </label>
-                            <input id="jobTitle" v-model="form.jobTitle" type="text"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="e.g., Software Engineer" />
-                        </div>
-                        <div>
-                            <label for="company" class="block text-sm font-medium text-gray-700 mb-2">
-                                Company
-                            </label>
-                            <input id="company" v-model="form.company" type="text"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter your company name" />
-                        </div>
-                        <div>
-                            <label for="industry" class="block text-sm font-medium text-gray-700 mb-2">
-                                Industry
-                            </label>
-                            <select id="industry" v-model="form.industry"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Select industry</option>
-                                <option value="technology">Technology</option>
-                                <option value="healthcare">Healthcare</option>
-                                <option value="finance">Finance</option>
-                                <option value="education">Education</option>
-                                <option value="marketing">Marketing</option>
-                                <option value="sales">Sales</option>
-                                <option value="consulting">Consulting</option>
-                                <option value="retail">Retail</option>
-                                <option value="manufacturing">Manufacturing</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="experience" class="block text-sm font-medium text-gray-700 mb-2">
-                                Years of Experience
-                            </label>
-                            <select id="experience" v-model="form.experience"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Select experience level</option>
-                                <option value="0-1">0-1 years</option>
-                                <option value="2-5">2-5 years</option>
-                                <option value="6-10">6-10 years</option>
-                                <option value="11-15">11-15 years</option>
-                                <option value="16-20">16-20 years</option>
-                                <option value="20+">20+ years</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mt-6">
-                        <label for="bio" class="block text-sm font-medium text-gray-700 mb-2">
-                            Bio
-                        </label>
-                        <textarea id="bio" v-model="form.bio" rows="4"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Tell us about yourself, your skills, and what you're looking for..."></textarea>
-                    </div>
-                </div>
-
-                <!-- Location Section -->
-                <div class="p-8 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-6">Location</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div>
-                            <label for="country" class="block text-sm font-medium text-gray-700 mb-2">
-                                Country
-                            </label>
-                            <select id="country" v-model="form.country"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Select country</option>
-                                <option value="ghana">Ghana</option>
-                                <option value="nigeria">Nigeria</option>
-                                <option value="kenya">Kenya</option>
-                                <option value="south-africa">South Africa</option>
-                                <option value="ethiopia">Ethiopia</option>
-                                <option value="uganda">Uganda</option>
-                                <option value="tanzania">Tanzania</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
-                                City
-                            </label>
-                            <input id="city" v-model="form.city" type="text"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter your city" />
-                        </div>
-                        <div>
-                            <label for="timezone" class="block text-sm font-medium text-gray-700 mb-2">
-                                Timezone
-                            </label>
-                            <select id="timezone" v-model="form.timezone"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Select timezone</option>
-                                <option value="GMT">GMT (UTC+0)</option>
-                                <option value="GMT+1">GMT+1 (UTC+1)</option>
-                                <option value="GMT+2">GMT+2 (UTC+2)</option>
-                                <option value="GMT+3">GMT+3 (UTC+3)</option>
-                                <option value="GMT-5">GMT-5 (UTC-5)</option>
-                                <option value="GMT-6">GMT-6 (UTC-6)</option>
-                                <option value="GMT-7">GMT-7 (UTC-7)</option>
-                                <option value="GMT-8">GMT-8 (UTC-8)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Preferences Section -->
+                <!-- Account Information Section -->
                 <div class="p-8">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-6">Preferences</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-6">Account Information</h2>
                     <div class="space-y-4">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                             <div>
-                                <h3 class="text-sm font-medium text-gray-900">Email Notifications</h3>
-                                <p class="text-sm text-gray-600">Receive job alerts and updates via email</p>
+                                <h3 class="text-sm font-medium text-gray-900">Account Status</h3>
+                                <p class="text-sm text-gray-600">{{ user?.isPro ? 'Pro Account' : 'Free Account' }}</p>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" v-model="form.emailNotifications" class="sr-only peer">
-                                <div
-                                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600">
-                                </div>
-                            </label>
+                            <span :class="user?.isPro ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                                class="px-2 py-1 text-xs font-medium rounded-full">
+                                {{ user?.isPro ? 'Pro' : 'Free' }}
+                            </span>
                         </div>
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                             <div>
-                                <h3 class="text-sm font-medium text-gray-900">SMS Notifications</h3>
-                                <p class="text-sm text-gray-600">Receive urgent updates via SMS</p>
+                                <h3 class="text-sm font-medium text-gray-900">Member Since</h3>
+                                <p class="text-sm text-gray-600">{{ memberSince }}</p>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" v-model="form.smsNotifications" class="sr-only peer">
-                                <div
-                                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600">
-                                </div>
-                            </label>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-900">Profile Visibility</h3>
-                                <p class="text-sm text-gray-600">Allow other users to see your profile</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" v-model="form.profileVisible" class="sr-only peer">
-                                <div
-                                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600">
-                                </div>
-                            </label>
                         </div>
                     </div>
                 </div>
@@ -296,27 +148,15 @@ const router = useRouter()
 const authStore = useAuthStore()
 const loading = ref(false)
 const error = ref('')
+const success = ref('')
 const fileInput = ref(null)
 const profileImage = ref('')
 
 const form = ref({
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
     phone: '',
-    dateOfBirth: '',
-    gender: '',
-    jobTitle: '',
-    company: '',
-    industry: '',
-    experience: '',
-    bio: '',
-    country: '',
-    city: '',
-    timezone: '',
-    emailNotifications: true,
-    smsNotifications: false,
-    profileVisible: true
+    dob: ''
 })
 
 const triggerFileInput = () => {
@@ -335,31 +175,57 @@ const handleImageUpload = (event) => {
 }
 
 // Computed
+const user = computed(() => authStore.getUser)
+
 const userInitials = computed(() => {
-    const firstName = form.value.firstName || ''
-    const lastName = form.value.lastName || ''
-    return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase()
+    const name = form.value.name || ''
+    return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2)
 })
+
+const memberSince = computed(() => {
+    if (!user.value?.id) return 'N/A'
+    // This would typically come from the user data, but for now we'll show a placeholder
+    return 'Recently joined'
+})
+
+// Format date for display (convert from DD/MM/YYYY to YYYY-MM-DD)
+const formatDateForInput = (dateString) => {
+    if (!dateString) return ''
+    const parts = dateString.split('/')
+    if (parts.length === 3) {
+        return `${parts[2]}-${parts[1]}-${parts[0]}`
+    }
+    return dateString
+}
+
+// Format date for API (convert from YYYY-MM-DD to DD/MM/YYYY)
+const formatDateForAPI = (dateString) => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = date.getFullYear()
+    return `${day}/${month}/${year}`
+}
 
 const saveProfile = async () => {
     loading.value = true
     error.value = ''
+    success.value = ''
 
     try {
         const result = await authStore.updateProfile({
-            firstName: form.value.firstName,
-            lastName: form.value.lastName,
+            name: form.value.name,
             email: form.value.email,
-            phone: form.value.phone,
+            dob: formatDateForAPI(form.value.dob),
             profileImage: profileImage.value
         })
 
         if (result.success) {
-            // Show success message (you can implement a toast notification here)
-            console.log('Profile updated successfully!')
-
-            // Redirect back to dashboard
-            await router.push('/dashboard')
+            success.value = 'Profile updated successfully!'
+            setTimeout(() => {
+                success.value = ''
+            }, 3000)
         } else {
             error.value = result.error || 'Profile update failed'
         }
@@ -371,15 +237,30 @@ const saveProfile = async () => {
     }
 }
 
-onMounted(() => {
+onMounted(async () => {
     // Load existing user data from auth store
-    const user = authStore.getUser
-    if (user) {
+    const currentUser = authStore.getUser
+    if (currentUser) {
         form.value = {
-            ...form.value,
-            ...user
+            name: currentUser.name || '',
+            email: currentUser.email || '',
+            phone: currentUser.phone || '',
+            dob: formatDateForInput(currentUser.dob || '')
         }
-        profileImage.value = user.profileImage || ''
+        profileImage.value = currentUser.profileImage || ''
+    } else {
+        // If no user data, try to fetch it
+        await authStore.fetchUser()
+        const fetchedUser = authStore.getUser
+        if (fetchedUser) {
+            form.value = {
+                name: fetchedUser.name || '',
+                email: fetchedUser.email || '',
+                phone: fetchedUser.phone || '',
+                dob: formatDateForInput(fetchedUser.dob || '')
+            }
+            profileImage.value = fetchedUser.profileImage || ''
+        }
     }
 })
 
