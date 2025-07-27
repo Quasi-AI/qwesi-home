@@ -8,7 +8,11 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: `QWESI AI - Your 24/7 Career & Recruitment Assistant`,
-      link: [{ rel: "icon", type: "image/png", href: "/logo.png" }],
+      link: [
+        { rel: "icon", type: "image/png", href: "/favicon.png" },
+        { rel: "shortcut icon", href: "/favicon.png" },
+        { rel: "apple-touch-icon", href: "/favicon.png" },
+      ],
       meta: [
         {
           name: "description",

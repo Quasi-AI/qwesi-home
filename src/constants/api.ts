@@ -14,6 +14,9 @@ export const API_ROUTES = {
     "https://dark-caldron-448714-u5.appspot.com/api/create-checkout-session",
   CANCEL_SUBSCRIPTION:
     "https://dark-caldron-448714-u5.appspot.com/api/cancel-subscription",
+
+  // Registration endpoints
+  REGISTER_ON_PAGE: "https://dark-caldron-448714-u5.appspot.com/register-on-page",
 } as const;
 
 export type ApiRoute = (typeof API_ROUTES)[keyof typeof API_ROUTES];
