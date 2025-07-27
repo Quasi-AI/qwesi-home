@@ -325,7 +325,7 @@
         </section>
 
         <!-- Statistics Section -->
-        <section class="py-20 bg-white">
+        <section id="stats" class="py-20 bg-white">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid md:grid-cols-4 gap-8">
                     <!-- Stat 1 -->
@@ -336,7 +336,9 @@
                                     d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                             </svg>
                         </div>
-                        <div class="text-3xl font-bold text-blue-600 mb-2">10000</div>
+                        <div class="text-3xl font-bold text-blue-600 mb-2 transition-transform duration-300"
+                            :class="{ 'scale-110': statsAnimated }">{{ animatedStats.jobSeekers.toLocaleString() }}
+                        </div>
                         <p class="text-gray-600">Job Seekers Assisted</p>
                     </div>
 
@@ -349,7 +351,8 @@
                                     clipRule="evenodd" />
                             </svg>
                         </div>
-                        <div class="text-3xl font-bold text-blue-600 mb-2">5000</div>
+                        <div class="text-3xl font-bold text-blue-600 mb-2 transition-transform duration-300"
+                            :class="{ 'scale-110': statsAnimated }">{{ animatedStats.jobsSent.toLocaleString() }}</div>
                         <p class="text-gray-600">Jobs Sent to Users</p>
                     </div>
 
@@ -362,7 +365,9 @@
                                     clipRule="evenodd" />
                             </svg>
                         </div>
-                        <div class="text-3xl font-bold text-blue-600 mb-2">7000</div>
+                        <div class="text-3xl font-bold text-blue-600 mb-2 transition-transform duration-300"
+                            :class="{ 'scale-110': statsAnimated }">{{ animatedStats.successfulMatches.toLocaleString()
+                            }}</div>
                         <p class="text-gray-600">Successful Matches</p>
                     </div>
 
@@ -375,7 +380,9 @@
                                     clipRule="evenodd" />
                             </svg>
                         </div>
-                        <div class="text-3xl font-bold text-blue-600 mb-2">200</div>
+                        <div class="text-3xl font-bold text-blue-600 mb-2 transition-transform duration-300"
+                            :class="{ 'scale-110': statsAnimated }">{{ animatedStats.partneredCompanies.toLocaleString()
+                            }}</div>
                         <p class="text-gray-600">Partnered Companies</p>
                     </div>
                 </div>
@@ -398,198 +405,43 @@
                 </div>
 
                 <div class="relative overflow-hidden">
-                    <div class="flex animate-scroll-testimonials">
-                        <!-- First set of testimonials -->
-                        <div class="flex space-x-8 flex-shrink-0">
-                            <!-- Testimonial 1 -->
-                            <div class="bg-gray-50 p-8 rounded-xl w-80">
-                                <div class="text-blue-600 text-4xl mb-4">"</div>
-                                <p class="text-gray-700 mb-6">
-                                    As a student, I use Qwesi AI for math homework and research
-                                    questions. It's like having a smart friend available 24/7 on
-                                    my phone!
-                                </p>
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
-                                        <span class="text-blue-600 font-bold">AB</span>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-gray-900">Akua Boateng</h4>
-                                        <p class="text-gray-600">High School Student</p>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- Navigation Arrows -->
+                    <button @click="() => { previousTestimonial(); pauseAutoScroll(); }"
+                        class="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        aria-label="Previous testimonial">
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
 
-                            <!-- Testimonial 2 -->
-                            <div class="bg-gray-50 p-8 rounded-xl w-80">
-                                <div class="text-blue-600 text-4xl mb-4">"</div>
-                                <p class="text-gray-700 mb-6">
-                                    I run a small business and Qwesi AI helped me draft customer
-                                    emails, proposals, and even marketing plans. It saves me so
-                                    much time and effort.
-                                </p>
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
-                                        <span class="text-blue-600 font-bold">KO</span>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-gray-900">Kwabena Owusu</h4>
-                                        <p class="text-gray-600">Entrepreneur</p>
-                                    </div>
-                                </div>
-                            </div>
+                    <button @click="() => { nextTestimonial(); pauseAutoScroll(); }"
+                        class="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        aria-label="Next testimonial">
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
 
-                            <!-- Testimonial 3 -->
-                            <div class="bg-gray-50 p-8 rounded-xl w-80">
-                                <div class="text-blue-600 text-4xl mb-4">"</div>
-                                <p class="text-gray-700 mb-6">
-                                    What I love most about Qwesi is the voice support. I can just
-                                    speak and get intelligent responses – no typing needed. It's
-                                    helped my grandma use tech more confidently.
-                                </p>
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
-                                        <span class="text-blue-600 font-bold">NA</span>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-gray-900">Nana Ama</h4>
-                                        <p class="text-gray-600">Family Caregiver</p>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- Testimonials Container -->
+                    <div class="flex transition-transform duration-500 ease-in-out"
+                        :style="{ transform: `translateX(-${currentTestimonialIndex * 100}%)` }"
+                        @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd"
+                        @keydown="handleKeydown" tabindex="0" role="region" aria-label="Testimonials carousel">
 
-                            <!-- Testimonial 4 -->
-                            <div class="bg-gray-50 p-8 rounded-xl w-80">
+                        <div v-for="(testimonial, index) in testimonials" :key="index"
+                            class="w-full flex-shrink-0 px-4">
+                            <div class="bg-gray-50 p-8 rounded-xl max-w-md mx-auto">
                                 <div class="text-blue-600 text-4xl mb-4">"</div>
                                 <p class="text-gray-700 mb-6">
-                                    Qwesi AI transformed my job search. It found opportunities I
-                                    never would have discovered and helped me prepare for
-                                    interviews perfectly!
+                                    {{ testimonial.text }}
                                 </p>
                                 <div class="flex items-center space-x-4">
                                     <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
-                                        <span class="text-blue-600 font-bold">SK</span>
+                                        <span class="text-blue-600 font-bold">{{ testimonial.initials }}</span>
                                     </div>
                                     <div>
-                                        <h4 class="font-semibold text-gray-900">Sarah Kwame</h4>
-                                        <p class="text-gray-600">Software Developer</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Testimonial 5 -->
-                            <div class="bg-gray-50 p-8 rounded-xl w-80">
-                                <div class="text-blue-600 text-4xl mb-4">"</div>
-                                <p class="text-gray-700 mb-6">
-                                    The investor matchmaking feature is incredible! Qwesi
-                                    connected me with the perfect investors who understood my
-                                    vision and helped scale my startup.
-                                </p>
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
-                                        <span class="text-blue-600 font-bold">MA</span>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-gray-900">Michael Addo</h4>
-                                        <p class="text-gray-600">Startup Founder</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Duplicate set for seamless loop -->
-                        <div class="flex space-x-8 flex-shrink-0">
-                            <!-- Testimonial 1 -->
-                            <div class="bg-gray-50 p-8 rounded-xl w-80">
-                                <div class="text-blue-600 text-4xl mb-4">"</div>
-                                <p class="text-gray-700 mb-6">
-                                    As a student, I use Qwesi AI for math homework and research
-                                    questions. It's like having a smart friend available 24/7 on
-                                    my phone!
-                                </p>
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
-                                        <span class="text-blue-600 font-bold">AB</span>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-gray-900">Akua Boateng</h4>
-                                        <p class="text-gray-600">High School Student</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Testimonial 2 -->
-                            <div class="bg-gray-50 p-8 rounded-xl w-80">
-                                <div class="text-blue-600 text-4xl mb-4">"</div>
-                                <p class="text-gray-700 mb-6">
-                                    I run a small business and Qwesi AI helped me draft customer
-                                    emails, proposals, and even marketing plans. It saves me so
-                                    much time and effort.
-                                </p>
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
-                                        <span class="text-blue-600 font-bold">KO</span>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-gray-900">Kwabena Owusu</h4>
-                                        <p class="text-gray-600">Entrepreneur</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Testimonial 3 -->
-                            <div class="bg-gray-50 p-8 rounded-xl w-80">
-                                <div class="text-blue-600 text-4xl mb-4">"</div>
-                                <p class="text-gray-700 mb-6">
-                                    What I love most about Qwesi is the voice support. I can just
-                                    speak and get intelligent responses – no typing needed. It's
-                                    helped my grandma use tech more confidently.
-                                </p>
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
-                                        <span class="text-blue-600 font-bold">NA</span>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-gray-900">Nana Ama</h4>
-                                        <p class="text-gray-600">Family Caregiver</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Testimonial 4 -->
-                            <div class="bg-gray-50 p-8 rounded-xl w-80">
-                                <div class="text-blue-600 text-4xl mb-4">"</div>
-                                <p class="text-gray-700 mb-6">
-                                    Qwesi AI transformed my job search. It found opportunities I
-                                    never would have discovered and helped me prepare for
-                                    interviews perfectly!
-                                </p>
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
-                                        <span class="text-blue-600 font-bold">SK</span>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-gray-900">Sarah Kwame</h4>
-                                        <p class="text-gray-600">Software Developer</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Testimonial 5 -->
-                            <div class="bg-gray-50 p-8 rounded-xl w-80">
-                                <div class="text-blue-600 text-4xl mb-4">"</div>
-                                <p class="text-gray-700 mb-6">
-                                    The investor matchmaking feature is incredible! Qwesi
-                                    connected me with the perfect investors who understood my
-                                    vision and helped scale my startup.
-                                </p>
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
-                                        <span class="text-blue-600 font-bold">MA</span>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-gray-900">Michael Addo</h4>
-                                        <p class="text-gray-600">Startup Founder</p>
+                                        <h4 class="font-semibold text-gray-900">{{ testimonial.name }}</h4>
+                                        <p class="text-gray-600">{{ testimonial.role }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -598,12 +450,15 @@
                 </div>
 
                 <!-- Pagination Dots -->
-                <div class="flex justify-center mt-8 space-x-2">
-                    <div class="w-3 h-3 bg-blue-600 rounded-full animate-pulse"></div>
-                    <div class="w-3 h-3 bg-blue-600 rounded-full animate-pulse" style="animation-delay: 8s"></div>
-                    <div class="w-3 h-3 bg-blue-600 rounded-full animate-pulse" style="animation-delay: 16s"></div>
-                    <div class="w-3 h-3 bg-blue-600 rounded-full animate-pulse" style="animation-delay: 24s"></div>
-                    <div class="w-3 h-3 bg-blue-600 rounded-full animate-pulse" style="animation-delay: 32s"></div>
+                <div class="flex justify-center mt-8 space-x-2" role="tablist" aria-label="Testimonial navigation">
+                    <button v-for="(testimonial, index) in testimonials" :key="index" @click="goToTestimonial(index)"
+                        :class="[
+                            'w-3 h-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+                            currentTestimonialIndex === index
+                                ? 'bg-blue-600 scale-110'
+                                : 'bg-gray-300 hover:bg-gray-400 hover:scale-105'
+                        ]" :aria-label="`Go to testimonial ${index + 1}`"
+                        :aria-selected="currentTestimonialIndex === index" role="tab"></button>
                 </div>
             </div>
         </section>
@@ -661,97 +516,7 @@
         </section>
 
         <!-- Footer -->
-        <footer class="bg-white border-t border-gray-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div class="grid md:grid-cols-4 gap-8">
-                    <!-- Contact Info -->
-                    <div class="space-y-4">
-                        <div class="flex items-center space-x-2">
-                            <img src="@/assets/images/logo.png" alt="QWESI AI Logo" class="w-32 h-auto" />
-                        </div>
-                        <p class="text-gray-600">DeReimer Street</p>
-                        <p class="text-gray-600">New York, NY 10745</p>
-                        <p class="text-gray-600">+1(201) 979-0148</p>
-                        <p class="text-gray-600">info@qwesi.org</p>
-                    </div>
-
-                    <!-- Quick Links -->
-                    <div class="space-y-4">
-                        <h3 class="font-bold text-gray-900">Quick Links</h3>
-                        <div class="space-y-2">
-                            <a href="#" class="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
-                                <span class="text-blue-600">></span>
-                                <span>Home</span>
-                            </a>
-                            <a href="#" class="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
-                                <span class="text-blue-600">></span>
-                                <span>How I Work</span>
-                            </a>
-                            <a href="#" class="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
-                                <span class="text-blue-600">></span>
-                                <span>Privacy Policy</span>
-                            </a>
-                            <a href="#" class="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
-                                <span class="text-blue-600">></span>
-                                <span>Frequently Asked Questions</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- AI Services -->
-                    <div class="space-y-4">
-                        <h3 class="font-bold text-gray-900">Our AI Services</h3>
-                        <div class="space-y-2">
-                            <a href="#" class="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
-                                <span class="text-blue-600">></span>
-                                <span>24/7 Service</span>
-                            </a>
-                            <a href="#" class="flex items-center space-x-2 text-gray-600 hover:text-blue-600">
-                                <span class="text-blue-600">></span>
-                                <span>Job alert</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Connect With Us -->
-                    <div class="space-y-4">
-                        <h3 class="font-bold text-gray-900">Connect With Us</h3>
-                        <p class="text-gray-600">
-                            Follow us for AI insights, news, and updates.
-                        </p>
-                        <div class="flex space-x-3">
-                            <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                                <span class="text-white font-bold text-sm">in</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Bottom Section -->
-                <div class="border-t border-gray-200 mt-8 pt-8">
-                    <div class="flex flex-col items-center space-y-2">
-                        <p class="text-gray-600">
-                            © 2025 Copyright Qwesi All Rights Reserved
-                        </p>
-                        <p class="text-gray-600">Designed by Rex</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Scroll to Top Button -->
-            <button @click="scrollToTop" :class="[
-                'fixed bottom-8 right-8 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-all duration-300 ease-in-out',
-                showScrollTop
-                    ? 'opacity-100 translate-y-0'
-                    : 'opacity-0 translate-y-4 pointer-events-none',
-            ]">
-                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd"
-                        d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z"
-                        clipRule="evenodd" />
-                </svg>
-            </button>
-        </footer>
+        <Footer :show-scroll-top="true" />
 
         <!-- Demo Modal -->
         <DemoModal :is-open="demoModalOpen" @close="closeDemoModal" />
@@ -761,13 +526,134 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import DemoModal from "@/components/landing/demo.vue";
+import Footer from "@/components/Footer.vue";
 import { useAuthStore } from '~/stores/auth'
 
 const authStore = useAuthStore();
 const mobileMenuOpen = ref(false);
-const showScrollTop = ref(false);
 const demoModalOpen = ref(false);
 const activeSection = ref('home');
+const statsAnimated = ref(false);
+
+// Testimonials functionality
+const currentTestimonialIndex = ref(0);
+const touchStartX = ref(0);
+const touchEndX = ref(0);
+const autoScrollInterval = ref(null);
+const isUserInteracting = ref(false);
+
+const testimonials = ref([
+    {
+        name: "Akua Boateng",
+        role: "High School Student",
+        initials: "AB",
+        text: "As a student, I use Qwesi AI for math homework and research questions. It's like having a smart friend available 24/7 on my phone!"
+    },
+    {
+        name: "Kwabena Owusu",
+        role: "Entrepreneur",
+        initials: "KO",
+        text: "I run a small business and Qwesi AI helped me draft customer emails, proposals, and even marketing plans. It saves me so much time and effort."
+    },
+    {
+        name: "Nana Ama",
+        role: "Family Caregiver",
+        initials: "NA",
+        text: "What I love most about Qwesi is the voice support. I can just speak and get intelligent responses – no typing needed. It's helped my grandma use tech more confidently."
+    },
+    {
+        name: "Sarah Kwame",
+        role: "Software Developer",
+        initials: "SK",
+        text: "Qwesi AI transformed my job search. It found opportunities I never would have discovered and helped me prepare for interviews perfectly!"
+    },
+    {
+        name: "Michael Addo",
+        role: "Startup Founder",
+        initials: "MA",
+        text: "The investor matchmaking feature is incredible! Qwesi connected me with the perfect investors who understood my vision and helped scale my startup."
+    }
+]);
+
+const startAutoScroll = () => {
+    if (autoScrollInterval.value) {
+        clearInterval(autoScrollInterval.value);
+    }
+    autoScrollInterval.value = setInterval(() => {
+        if (!isUserInteracting.value) {
+            nextTestimonial();
+        }
+    }, 4000); // Change testimonial every 4 seconds
+};
+
+const stopAutoScroll = () => {
+    if (autoScrollInterval.value) {
+        clearInterval(autoScrollInterval.value);
+        autoScrollInterval.value = null;
+    }
+};
+
+const pauseAutoScroll = () => {
+    isUserInteracting.value = true;
+    stopAutoScroll();
+
+    // Resume auto-scroll after 5 seconds of inactivity
+    setTimeout(() => {
+        isUserInteracting.value = false;
+        startAutoScroll();
+    }, 5000);
+};
+
+const nextTestimonial = () => {
+    currentTestimonialIndex.value = (currentTestimonialIndex.value + 1) % testimonials.value.length;
+};
+
+const previousTestimonial = () => {
+    currentTestimonialIndex.value = currentTestimonialIndex.value === 0
+        ? testimonials.value.length - 1
+        : currentTestimonialIndex.value - 1;
+};
+
+const goToTestimonial = (index) => {
+    currentTestimonialIndex.value = index;
+    pauseAutoScroll();
+};
+
+// Touch/swipe functionality
+const handleTouchStart = (event) => {
+    touchStartX.value = event.touches[0].clientX;
+    pauseAutoScroll();
+};
+
+const handleTouchMove = (event) => {
+    touchEndX.value = event.touches[0].clientX;
+};
+
+const handleTouchEnd = () => {
+    const swipeThreshold = 50;
+    const diff = touchStartX.value - touchEndX.value;
+
+    if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0) {
+            // Swiped left - next testimonial
+            nextTestimonial();
+        } else {
+            // Swiped right - previous testimonial
+            previousTestimonial();
+        }
+    }
+};
+
+// Keyboard navigation
+const handleKeydown = (event) => {
+    if (event.key === 'ArrowLeft') {
+        previousTestimonial();
+        pauseAutoScroll();
+    } else if (event.key === 'ArrowRight') {
+        nextTestimonial();
+        pauseAutoScroll();
+    }
+};
 
 const toggleMobileMenu = () => {
     mobileMenuOpen.value = !mobileMenuOpen.value;
@@ -782,11 +668,10 @@ const closeDemoModal = () => {
 };
 
 const handleScroll = () => {
-    showScrollTop.value = window.scrollY > 300;
-
     // Detect active section based on scroll position
     const scrollY = window.scrollY;
     const featuresSection = document.getElementById('features');
+    const statsSection = document.getElementById('stats');
 
     if (featuresSection) {
         const featuresTop = featuresSection.offsetTop;
@@ -794,18 +679,16 @@ const handleScroll = () => {
 
         if (scrollY >= featuresTop - 100 && scrollY < featuresBottom - 100) {
             activeSection.value = 'features';
+        } else if (statsSection && scrollY >= statsSection.offsetTop - 200 && scrollY < statsSection.offsetTop + statsSection.offsetHeight - 100) {
+            activeSection.value = 'stats';
+            // Trigger animation when stats section is approaching viewport
+            if (!statsAnimated.value && scrollY >= statsSection.offsetTop - 100) {
+                animateStats();
+            }
         } else {
             activeSection.value = 'home';
         }
     }
-};
-
-const scrollToTop = () => {
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-    });
-    activeSection.value = 'home';
 };
 
 const scrollToFeatures = () => {
@@ -819,11 +702,66 @@ const scrollToFeatures = () => {
     }
 };
 
+const animatedStats = ref({
+    jobSeekers: 0,
+    jobsSent: 0,
+    successfulMatches: 0,
+    partneredCompanies: 0,
+});
+
+const animateStats = () => {
+    if (statsAnimated.value) return; // Prevent re-animation
+
+    statsAnimated.value = true;
+    const duration = 1500; // Reduced animation duration for more responsiveness
+    const startTime = performance.now();
+
+    const animate = (currentTime) => {
+        const elapsedTime = currentTime - startTime;
+        const progress = Math.min(elapsedTime / duration, 1);
+
+        // Use easing function for smoother animation
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+
+        animatedStats.value.jobSeekers = Math.floor(easeOutQuart * 10000);
+        animatedStats.value.jobsSent = Math.floor(easeOutQuart * 5000);
+        animatedStats.value.successfulMatches = Math.floor(easeOutQuart * 7000);
+        animatedStats.value.partneredCompanies = Math.floor(easeOutQuart * 200);
+
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        }
+    };
+
+    requestAnimationFrame(animate);
+};
+
 onMounted(() => {
     window.addEventListener("scroll", handleScroll);
+    window.addEventListener("keydown", handleKeydown);
+    startAutoScroll(); // Start auto-scrolling on mount
+
+    // Set up Intersection Observer for stats animation
+    const statsSection = document.getElementById('stats');
+    if (statsSection) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !statsAnimated.value) {
+                    animateStats();
+                }
+            });
+        }, {
+            threshold: 0.3, // Trigger when 30% of the section is visible
+            rootMargin: '0px 0px -100px 0px' // Trigger 100px before the section comes into view
+        });
+
+        observer.observe(statsSection);
+    }
 });
 
 onUnmounted(() => {
     window.removeEventListener("scroll", handleScroll);
+    window.removeEventListener("keydown", handleKeydown);
+    stopAutoScroll(); // Stop auto-scrolling on unmount
 });
 </script>

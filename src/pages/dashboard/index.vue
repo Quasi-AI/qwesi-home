@@ -49,7 +49,7 @@
             </header>
 
             <!-- Main Content Area -->
-            <main class="flex-1 p-6">
+            <main class="flex-1 p-6 flex flex-col">
                 <!-- Try Pro Banner -->
                 <div class="mb-8 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-4 sm:p-6 text-white">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
@@ -71,7 +71,7 @@
                 </div>
 
                 <!-- Tables Grid -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     <!-- Tasks Table -->
                     <Table title="Recent Tasks" description="Your latest tasks and their status" :columns="taskColumns"
                         :data="tasks" />
@@ -79,6 +79,11 @@
                     <!-- People Table -->
                     <Table title="Team Members" description="People working on your projects" :columns="peopleColumns"
                         :data="people" />
+                </div>
+
+                <!-- Footer -->
+                <div class="mt-auto">
+                    <Footer />
                 </div>
             </main>
         </div>
@@ -96,6 +101,7 @@ import Sidebar from '@/components/dashboard/Sidebar.vue'
 import Stats from '@/components/dashboard/Stats.vue'
 import Table from '@/components/dashboard/Table.vue'
 import ProModal from '@/components/dashboard/ProModal.vue'
+import Footer from '@/components/Footer.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()

@@ -26,8 +26,8 @@
             </header>
 
             <!-- Main Content Area -->
-            <main class="flex-1 p-4 sm:p-6">
-                <div class="max-w-4xl mx-auto">
+            <main class="flex-1 p-4 sm:p-6 flex flex-col">
+                <div class="max-w-4xl mx-auto flex-1 flex flex-col">
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                         <!-- Profile Picture Section -->
                         <div class="p-4 sm:p-8 border-b border-gray-200">
@@ -38,45 +38,11 @@
                                         class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-gray-200 overflow-hidden relative">
                                         <img :src="profileImage" alt="Profile Picture"
                                             class="w-full h-full object-cover" />
-                                        <button @click="triggerFileInput" :disabled="uploading"
-                                            class="absolute bottom-1 right-1 w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors disabled:opacity-50 shadow-lg">
-                                            <svg v-if="uploading" class="animate-spin w-3 h-3 sm:w-4 sm:h-4 text-white"
-                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                                    stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor"
-                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                </path>
-                                            </svg>
-                                            <svg v-else class="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none"
-                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
-                                                </path>
-                                            </svg>
-                                        </button>
                                     </div>
                                     <div v-else
                                         class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-gray-200 bg-blue-100 flex items-center justify-center relative">
                                         <span class="text-blue-600 font-bold text-xl sm:text-2xl">{{ userInitials
-                                            }}</span>
-                                        <button @click="triggerFileInput" :disabled="uploading"
-                                            class="absolute bottom-0.5 right-1 w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors disabled:opacity-50 shadow-lg">
-                                            <svg v-if="uploading" class="animate-spin w-3 h-3 sm:w-4 sm:h-4 text-white"
-                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                                    stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor"
-                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                </path>
-                                            </svg>
-                                            <svg v-else class="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none"
-                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
-                                                </path>
-                                            </svg>
-                                        </button>
+                                        }}</span>
                                     </div>
                                 </div>
                                 <div class="flex-1 text-center sm:text-left">
@@ -154,7 +120,7 @@
                                     <div>
                                         <h3 class="text-sm font-medium text-gray-900">Account Status</h3>
                                         <p class="text-sm text-gray-600">{{ user?.isPro ? 'Pro Account' : 'Free Account'
-                                            }}</p>
+                                        }}</p>
                                     </div>
                                     <span
                                         :class="user?.isPro ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
@@ -172,6 +138,11 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Footer -->
+                <div class="mt-auto">
+                    <Footer />
+                </div>
             </main>
         </div>
     </div>
@@ -183,6 +154,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '~/stores/auth'
 import { useImageUpload } from '~/composables/useImageUpload'
 import Sidebar from '@/components/dashboard/Sidebar.vue'
+import Footer from '@/components/Footer.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
