@@ -19,8 +19,7 @@
                             class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors">
                             <div v-if="user.profileImage"
                                 class="w-8 h-8 object-cover rounded-full overflow-hidden border-2 border-gray-200">
-                                <img :src="user.profileImage" alt="Profile Picture"
-                                    class="w-8 h-8 object-cover" />
+                                <img :src="user.profileImage" alt="Profile Picture" class="w-8 h-8 object-cover" />
                             </div>
                             <div v-else class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                                 <span class="text-blue-600 font-medium text-sm">{{ userInitials }}</span>
@@ -85,74 +84,29 @@
         </div>
 
         <!-- Pro Modal -->
-        <div v-if="showProModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Upgrade to Pro</h3>
-                <p class="text-gray-600 mb-6">
-                    Enter your payment information to start your 30-day free trial. You can cancel anytime.
-                </p>
-
-                <form @submit.prevent="handleProUpgrade" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
-                        <input v-model="paymentForm.cardNumber" type="text" placeholder="1234 5678 9012 3456"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required />
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
-                            <input v-model="paymentForm.expiryDate" type="text" placeholder="MM/YY"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">CVV</label>
-                            <input v-model="paymentForm.cvv" type="text" placeholder="123"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required />
-                        </div>
-                    </div>
-
-                    <div class="flex space-x-3 pt-4">
-                        <button type="button" @click="showProModal = false"
-                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                            Cancel
-                        </button>
-                        <button type="submit" :disabled="upgrading"
-                            class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
-                            <span v-if="upgrading">Processing...</span>
-                            <span v-else>Start Trial</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <ProModal v-model="showProModal" mode="upgrade" :loading="upgrading" @submit="handleProUpgrade" />
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '~/stores/auth'
 import Sidebar from '@/components/dashboard/Sidebar.vue'
 import Stats from '@/components/dashboard/Stats.vue'
 import Table from '@/components/dashboard/Table.vue'
+import ProModal from '@/components/dashboard/ProModal.vue'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 // User state
-const user = ref({})
+const user = computed(() => authStore.getUser || {})
 const profileMenuOpen = ref(false)
 const showProModal = ref(false)
 const upgrading = ref(false)
 
-// Payment form
-const paymentForm = ref({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: ''
-})
+
 
 // Stats data
 const stats = ref({
@@ -219,12 +173,12 @@ const editProfile = () => {
     router.push('/dashboard/profile')
 }
 
-const handleLogout = () => {
-    localStorage.removeItem('user')
+const handleLogout = async () => {
+    await authStore.logout()
     router.push('/')
 }
 
-const handleProUpgrade = async () => {
+const handleProUpgrade = async (formData) => {
     upgrading.value = true
 
     try {
@@ -232,7 +186,7 @@ const handleProUpgrade = async () => {
         await new Promise(resolve => setTimeout(resolve, 2000))
 
         // Store payment info (in real app, this would be sent to payment processor)
-        localStorage.setItem('paymentInfo', JSON.stringify(paymentForm.value))
+        localStorage.setItem('paymentInfo', JSON.stringify(formData))
         localStorage.setItem('proSubscription', 'true')
 
         showProModal.value = false
@@ -246,22 +200,11 @@ const handleProUpgrade = async () => {
 
 // Lifecycle
 onMounted(() => {
-    loadUserData()
-})
-
-// Watch for changes in localStorage to update user data when returning from profile page
-watch(() => localStorage.getItem('user'), () => {
-    loadUserData()
-}, { immediate: false })
-
-const loadUserData = () => {
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-        user.value = JSON.parse(storedUser)
-    } else {
-        router.push('/')
+    // Check if user is authenticated
+    if (!authStore.isAuthenticated) {
+        router.push('/auth/login')
     }
-}
+})
 
 // Set page title
 useHead({

@@ -25,6 +25,11 @@
 
                 <!-- Login Form -->
                 <form class="space-y-6" @submit.prevent="handleLogin">
+                    <!-- Error Message -->
+                    <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-3">
+                        <p class="text-sm text-red-600">{{ error }}</p>
+                    </div>
+
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                             Email address
@@ -85,11 +90,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '~/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const loading = ref(false)
+const error = ref('')
 
 const form = ref({
     email: '',
@@ -99,28 +107,46 @@ const form = ref({
 
 const handleLogin = async () => {
     loading.value = true
+    error.value = ''
 
     try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const result = await authStore.login({
+            email: form.value.email,
+            password: form.value.password
+        })
 
-        // For demo purposes, accept any email/password
-        if (form.value.email && form.value.password) {
-            // Store user session
-            localStorage.setItem('user', JSON.stringify({
-                email: form.value.email,
-                name: form.value.email.split('@')[0]
-            }))
-
-            // Redirect to dashboard
-            await router.push('/dashboard')
+        if (result.success) {
+            // Check if there's a redirect URL stored
+            const redirectUrl = localStorage.getItem('redirect_after_login')
+            if (redirectUrl) {
+                localStorage.removeItem('redirect_after_login')
+                await router.push(redirectUrl)
+            } else {
+                await router.push('/dashboard')
+            }
+        } else {
+            error.value = result.error || 'Login failed'
         }
-    } catch (error) {
-        console.error('Login error:', error)
+    } catch (err) {
+        console.error('Login error:', err)
+        error.value = 'An unexpected error occurred'
     } finally {
         loading.value = false
     }
 }
+
+// Check if user is already logged in
+onMounted(() => {
+    if (authStore.isAuthenticated) {
+        const redirectUrl = localStorage.getItem('redirect_after_login')
+        if (redirectUrl) {
+            localStorage.removeItem('redirect_after_login')
+            router.push(redirectUrl)
+        } else {
+            router.push('/dashboard')
+        }
+    }
+})
 
 // Set page title
 useHead({

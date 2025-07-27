@@ -43,6 +43,11 @@
 
                 <!-- Reset Password Form -->
                 <form v-if="!passwordReset" class="space-y-6" @submit.prevent="handleResetPassword">
+                    <!-- Error Message -->
+                    <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-3">
+                        <p class="text-sm text-red-600">{{ error }}</p>
+                    </div>
+
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
                             New password
@@ -98,12 +103,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '~/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const loading = ref(false)
 const passwordReset = ref(false)
+const error = ref('')
 
 const form = ref({
     password: '',
@@ -112,24 +120,49 @@ const form = ref({
 
 const handleResetPassword = async () => {
     loading.value = true
+    error.value = ''
 
     try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        if (form.value.password !== form.value.confirmPassword) {
+            error.value = 'Passwords do not match'
+            return
+        }
 
-        // For demo purposes, always succeed
-        passwordReset.value = true
+        // Get token from URL params (in real app, this would come from email link)
+        const urlParams = new URLSearchParams(window.location.search)
+        const token = urlParams.get('token') || 'mock-reset-token'
 
-        // Redirect to login after 2 seconds
-        setTimeout(() => {
-            router.push('/auth/login')
-        }, 2000)
-    } catch (error) {
-        console.error('Reset password error:', error)
+        const result = await authStore.resetPassword(token, form.value.password)
+
+        if (result.success) {
+            passwordReset.value = true
+            // Redirect to login after 2 seconds
+            setTimeout(() => {
+                router.push('/auth/login')
+            }, 2000)
+        } else {
+            error.value = result.error || 'Password reset failed'
+        }
+    } catch (err) {
+        console.error('Reset password error:', err)
+        error.value = 'An unexpected error occurred'
     } finally {
         loading.value = false
     }
 }
+
+// Check if user is already logged in
+onMounted(() => {
+    if (authStore.isAuthenticated) {
+        const redirectUrl = localStorage.getItem('redirect_after_login')
+        if (redirectUrl) {
+            localStorage.removeItem('redirect_after_login')
+            router.push(redirectUrl)
+        } else {
+            router.push('/dashboard')
+        }
+    }
+})
 
 // Set page title
 useHead({

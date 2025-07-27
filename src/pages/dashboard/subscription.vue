@@ -17,6 +17,11 @@
 
             <!-- Main Content Area -->
             <main class="flex-1 p-6">
+                <!-- Error Message -->
+                <div v-if="subscriptionStore.getError" class="mb-6 bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p class="text-sm text-red-600">{{ subscriptionStore.getError }}</p>
+                </div>
+
                 <!-- Current Plan -->
                 <div class="mb-8">
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -34,9 +39,10 @@
                                 </div>
                             </div>
                             <div v-if="!isPro">
-                                <button @click="showUpgradeModal = true"
-                                    class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                                    Upgrade to Pro
+                                <button @click="showUpgradeModal = true" :disabled="subscriptionStore.isLoading"
+                                    class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span v-if="subscriptionStore.isLoading">Loading...</span>
+                                    <span v-else>Upgrade to Pro</span>
                                 </button>
                             </div>
                         </div>
@@ -156,10 +162,9 @@
                             class="w-full bg-gray-100 text-gray-400 py-2 px-4 rounded-lg cursor-not-allowed">
                             Current Plan
                         </button>
-                        <button v-else @click="showUpgradeModal = true"
-                            class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
-                            Get Started
-                        </button>
+                        <div v-else class="w-full bg-gray-50 text-gray-500 py-2 px-4 rounded-lg text-center">
+                            Current Plan
+                        </div>
                     </div>
 
                     <!-- Pro Plan -->
@@ -171,7 +176,7 @@
                         </div>
                         <div class="text-center">
                             <h3 class="text-xl font-semibold text-gray-900 mb-2">Pro Plan</h3>
-                            <p class="text-3xl font-bold text-gray-900 mb-1">$29</p>
+                            <p class="text-3xl font-bold text-gray-900 mb-1">$10</p>
                             <p class="text-gray-600 mb-6">per month</p>
                         </div>
                         <ul class="space-y-3 mb-6">
@@ -222,197 +227,100 @@
         </div>
 
         <!-- Upgrade Modal -->
-        <div v-if="showUpgradeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Upgrade to Pro</h3>
-                <p class="text-gray-600 mb-6">
-                    Enter your payment information to start your 30-day free trial. You can cancel anytime.
-                </p>
-
-                <form @submit.prevent="handleUpgrade" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
-                        <input v-model="upgradeForm.cardNumber" type="text" placeholder="1234 5678 9012 3456"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required />
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
-                            <input v-model="upgradeForm.expiryDate" type="text" placeholder="MM/YY"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">CVV</label>
-                            <input v-model="upgradeForm.cvv" type="text" placeholder="123"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required />
-                        </div>
-                    </div>
-
-                    <div class="flex space-x-3 pt-4">
-                        <button type="button" @click="showUpgradeModal = false"
-                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                            Cancel
-                        </button>
-                        <button type="submit" :disabled="upgrading"
-                            class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
-                            <span v-if="upgrading">Processing...</span>
-                            <span v-else>Start Trial</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <ProModal v-model="showUpgradeModal" mode="upgrade" :loading="subscriptionStore.isLoading"
+            @submit="handleUpgrade" />
 
         <!-- Update Payment Modal -->
-        <div v-if="showUpdatePaymentModal"
-            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Update Payment Method</h3>
-                <p class="text-gray-600 mb-6">
-                    Update your payment information to continue your Pro subscription.
-                </p>
-
-                <form @submit.prevent="handleUpdatePayment" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
-                        <input v-model="updatePaymentForm.cardNumber" type="text" placeholder="1234 5678 9012 3456"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required />
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
-                            <input v-model="updatePaymentForm.expiryDate" type="text" placeholder="MM/YY"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">CVV</label>
-                            <input v-model="updatePaymentForm.cvv" type="text" placeholder="123"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required />
-                        </div>
-                    </div>
-
-                    <div class="flex space-x-3 pt-4">
-                        <button type="button" @click="showUpdatePaymentModal = false"
-                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                            Cancel
-                        </button>
-                        <button type="submit" :disabled="updating"
-                            class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
-                            <span v-if="updating">Updating...</span>
-                            <span v-else>Update Payment</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <ProModal v-model="showUpdatePaymentModal" mode="update" :loading="subscriptionStore.isLoading"
+            @submit="handleUpdatePayment" />
     </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '~/stores/auth'
+import { useSubscriptionStore } from '~/stores/subscription'
 import Sidebar from '@/components/dashboard/Sidebar.vue'
+import ProModal from '@/components/dashboard/ProModal.vue'
 
 const router = useRouter()
+const authStore = useAuthStore()
+const subscriptionStore = useSubscriptionStore()
 
 // User state
-const user = ref({})
+const user = computed(() => authStore.getUser || {})
 const showUpgradeModal = ref(false)
 const showUpdatePaymentModal = ref(false)
-const upgrading = ref(false)
-const updating = ref(false)
 
-// Forms
-const upgradeForm = ref({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: ''
-})
 
-const updatePaymentForm = ref({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: ''
-})
 
-// Subscription data
-const isPro = ref(true)
-const subscriptionEndDate = ref('')
-const paymentInfo = ref({})
+// Computed subscription data
+const isPro = computed(() => subscriptionStore.isPro)
+const subscription = computed(() => subscriptionStore.getCurrentSubscription)
+const subscriptionEndDate = computed(() => subscription.value?.currentPeriodEnd || '')
+const paymentInfo = computed(() => subscription.value?.paymentMethod || {})
 
 // Computed
 const maskedCardNumber = computed(() => {
-    if (paymentInfo.value.cardNumber) {
-        return paymentInfo.value.cardNumber.slice(-4)
+    if (paymentInfo.value.last4) {
+        return paymentInfo.value.last4
     }
     return ''
 })
 
 // Methods
-const handleUpgrade = async () => {
-    upgrading.value = true
-
+const handleUpgrade = async (formData) => {
     try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        const result = await subscriptionStore.createSubscription({
+            planId: 'pro_monthly',
+            paymentMethodId: 'pm_' + Date.now() // Mock payment method ID
+        })
 
-        // Store payment info
-        localStorage.setItem('paymentInfo', JSON.stringify(upgradeForm.value))
-        localStorage.setItem('proSubscription', 'true')
-        localStorage.setItem('subscriptionEndDate', '2024-02-15')
-
-        isPro.value = true
-        paymentInfo.value = upgradeForm.value
-        subscriptionEndDate.value = '2024-02-15'
-        showUpgradeModal.value = false
-
-        alert('Pro subscription activated! Welcome to Qwesi AI Pro.')
+        if (result.success) {
+            showUpgradeModal.value = false
+            alert('Pro subscription activated! Welcome to Qwesi AI Pro.')
+        } else {
+            alert(result.error || 'Failed to create subscription')
+        }
     } catch (error) {
         console.error('Upgrade error:', error)
-    } finally {
-        upgrading.value = false
+        alert('An unexpected error occurred')
     }
 }
 
-const handleUpdatePayment = async () => {
-    updating.value = true
-
+const handleUpdatePayment = async (formData) => {
     try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        const result = await subscriptionStore.updatePaymentMethod({
+            paymentMethodId: 'pm_' + Date.now() // Mock payment method ID
+        })
 
-        // Update payment info
-        localStorage.setItem('paymentInfo', JSON.stringify(updatePaymentForm.value))
-        paymentInfo.value = updatePaymentForm.value
-
-        showUpdatePaymentModal.value = false
-        alert('Payment method updated successfully!')
+        if (result.success) {
+            showUpdatePaymentModal.value = false
+            alert('Payment method updated successfully!')
+        } else {
+            alert(result.error || 'Failed to update payment method')
+        }
     } catch (error) {
         console.error('Update payment error:', error)
-    } finally {
-        updating.value = false
+        alert('An unexpected error occurred')
     }
 }
 
-const cancelSubscription = () => {
+const cancelSubscription = async () => {
     if (confirm('Are you sure you want to cancel your Pro subscription?')) {
-        localStorage.removeItem('proSubscription')
-        localStorage.removeItem('paymentInfo')
-        localStorage.removeItem('subscriptionEndDate')
+        try {
+            const result = await subscriptionStore.cancelSubscription()
 
-        isPro.value = false
-        paymentInfo.value = {}
-        subscriptionEndDate.value = ''
-
-        alert('Subscription cancelled. You can upgrade again anytime.')
+            if (result.success) {
+                alert('Subscription cancelled. You can upgrade again anytime.')
+            } else {
+                alert(result.error || 'Failed to cancel subscription')
+            }
+        } catch (error) {
+            console.error('Cancel subscription error:', error)
+            alert('An unexpected error occurred')
+        }
     }
 }
 
@@ -426,28 +334,15 @@ const removeCard = () => {
 }
 
 // Lifecycle
-onMounted(() => {
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-        user.value = JSON.parse(storedUser)
-    } else {
-        router.push('/dashboard')
+onMounted(async () => {
+    // Check if user is authenticated
+    if (!authStore.isAuthenticated) {
+        router.push('/auth/login')
+        return
     }
 
     // Load subscription data
-    const proSubscription = localStorage.getItem('proSubscription')
-    const storedPaymentInfo = localStorage.getItem('paymentInfo')
-    const storedEndDate = localStorage.getItem('subscriptionEndDate')
-
-    if (proSubscription === 'true') {
-        isPro.value = true
-        if (storedPaymentInfo) {
-            paymentInfo.value = JSON.parse(storedPaymentInfo)
-        }
-        if (storedEndDate) {
-            subscriptionEndDate.value = storedEndDate
-        }
-    }
+    await subscriptionStore.fetchSubscription()
 })
 
 // Set page title

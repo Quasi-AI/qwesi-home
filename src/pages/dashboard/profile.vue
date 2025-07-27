@@ -32,11 +32,12 @@
                     <h2 class="text-lg font-semibold text-gray-900 mb-6">Profile Picture</h2>
                     <div class="flex items-center space-x-6">
                         <div class="relative">
-                            <div v-if="profileImage" class="w-24 h-24 rounded-full border-4 border-gray-200 overflow-hidden">
-                                <img :src="profileImage" alt="Profile Picture"
-                                    class="w-full h-full object-cover" />
+                            <div v-if="profileImage"
+                                class="w-24 h-24 rounded-full border-4 border-gray-200 overflow-hidden">
+                                <img :src="profileImage" alt="Profile Picture" class="w-full h-full object-cover" />
                             </div>
-                            <div v-else class="w-24 h-24 rounded-full border-4 border-gray-200 bg-blue-100 flex items-center justify-center">
+                            <div v-else
+                                class="w-24 h-24 rounded-full border-4 border-gray-200 bg-blue-100 flex items-center justify-center">
                                 <span class="text-blue-600 font-bold text-2xl">{{ userInitials }}</span>
                             </div>
                             <button @click="triggerFileInput"
@@ -63,6 +64,11 @@
 
                 <!-- Personal Information Section -->
                 <div class="p-8 border-b border-gray-200">
+                    <!-- Error Message -->
+                    <div v-if="error" class="mb-6 bg-red-50 border border-red-200 rounded-lg p-3">
+                        <p class="text-sm text-red-600">{{ error }}</p>
+                    </div>
+
                     <h2 class="text-lg font-semibold text-gray-900 mb-6">Personal Information</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -284,9 +290,12 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '~/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const loading = ref(false)
+const error = ref('')
 const fileInput = ref(null)
 const profileImage = ref('')
 
@@ -334,35 +343,37 @@ const userInitials = computed(() => {
 
 const saveProfile = async () => {
     loading.value = true
+    error.value = ''
 
     try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
-
-        // Update localStorage with new profile data
-        const user = JSON.parse(localStorage.getItem('user') || '{}')
-        const updatedUser = {
-            ...user,
-            ...form.value,
+        const result = await authStore.updateProfile({
+            firstName: form.value.firstName,
+            lastName: form.value.lastName,
+            email: form.value.email,
+            phone: form.value.phone,
             profileImage: profileImage.value
-        }
-        localStorage.setItem('user', JSON.stringify(updatedUser))
+        })
 
-        // Show success message (you can implement a toast notification here)
-        console.log('Profile updated successfully!')
-        
-        // Redirect back to dashboard
-        await router.push('/dashboard')
-    } catch (error) {
-        console.error('Error updating profile:', error)
+        if (result.success) {
+            // Show success message (you can implement a toast notification here)
+            console.log('Profile updated successfully!')
+
+            // Redirect back to dashboard
+            await router.push('/dashboard')
+        } else {
+            error.value = result.error || 'Profile update failed'
+        }
+    } catch (err) {
+        console.error('Error updating profile:', err)
+        error.value = 'An unexpected error occurred'
     } finally {
         loading.value = false
     }
 }
 
 onMounted(() => {
-    // Load existing user data
-    const user = JSON.parse(localStorage.getItem('user') || '{}')
+    // Load existing user data from auth store
+    const user = authStore.getUser
     if (user) {
         form.value = {
             ...form.value,

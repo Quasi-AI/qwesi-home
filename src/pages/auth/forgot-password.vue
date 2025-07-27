@@ -43,6 +43,11 @@
 
                 <!-- Forgot Password Form -->
                 <form v-if="!emailSent" class="space-y-6" @submit.prevent="handleForgotPassword">
+                    <!-- Error Message -->
+                    <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-3">
+                        <p class="text-sm text-red-600">{{ error }}</p>
+                    </div>
+
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                             Email address
@@ -89,10 +94,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '~/stores/auth'
 
+const router = useRouter()
+const authStore = useAuthStore()
 const loading = ref(false)
 const emailSent = ref(false)
+const error = ref('')
 
 const form = ref({
     email: ''
@@ -100,19 +110,36 @@ const form = ref({
 
 const handleForgotPassword = async () => {
     loading.value = true
+    error.value = ''
 
     try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const result = await authStore.forgotPassword(form.value.email)
 
-        // For demo purposes, always succeed
-        emailSent.value = true
-    } catch (error) {
-        console.error('Forgot password error:', error)
+        if (result.success) {
+            emailSent.value = true
+        } else {
+            error.value = result.error || 'Failed to send reset email'
+        }
+    } catch (err) {
+        console.error('Forgot password error:', err)
+        error.value = 'An unexpected error occurred'
     } finally {
         loading.value = false
     }
 }
+
+// Check if user is already logged in
+onMounted(() => {
+    if (authStore.isAuthenticated) {
+        const redirectUrl = localStorage.getItem('redirect_after_login')
+        if (redirectUrl) {
+            localStorage.removeItem('redirect_after_login')
+            router.push(redirectUrl)
+        } else {
+            router.push('/dashboard')
+        }
+    }
+})
 
 // Set page title
 useHead({

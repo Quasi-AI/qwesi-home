@@ -3,8 +3,10 @@
         :class="isCollapsed ? 'w-16' : 'w-64'">
         <!-- Logo -->
         <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-            <img v-if="!isCollapsed" src="@/assets/images/logo.png" alt="QWESI AI Logo" class="w-32 h-auto" />
-            <img v-else src="@/assets/images/logo.png" alt="QWESI AI Logo" class="w-8 h-auto" />
+            <NuxtLink to="/" class="hover:opacity-80 transition-opacity">
+                <img v-if="!isCollapsed" src="@/assets/images/logo.png" alt="QWESI AI Logo" class="w-32 h-auto" />
+                <img v-else src="@/assets/images/logo.png" alt="QWESI AI Logo" class="w-8 h-auto" />
+            </NuxtLink>
             <button @click="toggleCollapse" class="p-1 rounded-lg hover:bg-gray-100 transition-colors"
                 :class="isCollapsed ? 'ml-0' : 'ml-2'">
                 <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20"
