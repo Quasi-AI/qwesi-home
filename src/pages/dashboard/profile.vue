@@ -42,7 +42,7 @@
                                     <div v-else
                                         class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-gray-200 bg-blue-100 flex items-center justify-center relative">
                                         <span class="text-blue-600 font-bold text-xl sm:text-2xl">{{ userInitials
-                                            }}</span>
+                                        }}</span>
                                     </div>
                                 </div>
                                 <div class="flex-1 text-center sm:text-left">
@@ -129,7 +129,7 @@
                                     <div>
                                         <h3 class="text-sm font-medium text-gray-900">Account Status</h3>
                                         <p class="text-sm text-gray-600">{{ isSubscribe ? 'Pro Account' : 'Free Account'
-                                        }}</p>
+                                            }}</p>
                                     </div>
                                     <span
                                         :class="isSubscribe ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
@@ -249,9 +249,8 @@ const memberSince = computed(() => {
 console.log('Member Since:', memberSince.value)
 
 const isSubscribe = computed(() => {
-    // Check both user's isPro property and isSubscribe property for backward compatibility
-    // Also check subscription store for the latest status
-    return !!(user.value && (user.value.isPro || user.value.isSubscribe)) || subscriptionStore.isSubscribed
+    // Use same logic as dashboard - only check isSubscribe property
+    return !!(user.value && user.value.isSubscribe)
 })
 console.log('isSubscribe:', isSubscribe.value)
 
@@ -349,7 +348,7 @@ onMounted(async () => {
             profileImage.value = fetchedUser.profileImage || ''
         }
     }
-    
+
     // Fetch subscription data to ensure we have the latest status
     await subscriptionStore.fetchSubscription()
 })
