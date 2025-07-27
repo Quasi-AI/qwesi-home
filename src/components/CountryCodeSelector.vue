@@ -6,8 +6,8 @@
                 :class="{ 'ring-2 ring-blue-500 border-transparent': isOpen }">
                 <div class="flex items-center space-x-2 min-w-0">
                     <img v-if="selectedCountry" :src="selectedCountry.flag" :alt="selectedCountry.name"
-                        class="w-6 h-4 mr-2 rounded-sm object-cover" />
-                    <span v-if="selectedCountry" class="text-sm font-medium text-gray-900 truncate">
+                        class="w-6 h-4 mr-2 rounded-sm object-cover flex-shrink-0" />
+                    <span v-if="selectedCountry" class="text-sm font-medium text-gray-900 break-words">
                         +{{ selectedCountry.callingCodes[0] }}
                     </span>
                     <span v-else class="text-gray-500">Country</span>
@@ -20,9 +20,9 @@
 
             <!-- Dropdown -->
             <div v-if="isOpen" ref="dropdownRef" :class="[
-                'absolute z-50 w-full min-w-0 max-w-full bg-white border border-gray-300 rounded-lg shadow-lg overflow-y-auto',
+                'absolute z-50 w-full min-w-0 bg-white border border-gray-300 rounded-lg shadow-lg overflow-y-auto',
                 openUpward ? 'bottom-full mb-1 max-h-[60vh]' : 'mt-1 max-h-[60vh]'
-            ]">
+            ]" style="min-width: 280px;">
                 <!-- Search input -->
                 <div class="sticky top-0 bg-white border-b border-gray-200 p-2">
                     <input v-model="searchQuery" type="text" placeholder="Search countries..."
@@ -30,16 +30,16 @@
                 </div>
 
                 <!-- Country list -->
-                <div class="py-1 overflow-x-hidden">
+                <div class="py-1 overflow-x-auto">
                     <button v-for="country in filteredCountries" :key="country.alpha2Code"
                         @click="selectCountry(country)"
-                        class="w-full flex items-center px-3 py-3 sm:py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none min-h-[44px]">
+                        class="w-full flex items-center px-3 py-3 sm:py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none min-h-[44px] whitespace-nowrap">
                         <img :src="country.flag" :alt="country.name"
                             class="w-6 h-4 mr-3 flex-shrink-0 rounded-sm object-cover" />
                         <div class="flex-1 min-w-0">
-                            <div class="text-base sm:text-sm font-medium text-gray-900 truncate">{{ country.name }}
+                            <div class="text-base sm:text-sm font-medium text-gray-900 break-words">{{ country.name }}
                             </div>
-                            <div class="text-xs text-gray-500 truncate">+{{ country.callingCodes[0] }} ({{
+                            <div class="text-xs text-gray-500 break-words">+{{ country.callingCodes[0] }} ({{
                                 country.alpha2Code }})
                             </div>
                         </div>
