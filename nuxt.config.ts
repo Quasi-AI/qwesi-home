@@ -20,7 +20,6 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
-    apiBase: process.env.API_URL,
     public: {
       firebaseApiKey: "AIzaSyAH_3l6IEAldLkXyB0CXqYpHRwWDvqZjhU",
       firebaseAuthDomain: "park4me-b2127.firebaseapp.com",
