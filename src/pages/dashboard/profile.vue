@@ -18,7 +18,7 @@
                         <button @click="saveProfile" :disabled="loading || uploading"
                             class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors w-full sm:w-auto">
                             <span v-if="loading">Saving...</span>
-                            <span v-else-if="uploading">Uploading...</span>
+                            <span v-else-if="uploading">Uploading Image...</span>
                             <span v-else>Save Changes</span>
                         </button>
                     </div>
@@ -63,10 +63,19 @@
 
                                     <input ref="fileInput" type="file" accept="image/*" @change="handleImageUpload"
                                         class="hidden" />
-                                    <button @click="triggerFileInput" :disabled="uploading"
-                                        class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto">
-                                        {{ uploading ? 'Uploading...' : 'Choose Image' }}
-                                    </button>
+                                    <div class="flex space-x-2">
+                                        <button @click="triggerFileInput" :disabled="uploading"
+                                            class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                            {{ uploading ? 'Uploading...' : 'Choose Image' }}
+                                        </button>
+                                        <button v-if="selectedFile" @click="clearSelectedImage" type="button"
+                                            class="bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 transition-colors text-sm">
+                                            Clear
+                                        </button>
+                                    </div>
+                                    <p v-if="selectedFile" class="text-xs text-blue-600 mt-2">
+                                        ✓ Image selected - will be uploaded when you save
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -178,6 +187,14 @@ const triggerFileInput = () => {
     fileInput.value?.click()
 }
 
+const clearSelectedImage = () => {
+    selectedFile.value = null
+    profileImage.value = user.value?.profileImage || ''
+    if (fileInput.value) {
+        fileInput.value.value = ''
+    }
+}
+
 const handleImageUpload = async (event) => {
     const file = event.target.files[0]
     if (!file) return
@@ -196,22 +213,18 @@ const handleImageUpload = async (event) => {
         }
         reader.readAsDataURL(file)
 
-        // Compress and upload image
+        // Compress image and store for later upload
         const compressedFile = await compressImage(file)
         selectedFile.value = compressedFile
 
-        // Upload to Firebase
-        const downloadURL = await uploadImage(compressedFile, 'profile-images')
-        profileImage.value = downloadURL
-
-        success.value = 'Profile picture uploaded successfully!'
+        success.value = 'Image selected! Click "Save Changes" to upload and save your profile.'
         setTimeout(() => {
             success.value = ''
         }, 3000)
 
     } catch (err) {
-        console.error('Image upload error:', err)
-        error.value = 'Failed to upload image. Please try again.'
+        console.error('Image processing error:', err)
+        error.value = 'Failed to process image. Please try again.'
         // Reset preview
         profileImage.value = user.value?.profileImage || ''
     }
@@ -264,11 +277,29 @@ const saveProfile = async () => {
     success.value = ''
 
     try {
+        let finalProfileImage = profileImage.value
+
+        // If there's a selected file, upload it first
+        if (selectedFile.value) {
+            try {
+                uploading.value = true
+                const downloadURL = await uploadImage(selectedFile.value, 'profile-images')
+                finalProfileImage = downloadURL
+                selectedFile.value = null // Clear the selected file after upload
+            } catch (uploadErr) {
+                console.error('Image upload error:', uploadErr)
+                error.value = 'Failed to upload image. Please try again.'
+                return
+            } finally {
+                uploading.value = false
+            }
+        }
+
         const profileData = {
             name: form.value.name,
             email: form.value.email, // Include email since API requires it
             dob: formatDateForAPI(form.value.dob),
-            profileImage: profileImage.value
+            profileImage: finalProfileImage
         };
 
         const result = await authStore.updateProfile(profileData)
