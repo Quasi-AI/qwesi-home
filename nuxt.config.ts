@@ -9,9 +9,19 @@ export default defineNuxtConfig({
     head: {
       title: `QWESI AI - Your 24/7 Career & Recruitment Assistant`,
       link: [
-        { rel: "icon", type: "image/png", href: "/favicon.png" },
-        { rel: "shortcut icon", href: "/favicon.png" },
-        { rel: "apple-touch-icon", href: "/favicon.png" },
+        {
+          rel: "icon",
+          type: "image/png",
+          href: "https://raw.githubusercontent.com/Quasi-AI/qwesi-home/refs/heads/main/public/favicon.png",
+        },
+        {
+          rel: "shortcut icon",
+          href: "https://raw.githubusercontent.com/Quasi-AI/qwesi-home/refs/heads/main/public/favicon.png",
+        },
+        {
+          rel: "apple-touch-icon",
+          href: "https://raw.githubusercontent.com/Quasi-AI/qwesi-home/refs/heads/main/public/favicon.png",
+        },
       ],
       meta: [
         {
