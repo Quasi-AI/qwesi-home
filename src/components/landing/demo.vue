@@ -42,6 +42,8 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 
+const videoUrl = ref('')
+
 const closeModal = () => {
     emit('close')
 }
