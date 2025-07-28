@@ -77,7 +77,7 @@
 
                 <!-- Footer -->
                 <div class="mt-auto">
-                    <Footer />
+                    <!-- Footer -->
                 </div>
             </main>
         </div>
@@ -101,7 +101,6 @@ import { useAuthStore } from '~/stores/auth'
 import { useSubscriptionStore } from '~/stores/subscription'
 import Sidebar from '@/components/dashboard/Sidebar.vue'
 import ProModal from '@/components/dashboard/ProModal.vue'
-import Footer from '@/components/Footer.vue'
 
 
 const authStore = useAuthStore()

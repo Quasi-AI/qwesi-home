@@ -123,7 +123,7 @@
 
                 <!-- Footer -->
                 <div class="mt-auto">
-                    <Footer />
+                    <!-- Footer component was removed -->
                 </div>
             </main>
         </div>
@@ -143,7 +143,6 @@ import Sidebar from '@/components/dashboard/Sidebar.vue'
 import Stats from '@/components/dashboard/Stats.vue'
 import Table from '@/components/dashboard/Table.vue'
 import ProModal from '@/components/dashboard/ProModal.vue'
-import Footer from '@/components/Footer.vue'
 
 
 const authStore = useAuthStore()
