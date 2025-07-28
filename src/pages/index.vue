@@ -139,7 +139,7 @@
                                     </svg>
                                     <span>Get Started on WhatsApp</span>
                                 </a>
-                                <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-300 cursor-pointer group max-w-sm"
+                                <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-300 cursor-pointer group w-full sm:max-w-sm"
                                     @click="openDemoModal">
                                     <div class="relative">
                                         <button
@@ -449,7 +449,7 @@
         <!-- Testimonials Section -->
         <section class="py-20 bg-white">
             <div class="max-w-7xl mx-auto">
-                <div class="text-center mb-16">
+                <div class="text-center mb-16 px-4">
                     <h2 class="text-4xl font-bold text-gray-900 mb-6">TESTIMONIALS</h2>
                     <p class="text-lg text-gray-600 mb-4">
                         Discover how Qwesi AI is empowering people across the globe through
