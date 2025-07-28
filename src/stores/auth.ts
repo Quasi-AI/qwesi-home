@@ -30,7 +30,6 @@ export const useAuthStore = defineStore("auth", {
         if (storedToken) {
           this.token = storedToken;
           this.isAuthenticated = true;
-          // Note: user will be fetched by checkAuth if needed
         }
       }
     },

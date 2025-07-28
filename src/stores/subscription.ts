@@ -3,8 +3,6 @@ import { useAuthStore } from "~/stores/auth";
 import type {
   SubscriptionState,
   SubscriptionResponse,
-  SubscriptionPlan,
-  Subscription,
   CreateSubscriptionData,
   UpdatePaymentMethodData,
   CheckoutData,

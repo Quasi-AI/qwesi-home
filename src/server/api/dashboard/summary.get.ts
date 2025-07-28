@@ -1,5 +1,4 @@
 import { API_ROUTES } from "~/constants/api";
-import type { DashboardApiResponse } from "~/types/dashboard";
 
 export default defineEventHandler(async (event) => {
   const headers = getHeaders(event);

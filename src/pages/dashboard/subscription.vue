@@ -21,17 +21,51 @@
                     <!-- Subscription Status -->
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
                         <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-xl font-semibold text-gray-900">Subscription Status</h2>
+                            <div class="flex items-center gap-2">
+                                <svg v-if="isSubscribe" class="w-6 h-6 text-green-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                                <svg v-else class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h8" />
+                                </svg>
+                                <h2 class="text-xl font-semibold text-gray-900">Subscription Status</h2>
+                            </div>
                             <span :class="isSubscribe ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
-                                class="px-3 py-1 text-sm font-medium rounded-full">
+                                class="px-3 py-1 text-sm font-medium rounded-full border border-gray-200">
                                 {{ isSubscribe ? 'Pro' : 'Free' }}
                             </span>
                         </div>
                         <p class="text-gray-600 mb-4">
                             {{ subscriptionMessage }}
                         </p>
-                        <div v-if="isSubscribe && subscriptionEndDate" class="text-sm text-gray-500">
-                            Next billing date: {{ formattedSubscriptionEndDate }}
+                        <div v-if="isSubscribe && (subscriptionStartDate || subscriptionEndDate)"
+                            class="flex flex-col sm:flex-row gap-4 text-sm">
+                            <div v-if="subscriptionStartDate" class="flex items-center bg-blue-50 rounded px-3 py-2">
+                                <svg class="w-4 h-4 text-blue-500 mr-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"
+                                        stroke="currentColor" fill="none" />
+                                    <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" stroke="currentColor"
+                                        fill="none" />
+                                </svg>
+                                <span>Start date: <span class="font-medium">{{ formattedSubscriptionStartDate
+                                        }}</span></span>
+                            </div>
+                            <div v-if="subscriptionEndDate" class="flex items-center bg-yellow-50 rounded px-3 py-2">
+                                <svg class="w-4 h-4 text-yellow-500 mr-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"
+                                        stroke="currentColor" fill="none" />
+                                    <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" stroke="currentColor"
+                                        fill="none" />
+                                </svg>
+                                <span>Next billing: <span class="font-medium">{{ formattedSubscriptionEndDate
+                                        }}</span></span>
+                            </div>
                         </div>
                     </div>
 
@@ -116,14 +150,28 @@ const showUpdatePaymentModal = ref(false)
 const isSubscribe = computed(() => {
     return !!(user.value && user.value.isSubscribe)
 })
-const subscription = computed(() => subscriptionStore.getCurrentSubscription)
-const subscriptionEndDate = computed(() => subscription.value?.currentPeriodEnd || '')
+
+// Use currentPeriodEnd and subscriptionStartDate from user object
+const subscriptionStartDate = computed(() => user.value?.subscriptionStartDate || '')
+const subscriptionEndDate = computed(() => user.value?.currentPeriodEnd || '')
 
 // Add a computed property for human-readable date
 const formattedSubscriptionEndDate = computed(() => {
     if (!subscriptionEndDate.value) return ''
     const date = new Date(subscriptionEndDate.value)
     if (isNaN(date.getTime())) return subscriptionEndDate.value // fallback if not a valid date
+    return date.toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    })
+})
+
+// Add a computed property for human-readable start date
+const formattedSubscriptionStartDate = computed(() => {
+    if (!subscriptionStartDate.value) return ''
+    const date = new Date(subscriptionStartDate.value)
+    if (isNaN(date.getTime())) return subscriptionStartDate.value // fallback if not a valid date
     return date.toLocaleDateString(undefined, {
         year: 'numeric',
         month: 'long',

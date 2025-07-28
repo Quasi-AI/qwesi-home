@@ -12,126 +12,51 @@
         <!-- Content -->
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="bg-white rounded-lg shadow-sm border">
+                <!-- Search Bar -->
+                <div class="p-6 border-b border-gray-100">
+                    <input v-model="searchQuery" type="text" placeholder="Search for a question..."
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
                 <!-- FAQ Items -->
                 <div class="divide-y divide-gray-200">
-                    <!-- What is Qwesi AI? -->
-                    <div class="p-6">
-                        <button @click="toggleFAQ(0)"
+                    <div v-for="(faq, idx) in filteredFAQs" :key="idx" class="p-6 transition-colors duration-150"
+                        :class="openFAQs[idx] ? 'bg-blue-50' : ''">
+                        <button @click="toggleFAQ(idx)"
                             class="flex justify-between items-center w-full text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg">
-                            <h3 class="text-lg font-semibold text-gray-900">What is Qwesi AI?</h3>
-                            <svg :class="[
-                                'w-5 h-5 text-gray-500 transition-transform duration-200',
-                                openFAQs[0] ? 'rotate-180' : ''
-                            ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
+                            <div class="flex items-center">
+                                <svg v-if="openFAQs[idx]" class="w-5 h-5 text-blue-600 mr-2" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 15l7-7 7 7" />
+                                </svg>
+                                <svg v-else class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                                <h3 class="text-lg font-semibold text-gray-900">{{ faq.question }}</h3>
+                            </div>
                         </button>
-                        <div v-show="openFAQs[0]" class="mt-4 text-gray-700 leading-relaxed">
-                            Qwesi AI is a smart assistant that helps you find jobs, connect with employers or investors,
-                            solve homework, and more—via voice or WhatsApp.
-                        </div>
+                        <transition name="fade">
+                            <div v-show="openFAQs[idx]" class="mt-4 text-gray-700 leading-relaxed">
+                                {{ faq.answer }}
+                            </div>
+                        </transition>
                     </div>
-
-                    <!-- How do I use Qwesi AI? -->
-                    <div class="p-6">
-                        <button @click="toggleFAQ(1)"
-                            class="flex justify-between items-center w-full text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg">
-                            <h3 class="text-lg font-semibold text-gray-900">How do I use Qwesi AI?</h3>
-                            <svg :class="[
-                                'w-5 h-5 text-gray-500 transition-transform duration-200',
-                                openFAQs[1] ? 'rotate-180' : ''
-                            ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        <div v-show="openFAQs[1]" class="mt-4 text-gray-700 leading-relaxed">
-                            You can use Qwesi AI by calling, chatting on WhatsApp, or subscribing on the website. Ask
-                            questions, make requests, or even search for opportunities.
-                        </div>
-                    </div>
-
-                    <!-- Can Qwesi help with my school work? -->
-                    <div class="p-6">
-                        <button @click="toggleFAQ(2)"
-                            class="flex justify-between items-center w-full text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg">
-                            <h3 class="text-lg font-semibold text-gray-900">Can Qwesi help with my school work?</h3>
-                            <svg :class="[
-                                'w-5 h-5 text-gray-500 transition-transform duration-200',
-                                openFAQs[2] ? 'rotate-180' : ''
-                            ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        <div v-show="openFAQs[2]" class="mt-4 text-gray-700 leading-relaxed">
-                            Yes! Qwesi AI assists with homework, assignments, explanations, writing help, and
-                            educational support for students at any level.
-                        </div>
-                    </div>
-
-                    <!-- How much does it cost to use? -->
-                    <div class="p-6">
-                        <button @click="toggleFAQ(3)"
-                            class="flex justify-between items-center w-full text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg">
-                            <h3 class="text-lg font-semibold text-gray-900">How much does it cost to use?</h3>
-                            <svg :class="[
-                                'w-5 h-5 text-gray-500 transition-transform duration-200',
-                                openFAQs[3] ? 'rotate-180' : ''
-                            ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        <div v-show="openFAQs[3]" class="mt-4 text-gray-700 leading-relaxed">
-                            You get free access to some features, but full unlimited access is $10/month via Stripe or
-                            Paystack.
-                        </div>
-                    </div>
-
-                    <!-- Can I cancel my subscription? -->
-                    <div class="p-6">
-                        <button @click="toggleFAQ(4)"
-                            class="flex justify-between items-center w-full text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg">
-                            <h3 class="text-lg font-semibold text-gray-900">Can I cancel my subscription?</h3>
-                            <svg :class="[
-                                'w-5 h-5 text-gray-500 transition-transform duration-200',
-                                openFAQs[4] ? 'rotate-180' : ''
-                            ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        <div v-show="openFAQs[4]" class="mt-4 text-gray-700 leading-relaxed">
-                            Yes, Stripe users can cancel from their customer portal. For Paystack, contact support via
-                            email to cancel anytime.
-                        </div>
-                    </div>
-
-                    <!-- Can Qwesi connect me to real people? -->
-                    <div class="p-6">
-                        <button @click="toggleFAQ(5)"
-                            class="flex justify-between items-center w-full text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg">
-                            <h3 class="text-lg font-semibold text-gray-900">Can Qwesi connect me to real people?</h3>
-                            <svg :class="[
-                                'w-5 h-5 text-gray-500 transition-transform duration-200',
-                                openFAQs[5] ? 'rotate-180' : ''
-                            ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        <div v-show="openFAQs[5]" class="mt-4 text-gray-700 leading-relaxed">
-                            Yes. Qwesi can connect you with employers, investors, or collaborators depending on what
-                            you're seeking.
-                        </div>
+                    <div v-if="filteredFAQs.length === 0" class="p-6 text-center text-gray-500">
+                        No questions found.
                     </div>
                 </div>
 
                 <!-- Contact Section -->
-                <div class="bg-gray-50 p-6 rounded-b-lg">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Still have questions?</h3>
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-b-lg mt-2 border-t border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                        <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 10h.01M12 10h.01M16 10h.01M9 16h6" />
+                        </svg>
+                        Still have questions?
+                    </h3>
                     <p class="text-gray-700 mb-4">
                         If you couldn't find the answer you're looking for, feel free to reach out to us directly.
                     </p>
@@ -162,7 +87,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import BackButton from '@/components/BackButton.vue'
 import { useRouter } from 'vue-router'
 const router = useRouter()
@@ -176,10 +101,58 @@ useHead({
     ]
 })
 
-// FAQ state management
-const openFAQs = ref(Array(6).fill(false))
+// FAQ data
+const faqs = [
+    {
+        question: 'What is Qwesi AI?',
+        answer: 'Qwesi AI is a smart assistant that helps you find jobs, connect with employers or investors, solve homework, and more—via voice or WhatsApp.'
+    },
+    {
+        question: 'How do I use Qwesi AI?',
+        answer: 'You can use Qwesi AI by calling, chatting on WhatsApp, or subscribing on the website. Ask questions, make requests, or even search for opportunities.'
+    },
+    {
+        question: 'Can Qwesi help with my school work?',
+        answer: 'Yes! Qwesi AI assists with homework, assignments, explanations, writing help, and educational support for students at any level.'
+    },
+    {
+        question: 'How much does it cost to use?',
+        answer: 'You get free access to some features, but full unlimited access is $10/month via Stripe or Paystack.'
+    },
+    {
+        question: 'Can I cancel my subscription?',
+        answer: 'Yes, Stripe users can cancel from their customer portal. For Paystack, contact support via email to cancel anytime.'
+    },
+    {
+        question: 'Can Qwesi connect me to real people?',
+        answer: 'Yes. Qwesi can connect you with employers, investors, or collaborators depending on what you\'re seeking.'
+    }
+]
+
+const searchQuery = ref('')
+const openFAQs = ref(Array(faqs.length).fill(false))
+
+const filteredFAQs = computed(() => {
+    if (!searchQuery.value) return faqs
+    return faqs.filter(faq =>
+        faq.question.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        faq.answer.toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
+})
 
 const toggleFAQ = (index) => {
     openFAQs.value[index] = !openFAQs.value[index]
 }
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+</style>
