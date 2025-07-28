@@ -31,7 +31,7 @@
                             {{ subscriptionMessage }}
                         </p>
                         <div v-if="isSubscribe && subscriptionEndDate" class="text-sm text-gray-500">
-                            Next billing date: {{ subscriptionEndDate }}
+                            Next billing date: {{ formattedSubscriptionEndDate }}
                         </div>
                     </div>
 
@@ -118,6 +118,19 @@ const isSubscribe = computed(() => {
 })
 const subscription = computed(() => subscriptionStore.getCurrentSubscription)
 const subscriptionEndDate = computed(() => subscription.value?.currentPeriodEnd || '')
+
+// Add a computed property for human-readable date
+const formattedSubscriptionEndDate = computed(() => {
+    if (!subscriptionEndDate.value) return ''
+    const date = new Date(subscriptionEndDate.value)
+    if (isNaN(date.getTime())) return subscriptionEndDate.value // fallback if not a valid date
+    return date.toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    })
+})
+
 const paymentInfo = computed(() => subscription.value?.paymentMethod || {})
 
 // Computed
