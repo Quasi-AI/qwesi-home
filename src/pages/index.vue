@@ -121,7 +121,7 @@
         </header>
 
         <!-- Hero Section -->
-        <section class="py-20 bg-white">
+        <section class="pt-8 pb-12 sm:pt-16 sm:pb-20 lg:py-20 bg-white">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid lg:grid-cols-2 gap-12 items-center">
                     <!-- Left Content -->
