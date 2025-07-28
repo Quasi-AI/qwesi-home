@@ -36,7 +36,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 
-const videoUrl = ref('https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1')
+const videoUrl = ref('https://home.qwesi.org')
 
 const closeModal = () => {
     emit('close')
