@@ -59,8 +59,7 @@
                     <!-- Mobile Menu Button -->
                     <div class="flex items-center space-x-2 md:hidden">
                         <div class="relative w-10 h-10 flex items-center justify-center rounded-full">
-                            <span
-                                class="absolute w-full h-full rounded-full bg-blue-500 opacity-30 animate-call-pulse"></span>
+                            <span class="absolute inset-0 bg-blue-600 rounded-full animate-ping opacity-20"></span>
                             <a href="tel:+12019790148"
                                 class="p-2 rounded-full hover:bg-blue-50 transition-colors relative z-10"
                                 aria-label="Call Me">
@@ -152,8 +151,6 @@
                                                 <path d="M8 5v10l8-5-8-5z" />
                                             </svg>
                                         </button>
-                                        <div class="absolute inset-0 bg-blue-600 rounded-full animate-ping opacity-20">
-                                        </div>
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <span
@@ -897,26 +894,5 @@ onUnmounted(() => {
 
 .animate-breathing {
     animation: breathing 4s ease-in-out infinite;
-}
-
-@keyframes callPulse {
-    0% {
-        transform: scale(1);
-        opacity: 0.5;
-    }
-
-    70% {
-        transform: scale(1.8);
-        opacity: 0;
-    }
-
-    100% {
-        transform: scale(2);
-        opacity: 0;
-    }
-}
-
-.animate-call-pulse {
-    animation: callPulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 </style>
