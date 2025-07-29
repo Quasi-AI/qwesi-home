@@ -255,11 +255,58 @@
                         </p>
                     </div>
                 </div>
+
+                <!-- Pitch/Challenge Banner -->
+                <div v-if="FEATURE_SWITCH.showPitchBanner && showPitchBanner"
+                    class="border border-blue-300 rounded-lg bg-white mt-10 p-8 shadow-sm relative">
+                    <!-- Desktop Layout -->
+                    <div class="hidden md:flex items-center">
+                        <div class="flex items-center mr-4">
+                            <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-50">
+                                <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M17 3a1 1 0 0 1 1 1v2h1a1 1 0 0 1 1 1v2a5 5 0 0 1-4 4.9V15a5 5 0 0 1-4 4.9V21h3a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2h3v-1.1A5 5 0 0 1 7 15v-2.1A5 5 0 0 1 3 7V5a1 1 0 0 1 1-1h1V4a1 1 0 0 1 1-1h12zm-1 2H8v2a3 3 0 0 0 6 0V5zm-8 2v2a3 3 0 0 0 2 2.83V7H6zm10 0h-2v4.83A3 3 0 0 0 18 9V7z" />
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <span class="font-bold text-blue-800 text-lg">Pitch/Challenge Submissions Open!</span>
+                            <div class="text-gray-600 text-sm">Have a great idea, startup, or challenge? Submit it for
+                                competitions
+                                and get noticed!</div>
+                        </div>
+                        <NuxtLink to="/dashboard/get-started?tab=pitch"
+                            class="ml-6 bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-semibold px-6 py-2 rounded-lg shadow transition-colors duration-200">
+                            Submit Your Pitch</NuxtLink>
+                    </div>
+
+                    <!-- Mobile Layout -->
+                    <div class="md:hidden space-y-3">
+                        <div class="flex items-center">
+                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 mr-3">
+                                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M17 3a1 1 0 0 1 1 1v2h1a1 1 0 0 1 1 1v2a5 5 0 0 1-4 4.9V15a5 5 0 0 1-4 4.9V21h3a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2h3v-1.1A5 5 0 0 1 7 15v-2.1A5 5 0 0 1 3 7V5a1 1 0 0 1 1-1h1V4a1 1 0 0 1 1-1h12zm-1 2H8v2a3 3 0 0 0 6 0V5zm-8 2v2a3 3 0 0 0 2 2.83V7H6zm10 0h-2v4.83A3 3 0 0 0 18 9V7z" />
+                                </svg>
+                            </span>
+                            <span class="font-bold text-blue-800 text-base">Pitch/Challenge Submissions Open!</span>
+                        </div>
+                        <div class="text-gray-600 text-sm ml-11">Have a great idea, startup, or challenge? Submit it for
+                            competitions
+                            and get noticed!</div>
+                        <div class="ml-11">
+                            <NuxtLink to="/dashboard/get-started?tab=pitch"
+                                class="inline-block bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-semibold px-4 py-2 rounded-lg shadow transition-colors duration-200 text-sm">
+                                Submit Your Pitch
+                            </NuxtLink>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
         <!-- Company Logos Section -->
-        <section class="py-16 bg-gray-50">
+        <section class="py-8 bg-gray-50">
             <div class="max-w-7xl mx-auto">
                 <div class="text-center mb-12">
                     <h2 class="text-2xl font-bold text-gray-900 mb-4">
@@ -573,6 +620,7 @@ const demoModalOpen = ref(false);
 const activeSection = ref('home');
 const statsAnimated = ref(false);
 const featuresAnimated = ref(false);
+const showPitchBanner = ref(true);
 
 // Computed property to safely check login status
 const isLoggedIn = computed(() => {
