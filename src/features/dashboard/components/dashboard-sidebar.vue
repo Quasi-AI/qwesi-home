@@ -4,8 +4,8 @@
         <!-- Logo -->
         <div class="p-6 border-b border-gray-200 flex items-center justify-between">
             <NuxtLink to="/" class="hover:opacity-80 transition-opacity">
-                <img v-if="!isCollapsed" src="@/assets/images/logo.png" alt="QWESI AI Logo" class="w-32 h-auto" />
-                <img v-else src="@/assets/images/logo.png" alt="QWESI AI Logo" class="w-8 h-auto" />
+                <img v-if="!isCollapsed" src="~/assets/images/logo.png" alt="QWESI AI Logo" class="w-32 h-auto" />
+                <img v-else src="~/assets/images/logo.png" alt="QWESI AI Logo" class="w-8 h-auto" />
             </NuxtLink>
             <button @click="toggleCollapse" class="p-1 rounded-lg hover:bg-gray-100 transition-colors"
                 :class="isCollapsed ? 'ml-0' : 'ml-2'">
@@ -59,11 +59,7 @@
                                 : 'text-gray-700 hover:bg-gray-50',
                             isCollapsed ? 'justify-center p-2' : 'px-3 py-2'
                         ]" :title="isCollapsed ? 'Subscription' : ''">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                                clip-rule="evenodd" />
-                        </svg>
+                        <CurrencyDollarIcon />
                         <span v-if="!isCollapsed" class="ml-3">Subscription</span>
                     </NuxtLink>
                 </li>
@@ -90,6 +86,8 @@
 </template>
 
 <script setup>
+import CurrencyDollarIcon from '@/shared/components/icons/currency-dollar-icon.vue'
+
 const props = defineProps({
     user: {
         type: Object,
@@ -98,8 +96,6 @@ const props = defineProps({
 })
 
 const isCollapsed = ref(true)
-
-
 
 const toggleCollapse = () => {
     isCollapsed.value = !isCollapsed.value

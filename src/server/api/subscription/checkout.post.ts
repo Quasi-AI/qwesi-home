@@ -1,4 +1,4 @@
-import { API_ROUTES } from "~/constants/api";
+import { API_ROUTES } from "~/shared/constants/api-routes";
 
 export default defineEventHandler(async (event) => {
   const headers = getHeaders(event);

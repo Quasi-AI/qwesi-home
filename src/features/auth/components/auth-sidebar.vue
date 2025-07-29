@@ -26,7 +26,7 @@
                     style="animation-delay: 1s;"></div>
 
                 <!-- Main Image -->
-                <img src="@/assets/images/qwesi-image.png" alt="QWESI AI Assistant"
+                <img src="~/assets/images/qwesi-image.png" alt="QWESI AI Assistant"
                     class="w-64 h-auto object-contain rounded-2xl animate-breathing relative z-10" />
 
                 <!-- Bottom thinking elements -->

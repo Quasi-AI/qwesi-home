@@ -232,7 +232,7 @@
 </template>
 
 <script setup>
-import BackButton from '@/components/BackButton.vue'
+import BackButton from '@/shared/components/ui/back-button.vue'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 const goBack = () => router.back()

@@ -6,7 +6,7 @@
                 <div class="flex justify-between items-center h-16">
                     <!-- Logo -->
                     <div class="flex items-center space-x-2">
-                        <img src="@/assets/images/logo.png" alt="QWESI AI Logo" class="w-32 h-auto" />
+                        <img src="~/assets/images/logo.png" alt="QWESI AI Logo" class="w-32 h-auto" />
                     </div>
 
                     <!-- Desktop Navigation -->
@@ -195,7 +195,7 @@
                                 style="animation-delay: 1s;"></div>
 
                             <!-- Main Image -->
-                            <img src="@/assets/images/qwesi-image.png" alt="Professional AI Assistant"
+                            <img src="~/assets/images/qwesi-image.png" alt="Professional AI Assistant"
                                 class="w-64 h-auto object-contain rounded-2xl animate-breathing relative z-10" />
 
                             <!-- Bottom thinking elements -->
@@ -310,70 +310,70 @@
                         <!-- First set of logos -->
                         <div class="flex items-center space-x-12 flex-shrink-0">
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/linkedin.png" alt="LinkedIn"
+                                <img src="~/assets/images/brands/linkedin.png" alt="LinkedIn"
                                     class="w-full h-full object-contain" />
                             </div>
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/amazon.png" alt="Amazon"
+                                <img src="~/assets/images/brands/amazon.png" alt="Amazon"
                                     class="w-full h-full object-contain" />
                             </div>
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/microsoft.png" alt="Microsoft"
+                                <img src="~/assets/images/brands/microsoft.png" alt="Microsoft"
                                     class="w-full h-full object-contain" />
                             </div>
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/apple.png" alt="Apple"
+                                <img src="~/assets/images/brands/apple.png" alt="Apple"
                                     class="w-full h-full object-contain" />
                             </div>
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/meta.png" alt="Meta"
+                                <img src="~/assets/images/brands/meta.png" alt="Meta"
                                     class="w-full h-full object-contain" />
                             </div>
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/netflix.webp" alt="Netflix"
+                                <img src="~/assets/images/brands/netflix.webp" alt="Netflix"
                                     class="w-full h-full object-contain" />
                             </div>
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/ibm.png" alt="IBM"
+                                <img src="~/assets/images/brands/ibm.png" alt="IBM"
                                     class="w-full h-full object-contain" />
                             </div>
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/google.png" alt="Google"
+                                <img src="~/assets/images/brands/google.png" alt="Google"
                                     class="w-full h-full object-contain" />
                             </div>
                         </div>
                         <!-- Duplicate set for seamless loop -->
                         <div class="flex items-center space-x-12 flex-shrink-0">
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/linkedin.png" alt="LinkedIn"
+                                <img src="~/assets/images/brands/linkedin.png" alt="LinkedIn"
                                     class="w-full h-full object-contain" />
                             </div>
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/amazon.png" alt="Amazon"
+                                <img src="~/assets/images/brands/amazon.png" alt="Amazon"
                                     class="w-full h-full object-contain" />
                             </div>
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/microsoft.png" alt="Microsoft"
+                                <img src="~/assets/images/brands/microsoft.png" alt="Microsoft"
                                     class="w-full h-full object-contain" />
                             </div>
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/apple.png" alt="Apple"
+                                <img src="~/assets/images/brands/apple.png" alt="Apple"
                                     class="w-full h-full object-contain" />
                             </div>
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/meta.png" alt="Meta"
+                                <img src="~/assets/images/brands/meta.png" alt="Meta"
                                     class="w-full h-full object-contain" />
                             </div>
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/netflix.webp" alt="Netflix"
+                                <img src="~/assets/images/brands/netflix.webp" alt="Netflix"
                                     class="w-full h-full object-contain" />
                             </div>
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/ibm.png" alt="IBM"
+                                <img src="~/assets/images/brands/ibm.png" alt="IBM"
                                     class="w-full h-full object-contain" />
                             </div>
                             <div class="w-32 h-16 flex items-center justify-center">
-                                <img src="@/assets/images/brands/google.png" alt="Google"
+                                <img src="~/assets/images/brands/google.png" alt="Google"
                                     class="w-full h-full object-contain" />
                             </div>
                         </div>
@@ -536,7 +536,7 @@
                 <div class="grid grid-cols-1 md:flex md:justify-center md:space-x-16 max-w-4xl mx-auto gap-8 md:gap-0">
                     <!-- Team Member 1 -->
                     <div class="text-center">
-                        <img src="@/assets/images/paul.png" alt="DR. Paul Amissah"
+                        <img src="~/assets/images/paul.png" alt="DR. Paul Amissah"
                             class="w-48 h-48 rounded-full mx-auto mb-6 object-cover" />
                         <h3 class="text-xl font-bold text-gray-900 mb-2">
                             DR. Paul Amissah
@@ -555,7 +555,7 @@
 
                     <!-- Team Member 2 -->
                     <div class="text-center">
-                        <img src="@/assets/images/rexton.jpg" alt="Rexton Itsiah"
+                        <img src="~/assets/images/rexton.jpg" alt="Rexton Itsiah"
                             class="w-48 h-48 rounded-full mx-auto mb-6 object-cover" />
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Rexton Itsiah</h3>
                         <p class="text-blue-600 mb-4">Technical Co-Founder</p>
@@ -583,9 +583,9 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
-import DemoModal from "@/components/landing/demo.vue";
-import Footer from "@/components/Footer.vue";
-import { useAuthStore } from '~/stores/auth'
+import DemoModal from "@/features/landing/components/landing-demo.vue";
+import Footer from "@/shared/components/ui/footer.vue";
+import { useAuthStore } from '~/features/auth/stores/auth.store'
 
 const authStore = useAuthStore();
 const mobileMenuOpen = ref(false);

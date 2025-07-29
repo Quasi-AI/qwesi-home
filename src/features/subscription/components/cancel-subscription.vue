@@ -63,8 +63,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useAuthStore } from '~/stores/auth'
-import { useSubscriptionStore } from '~/stores/subscription'
+import { useAuthStore } from '~/features/auth/stores/auth.store'
+import { useSubscriptionStore } from '~/features/subscription/stores/subscription.store'
 
 const authStore = useAuthStore()
 const subscriptionStore = useSubscriptionStore()

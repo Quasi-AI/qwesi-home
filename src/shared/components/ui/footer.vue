@@ -5,7 +5,7 @@
                 <!-- Contact Info -->
                 <div class="space-y-4">
                     <div class="flex items-center space-x-2">
-                        <img src="@/assets/images/logo.png" alt="QWESI AI Logo" class="w-32 h-auto" />
+                        <img src="~/assets/images/logo.png" alt="QWESI AI Logo" class="w-32 h-auto" />
                     </div>
                     <p class="text-gray-600">DeReimer Street</p>
                     <p class="text-gray-600">New York, NY 10745</p>

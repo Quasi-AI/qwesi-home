@@ -1,5 +1,5 @@
-import { useAuthStore } from "~/stores/auth";
-import type { DashboardSummary } from "~/types/dashboard";
+import { useAuthStore } from '~/features/auth/stores/auth.store';
+import type { DashboardSummary } from '~/features/dashboard/types/dashboard.types';
 
 export const useDashboard = () => {
   const authStore = useAuthStore();

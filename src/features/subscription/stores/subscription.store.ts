@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { useAuthStore } from "~/stores/auth";
+import { useAuthStore } from '~/features/auth/stores/auth.store';
 import type {
   SubscriptionState,
   SubscriptionResponse,
@@ -7,7 +7,7 @@ import type {
   UpdatePaymentMethodData,
   CheckoutData,
   CancelSubscriptionData,
-} from "~/types/subscription";
+} from '~/features/subscription/types/subscription.types';
 
 export const useSubscriptionStore = defineStore("subscription", {
   state: (): SubscriptionState => ({

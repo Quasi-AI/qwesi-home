@@ -5,7 +5,7 @@ import type {
   LoginData,
   SignupData,
   ProfileData,
-} from "~/types/auth";
+} from "~/features/auth/types/auth.types";
 
 export const useAuthStore = defineStore("auth", {
   state: (): AuthState => ({
@@ -23,16 +23,7 @@ export const useAuthStore = defineStore("auth", {
   },
 
   actions: {
-    // Initialize auth state from localStorage
-    initializeAuth() {
-      if (process.client) {
-        const storedToken = localStorage.getItem("auth_token");
-        if (storedToken) {
-          this.token = storedToken;
-          this.isAuthenticated = true;
-        }
-      }
-    },
+    // Remove initializeAuth, as persistence is handled by Pinia
 
     async login(data: LoginData) {
       this.loading = true;
@@ -51,9 +42,6 @@ export const useAuthStore = defineStore("auth", {
             this.user = response.user;
           } else {
             // If no user data in login response, try to fetch it separately
-            console.log(
-              "No user data in login response, attempting to fetch user details..."
-            );
             try {
               const userResult = await this.fetchUser();
               if (userResult.success && userResult.user) {
@@ -67,10 +55,7 @@ export const useAuthStore = defineStore("auth", {
             }
           }
 
-          // Store token in localStorage
-          if (process.client) {
-            localStorage.setItem("auth_token", response.token);
-          }
+          // No need to manually store token in localStorage
 
           return { success: true };
         } else {
@@ -121,10 +106,7 @@ export const useAuthStore = defineStore("auth", {
       this.user = null;
       this.token = null;
       this.isAuthenticated = false;
-
-      if (process.client) {
-        localStorage.removeItem("auth_token");
-      }
+      // No need to remove token from localStorage
     },
 
     async checkAuth(): Promise<boolean> {
@@ -132,32 +114,32 @@ export const useAuthStore = defineStore("auth", {
         return true;
       }
 
-      // Check for stored token
-      if (process.client) {
-        const storedToken = localStorage.getItem("auth_token");
-        if (storedToken) {
-          try {
-            // Verify token with backend
-            const response = await $fetch<AuthResponse>("/api/auth/verify", {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${storedToken}`,
-              },
-            });
+      // No need to check localStorage for token, just use Pinia state
+      if (this.token) {
+        try {
+          // Verify token with backend
+          const response = await $fetch<AuthResponse>("/api/auth/verify", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${this.token}`,
+            },
+          });
 
-            if (response.success && response.user) {
-              this.user = response.user;
-              this.token = storedToken;
-              this.isAuthenticated = true;
-              return true;
-            } else {
-              // Invalid token, clear it
-              localStorage.removeItem("auth_token");
-            }
-          } catch (error: any) {
-            console.error("Token verification error:", error);
-            localStorage.removeItem("auth_token");
+          if (response.success && response.user) {
+            this.user = response.user;
+            this.isAuthenticated = true;
+            return true;
+          } else {
+            // Invalid token, clear state
+            this.token = null;
+            this.isAuthenticated = false;
+            this.user = null;
           }
+        } catch (error: any) {
+          console.error("Token verification error:", error);
+          this.token = null;
+          this.isAuthenticated = false;
+          this.user = null;
         }
       }
 

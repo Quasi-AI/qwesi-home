@@ -1,4 +1,4 @@
-import { useAuthStore } from "../stores/auth";
+import { useAuthStore } from "~/features/auth/stores/auth.store";
 
 export default defineNuxtRouteMiddleware(async (to) => {
   if (!to.path.startsWith("/dashboard")) {

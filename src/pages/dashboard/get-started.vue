@@ -35,8 +35,7 @@
                                             class="w-6 h-6 text-blue-600" />
                                         <BuildingOfficeIcon v-else-if="type.value === 'employer'"
                                             class="w-6 h-6 text-blue-600" />
-                                        <TrophyIcon v-else-if="type.value === 'pitch'"
-                                            class="w-6 h-6 text-blue-600" />
+                                        <TrophyIcon v-else-if="type.value === 'pitch'" class="w-6 h-6 text-blue-600" />
                                     </div>
                                     <div>
                                         <h3 class="font-semibold text-gray-900">{{ type.label }}</h3>
@@ -100,7 +99,8 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-3">What help do you need?</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-3">What help do you
+                                    need?</label>
                                 <div class="space-y-2">
                                     <label v-for="option in seekerOptions" :key="option.value"
                                         class="flex items-center">
@@ -112,7 +112,8 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Tell us more about your goals (Optional)</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tell us more about your
+                                    goals (Optional)</label>
                                 <textarea v-model="seekerForm.goals" rows="4"
                                     placeholder="Describe your career goals and aspirations..."
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"></textarea>
@@ -173,7 +174,8 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Briefly describe your investment offer or interest...</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Briefly describe your
+                                    investment offer or interest...</label>
                                 <textarea v-model="investorForm.description" rows="4"
                                     placeholder="Describe your investment interests, opportunities, or what you're looking for..."
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
@@ -231,7 +233,8 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-3">What are you looking for?</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-3">What are you looking
+                                    for?</label>
                                 <div class="space-y-2">
                                     <label v-for="option in employerOptions" :key="option.value"
                                         class="flex items-center">
@@ -244,7 +247,8 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Describe your hiring or advertising needs...</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Describe your hiring or
+                                    advertising needs...</label>
                                 <textarea v-model="employerForm.description" rows="4"
                                     placeholder="Describe your hiring needs, company culture, or advertising requirements..."
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
@@ -261,7 +265,8 @@
 
                         <!-- Pitch Competition/Challenge Form -->
                         <form v-if="selectedUserType === 'pitch'" @submit.prevent="submitPitchForm" class="space-y-6">
-                            <h2 class="text-xl font-semibold text-gray-900 mb-6">Pitch Competition / Challenge Submission</h2>
+                            <h2 class="text-xl font-semibold text-gray-900 mb-6">Pitch Competition / Challenge
+                                Submission</h2>
 
                             <!-- Personal Information -->
                             <div class="bg-gray-50 p-4 rounded-lg">
@@ -275,7 +280,8 @@
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Email
+                                            Address</label>
                                         <input v-model="pitchForm.email" type="email" placeholder="Email Address"
                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                             required />
@@ -296,8 +302,10 @@
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Organization/Company (Optional)</label>
-                                        <input v-model="pitchForm.organization" type="text" placeholder="Organization or Company Name"
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Organization/Company
+                                            (Optional)</label>
+                                        <input v-model="pitchForm.organization" type="text"
+                                            placeholder="Organization or Company Name"
                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                                     </div>
                                 </div>
@@ -306,22 +314,26 @@
                             <!-- Project/Pitch Information -->
                             <div class="bg-gray-50 p-4 rounded-lg">
                                 <h3 class="text-lg font-medium text-gray-900 mb-4">Project Information</h3>
-                                
+
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Project/Idea Name</label>
-                                        <input v-model="pitchForm.projectName" type="text" placeholder="Your Project or Idea Name"
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Project/Idea
+                                            Name</label>
+                                        <input v-model="pitchForm.projectName" type="text"
+                                            placeholder="Your Project or Idea Name"
                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                             required />
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Industry/Category</label>
+                                        <label
+                                            class="block text-sm font-medium text-gray-700 mb-2">Industry/Category</label>
                                         <select v-model="pitchForm.industry"
                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                             required>
                                             <option value="">Select Industry</option>
-                                            <option v-for="industry in industries" :key="industry" :value="industry">{{ industry }}</option>
+                                            <option v-for="industry in industries" :key="industry" :value="industry">{{
+                                                industry }}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -340,7 +352,8 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-3">Type of Submission</label>
                                 <div class="space-y-2">
                                     <label v-for="option in pitchTypes" :key="option.value" class="flex items-center">
-                                        <input v-model="pitchForm.submissionType" :value="option.value" type="radio" name="submissionType"
+                                        <input v-model="pitchForm.submissionType" :value="option.value" type="radio"
+                                            name="submissionType"
                                             class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
                                         <span class="ml-2 text-sm text-gray-700">{{ option.label }}</span>
                                     </label>
@@ -364,13 +377,16 @@
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         required>
                                         <option value="">Select Stage</option>
-                                        <option v-for="stage in projectStages" :key="stage" :value="stage">{{ stage }}</option>
+                                        <option v-for="stage in projectStages" :key="stage" :value="stage">{{ stage }}
+                                        </option>
                                     </select>
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Funding Sought (Optional)</label>
-                                    <input v-model="pitchForm.fundingAmount" type="text" placeholder="e.g., $50,000 or Not Applicable"
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Funding Sought
+                                        (Optional)</label>
+                                    <input v-model="pitchForm.fundingAmount" type="text"
+                                        placeholder="e.g., $50,000 or Not Applicable"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                                 </div>
                             </div>
@@ -390,17 +406,21 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Website/Demo URL (Optional)</label>
-                                    <input v-model="pitchForm.websiteUrl" type="url" placeholder="https://your-project.com"
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Website/Demo URL
+                                        (Optional)</label>
+                                    <input v-model="pitchForm.websiteUrl" type="url"
+                                        placeholder="https://your-project.com"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                                 </div>
                             </div>
 
                             <!-- What they're looking for -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-3">What are you looking for? (Check all that apply)</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-3">What are you looking for?
+                                    (Check all that apply)</label>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    <label v-for="option in seekingOptions" :key="option.value" class="flex items-center">
+                                    <label v-for="option in seekingOptions" :key="option.value"
+                                        class="flex items-center">
                                         <input v-model="pitchForm.seeking" :value="option.value" type="checkbox"
                                             class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
                                         <span class="ml-2 text-sm text-gray-700">{{ option.label }}</span>
@@ -423,14 +443,14 @@
 </template>
 
 <script setup>
-import { API_ROUTES } from '~/constants/api'
-import { useAuthStore } from '~/stores/auth'
-import Sidebar from '@/components/dashboard/Sidebar.vue'
-import UserIcon from '~/components/icons/UserIcon.vue'
-import CurrencyDollarIcon from '~/components/icons/CurrencyDollarIcon.vue'
-import BuildingOfficeIcon from '~/components/icons/BuildingOfficeIcon.vue'
-import TrophyIcon from '~/components/icons/TrophyIcon.vue'
-import CountryCodeSelector from '~/components/CountryCodeSelector.vue'
+import { API_ROUTES } from '~/shared/constants/api-routes'
+import { useAuthStore } from '~/features/auth/stores/auth.store'
+import Sidebar from '@/features/dashboard/components/dashboard-sidebar.vue'
+import UserIcon from '~/shared/components/icons/user-icon.vue'
+import CurrencyDollarIcon from '~/shared/components/icons/currency-dollar-icon.vue'
+import BuildingOfficeIcon from '~/shared/components/icons/building-office-icon.vue'
+import TrophyIcon from '~/shared/components/icons/trophy-icon.vue'
+import CountryCodeSelector from '~/shared/components/ui/country-code-selector.vue'
 
 const authStore = useAuthStore()
 
@@ -774,7 +794,7 @@ onMounted(async () => {
         navigateTo('/auth/login')
         return
     }
-    
+
 })
 
 // Set page title

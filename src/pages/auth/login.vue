@@ -8,7 +8,7 @@
             <div class="max-w-md w-full space-y-8">
                 <!-- Logo and Header -->
                 <div class="text-center">
-                    <img src="@/assets/images/qwesi-head.png" alt="QWESI AI Logo"
+                    <img src="~/assets/images/qwesi-head.png" alt="QWESI AI Logo"
                         class="w-32 h-32 object-cover mx-auto rounded-full border mb-8" />
                     <h2 class="text-3xl font-bold text-gray-900 mb-2">Welcome back</h2>
                     <p class="text-gray-600">Sign in to your Qwesi AI account</p>
@@ -105,8 +105,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '~/stores/auth'
-import BackButton from '@/components/BackButton.vue'
+import { useAuthStore } from '~/features/auth/stores/auth.store'
+import BackButton from '@/shared/components/ui/back-button.vue'
+import AuthSidebar from '~/features/auth/components/auth-sidebar.vue'
+import CountryCodeSelector from '~/shared/components/ui/country-code-selector.vue'
 const router = useRouter()
 const goBack = () => router.back()
 

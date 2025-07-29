@@ -53,7 +53,7 @@
                                         fill="none" />
                                 </svg>
                                 <span>Start date: <span class="font-medium">{{ formattedSubscriptionStartDate
-                                        }}</span></span>
+                                }}</span></span>
                             </div>
                             <div v-if="subscriptionEndDate" class="flex items-center bg-yellow-50 rounded px-3 py-2">
                                 <svg class="w-4 h-4 text-yellow-500 mr-2" fill="none" stroke="currentColor"
@@ -64,7 +64,7 @@
                                         fill="none" />
                                 </svg>
                                 <span>Next billing: <span class="font-medium">{{ formattedSubscriptionEndDate
-                                        }}</span></span>
+                                }}</span></span>
                             </div>
                         </div>
                     </div>
@@ -131,10 +131,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 
-import { useAuthStore } from '~/stores/auth'
-import { useSubscriptionStore } from '~/stores/subscription'
-import Sidebar from '@/components/dashboard/Sidebar.vue'
-import ProModal from '@/components/dashboard/ProModal.vue'
+import { useAuthStore } from '~/features/auth/stores/auth.store'
+import { useSubscriptionStore } from '~/features/subscription/stores/subscription.store'
+import Sidebar from '@/features/dashboard/components/dashboard-sidebar.vue'
+import ProModal from '@/features/subscription/components/pro-modal.vue'
 
 
 const authStore = useAuthStore()

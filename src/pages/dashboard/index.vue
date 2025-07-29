@@ -136,13 +136,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 
-import { useAuthStore } from '~/stores/auth'
-import { useSubscriptionStore } from '~/stores/subscription'
-import { useDashboard } from '~/composables/useDashboard'
-import Sidebar from '@/components/dashboard/Sidebar.vue'
-import Stats from '@/components/dashboard/Stats.vue'
-import Table from '@/components/dashboard/Table.vue'
-import ProModal from '@/components/dashboard/ProModal.vue'
+import { useAuthStore } from '~/features/auth/stores/auth.store'
+import { useSubscriptionStore } from '~/features/subscription/stores/subscription.store'
+import { useDashboard } from '~/features/dashboard/composables/use-dashboard'
+import Sidebar from '@/features/dashboard/components/dashboard-sidebar.vue'
+import Stats from '@/features/dashboard/components/dashboard-stats.vue'
+import Table from '@/features/dashboard/components/dashboard-table.vue'
+import ProModal from '@/features/subscription/components/pro-modal.vue'
 
 
 const authStore = useAuthStore()

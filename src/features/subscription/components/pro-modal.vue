@@ -69,8 +69,8 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import StripeCheckout from './upgrade-pro/StripeCheckout.vue'
-import CancelSubscription from './upgrade-pro/CancelSubscription.vue'
+import StripeCheckout from './subscription-checkout.vue'
+import CancelSubscription from './cancel-subscription.vue'
 
 // Props
 const props = defineProps({
