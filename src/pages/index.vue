@@ -94,24 +94,27 @@
             </div>
         </div>
         <!-- Ads Banner: Invite to Pitch/Challenge (full width, below navbar, more intuitive) -->
-        <div
-            v-if="showPitchBanner"
-            class="w-full bg-blue-600 text-white text-center shadow-md flex flex-col md:flex-row items-center justify-center gap-3 relative z-40 border-b border-blue-700 mobile-pitch-banner"
-        >
-            <span class="flex items-center justify-center text-xl md:text-3xl mr-0 md:mr-3 pt-3 md:pt-0" aria-hidden="true">
+        <div v-if="FEATURE_SWITCH.showPitchBanner && showPitchBanner"
+            class="w-full bg-blue-600 text-white text-center shadow-md flex flex-col md:flex-row items-center justify-center gap-3 relative z-40 border-b border-blue-700 mobile-pitch-banner">
+            <span class="flex items-center justify-center text-xl md:text-3xl mr-0 md:mr-3 pt-3 md:pt-0"
+                aria-hidden="true">
                 <!-- Trophy Icon for Pitch/Challenge -->
                 <svg class="w-7 h-7 md:w-8 md:h-8 text-yellow-300 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17 3a1 1 0 0 1 1 1v2h1a1 1 0 0 1 1 1v2a5 5 0 0 1-4 4.9V15a5 5 0 0 1-4 4.9V21h3a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2h3v-1.1A5 5 0 0 1 7 15v-2.1A5 5 0 0 1 3 7V5a1 1 0 0 1 1-1h1V4a1 1 0 0 1 1-1h12zm-1 2H8v2a3 3 0 0 0 6 0V5zm-8 2v2a3 3 0 0 0 2 2.83V7H6zm10 0h-2v4.83A3 3 0 0 0 18 9V7z" />
+                    <path
+                        d="M17 3a1 1 0 0 1 1 1v2h1a1 1 0 0 1 1 1v2a5 5 0 0 1-4 4.9V15a5 5 0 0 1-4 4.9V21h3a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2h3v-1.1A5 5 0 0 1 7 15v-2.1A5 5 0 0 1 3 7V5a1 1 0 0 1 1-1h1V4a1 1 0 0 1 1-1h12zm-1 2H8v2a3 3 0 0 0 6 0V5zm-8 2v2a3 3 0 0 0 2 2.83V7H6zm10 0h-2v4.83A3 3 0 0 0 18 9V7z" />
                 </svg>
             </span>
             <div class="flex-1 text-left">
                 <span class="block font-bold text-base md:text-xl">Pitch/Challenge Submissions Open!</span>
-                <span class="block text-xs md:text-base">Have a great idea, startup, or challenge? Submit it for competitions and get noticed!</span>
+                <span class="block text-xs md:text-base">Have a great idea, startup, or challenge? Submit it for
+                    competitions and get noticed!</span>
             </div>
-            <NuxtLink to="/dashboard/get-started?tab=pitch" class="mt-2 md:mt-0 bg-yellow-300 text-blue-900 font-bold px-4 py-2 rounded-lg shadow hover:bg-yellow-400 transition-colors text-xs md:text-base focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2">
+            <NuxtLink to="/dashboard/get-started?tab=pitch"
+                class="mt-2 md:mt-0 bg-yellow-300 text-blue-900 font-bold px-4 py-2 rounded-lg shadow hover:bg-yellow-400 transition-colors text-xs md:text-base focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2">
                 Submit Your Pitch
             </NuxtLink>
-            <button @click="closePitchBanner" aria-label="Close banner" class="absolute top-2 right-2 md:static md:ml-4 text-white hover:text-yellow-300 text-lg md:text-2xl focus:outline-none">
+            <button @click="closePitchBanner" aria-label="Close banner"
+                class="absolute top-2 right-2 md:static md:ml-4 text-white hover:text-yellow-300 text-lg md:text-2xl focus:outline-none">
                 &times;
             </button>
         </div>
@@ -582,6 +585,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 import DemoModal from "@/features/landing/components/landing-demo.vue";
 import Footer from "@/shared/components/ui/footer.vue";
 import { useAuthStore } from '~/features/auth/stores/auth.store'
+import { FEATURE_SWITCH } from '~/shared/constants/feature-switch'
 
 const authStore = useAuthStore();
 const mobileMenuOpen = ref(false);
