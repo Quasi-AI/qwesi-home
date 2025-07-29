@@ -120,7 +120,35 @@
                     <Table v-else title="Team Members" description="People working on your projects"
                         :columns="peopleColumns" :data="people" />
                 </div>
-
+                <!-- Pitch Banner (responsive, mobile-friendly) -->
+                <div v-if="FEATURE_SWITCH.showPitchBanner && showPitchBanner"
+                    class="relative flex flex-col sm:flex-row items-center sm:items-center gap-4 p-4 sm:p-6 bg-white border-l-8 border-blue-600 rounded-lg shadow-md mb-8 text-center sm:text-left">
+                    <!-- Close button for mobile (absolute top right) -->
+                    <button @click="closePitchBanner" aria-label="Close banner"
+                        class="absolute top-2 right-2 sm:static sm:ml-2 text-gray-400 hover:text-blue-600 transition-colors rounded-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <span
+                        class="flex items-center justify-center text-2xl bg-blue-100 rounded-full w-12 h-12 mx-auto sm:mx-0">
+                        <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M17 3a1 1 0 0 1 1 1v2h1a1 1 0 0 1 1 1v2a5 5 0 0 1-4 4.9V15a5 5 0 0 1-4 4.9V21h3a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2h3v-1.1A5 5 0 0 1 7 15v-2.1A5 5 0 0 1 3 7V5a1 1 0 0 1 1-1h1V4a1 1 0 0 1 1-1h12zm-1 2H8v2a3 3 0 0 0 6 0V5zm-8 2v2a3 3 0 0 0 2 2.83V7H6zm10 0h-2v4.83A3 3 0 0 0 18 9V7z" />
+                        </svg>
+                    </span>
+                    <div class="flex-1 min-w-0 mt-2 sm:mt-0">
+                        <div class="font-bold text-blue-700 text-base sm:text-lg mb-1">Pitch/Challenge Submissions Open!
+                        </div>
+                        <div class="text-gray-700 text-sm sm:text-base">Have a great idea, startup, or challenge? Submit
+                            it for competitions and get noticed!</div>
+                    </div>
+                    <NuxtLink to="/dashboard/get-started?tab=pitch"
+                        class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold px-4 py-2 rounded-lg shadow transition-colors text-xs sm:text-base focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 mt-3 sm:mt-0">
+                        Submit Your Pitch
+                    </NuxtLink>
+                </div>
                 <!-- Footer -->
                 <div class="mt-auto">
                     <!-- Footer component was removed -->
@@ -143,6 +171,7 @@ import Sidebar from '@/features/dashboard/components/dashboard-sidebar.vue'
 import Stats from '@/features/dashboard/components/dashboard-stats.vue'
 import Table from '@/features/dashboard/components/dashboard-table.vue'
 import ProModal from '@/features/subscription/components/pro-modal.vue'
+import { FEATURE_SWITCH } from '~/shared/constants/feature-switch'
 
 
 const authStore = useAuthStore()
@@ -231,6 +260,14 @@ const editProfile = () => {
 const handleLogout = async () => {
     await authStore.logout()
     navigateTo('/')
+}
+
+const showPitchBanner = ref(true)
+function closePitchBanner() {
+    showPitchBanner.value = false
+    if (process.client) {
+        localStorage.setItem('hide_pitch_banner', 'true')
+    }
 }
 
 // Lifecycle

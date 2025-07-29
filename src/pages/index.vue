@@ -93,43 +93,16 @@
                 <NuxtLink v-else to="/dashboard" class="menu-link dashboard !rounded-lg">Dashboard</NuxtLink>
             </div>
         </div>
-        <!-- Ads Banner: Invite to Pitch/Challenge (full width, below navbar, more intuitive) -->
-        <div v-if="FEATURE_SWITCH.showPitchBanner && showPitchBanner"
-            class="w-full bg-blue-600 text-white text-center shadow-md flex flex-col md:flex-row items-center justify-center gap-3 relative z-40 border-b border-blue-700 mobile-pitch-banner">
-            <span class="flex items-center justify-center text-xl md:text-3xl mr-0 md:mr-3 pt-3 md:pt-0"
-                aria-hidden="true">
-                <!-- Trophy Icon for Pitch/Challenge -->
-                <svg class="w-7 h-7 md:w-8 md:h-8 text-yellow-300 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                        d="M17 3a1 1 0 0 1 1 1v2h1a1 1 0 0 1 1 1v2a5 5 0 0 1-4 4.9V15a5 5 0 0 1-4 4.9V21h3a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2h3v-1.1A5 5 0 0 1 7 15v-2.1A5 5 0 0 1 3 7V5a1 1 0 0 1 1-1h1V4a1 1 0 0 1 1-1h12zm-1 2H8v2a3 3 0 0 0 6 0V5zm-8 2v2a3 3 0 0 0 2 2.83V7H6zm10 0h-2v4.83A3 3 0 0 0 18 9V7z" />
-                </svg>
-            </span>
-            <div class="flex-1 text-left">
-                <span class="block font-bold text-base md:text-xl">Pitch/Challenge Submissions Open!</span>
-                <span class="block text-xs md:text-base">Have a great idea, startup, or challenge? Submit it for
-                    competitions and get noticed!</span>
-            </div>
-            <NuxtLink to="/dashboard/get-started?tab=pitch"
-                class="mt-2 md:mt-0 bg-yellow-300 text-blue-900 font-bold px-4 py-2 rounded-lg shadow hover:bg-yellow-400 transition-colors text-xs md:text-base focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2">
-                Submit Your Pitch
-            </NuxtLink>
-            <button @click="closePitchBanner" aria-label="Close banner"
-                class="absolute top-2 right-2 md:static md:ml-4 text-white hover:text-yellow-300 text-lg md:text-2xl focus:outline-none">
-                &times;
-            </button>
-        </div>
-
-        <!-- Hero Section -->
+        <!-- Hero Section (restored) -->
         <section class="pt-8 pb-12 sm:pt-16 sm:pb-20 lg:py-20 bg-white">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid lg:grid-cols-2 gap-12 items-center">
                     <!-- Left Content -->
                     <div class="space-y-8">
-                        <h1 class="text-3xl lg:text-xl font-medium text-gray-900 leading-tight">
+                        <h1 class="text-3xl lg:text-4xl font-medium text-gray-900 leading-tight">
                             Qwesi - Your 24/7 Career & Recruitment Assistant
                             <span class="inline-block w-3 h-3 bg-green-500 rounded-full ml-2"></span>
                         </h1>
-
                         <div class="space-y-6">
                             <div class="grid grid-cols-1 sm:flex sm:flex-row lg:grid lg:grid-cols-2 gap-4">
                                 <a href="https://api.whatsapp.com/send/?phone=12019790148&text&type=phone_number&app_absent=0"
@@ -166,7 +139,6 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Right Content - Illustration -->
                     <div class="flex justify-center lg:justify-end">
                         <div class="relative">
@@ -183,7 +155,6 @@
                                 style="animation-delay: 0.4s;">
                                 <div class="w-1 h-1 bg-purple-500 rounded-full"></div>
                             </div>
-
                             <!-- Floating dots around the image -->
                             <div
                                 class="absolute -top-6 left-8 w-3 h-3 bg-yellow-400 rounded-full animate-pulse opacity-80">
@@ -192,11 +163,9 @@
                                 style="animation-delay: 0.5s;"></div>
                             <div class="absolute top-16 -left-6 w-2.5 h-2.5 bg-indigo-400 rounded-full animate-pulse opacity-60"
                                 style="animation-delay: 1s;"></div>
-
                             <!-- Main Image -->
                             <img src="~/assets/images/qwesi-image.png" alt="Professional AI Assistant"
                                 class="w-64 h-auto object-contain rounded-2xl animate-breathing relative z-10" />
-
                             <!-- Bottom thinking elements -->
                             <div class="absolute -bottom-4 left-12 w-4 h-4 bg-orange-100 rounded-full flex items-center justify-center animate-bounce"
                                 style="animation-delay: 0.6s;">
@@ -206,7 +175,6 @@
                                 style="animation-delay: 0.8s;">
                                 <div class="w-0.5 h-0.5 bg-teal-500 rounded-full"></div>
                             </div>
-
                             <!-- Connection lines (subtle) -->
                             <div
                                 class="absolute top-1/2 -right-2 w-8 h-px bg-gradient-to-r from-blue-200 to-transparent opacity-30">
@@ -219,7 +187,6 @@
                 </div>
             </div>
         </section>
-
         <!-- Features Section -->
         <section id="features" class="py-20 bg-gray-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -593,7 +560,6 @@ const demoModalOpen = ref(false);
 const activeSection = ref('home');
 const statsAnimated = ref(false);
 const featuresAnimated = ref(false);
-const showPitchBanner = ref(true)
 
 // Computed property to safely check login status
 const isLoggedIn = computed(() => {
@@ -850,7 +816,6 @@ onMounted(() => {
 
             observer.observe(featuresSection);
         }
-        showPitchBanner.value = localStorage.getItem('hide_pitch_banner') !== 'true'
     }
 });
 
@@ -861,13 +826,6 @@ onUnmounted(() => {
         stopAutoScroll(); // Stop auto-scrolling on unmount
     }
 });
-
-function closePitchBanner() {
-    showPitchBanner.value = false
-    if (process.client) {
-        localStorage.setItem('hide_pitch_banner', 'true')
-    }
-}
 </script>
 
 <style scoped>
