@@ -23,7 +23,8 @@
                     <div class="mb-8">
                         <label class="block text-sm font-medium text-gray-700 mb-3">I am a:</label>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <button v-for="type in userTypes" :key="type.value" @click="selectedUserType = type.value"
+                            <button v-for="type in userTypes" :key="type.value"
+                                @click="() => selectedUserType = type.value"
                                 class="p-4 border-2 rounded-lg text-left transition-all duration-200 hover:shadow-md"
                                 :class="selectedUserType === type.value
                                     ? 'border-blue-500 bg-blue-50'
@@ -451,6 +452,7 @@ import CurrencyDollarIcon from '~/shared/components/icons/currency-dollar-icon.v
 import BuildingOfficeIcon from '~/shared/components/icons/building-office-icon.vue'
 import TrophyIcon from '~/shared/components/icons/trophy-icon.vue'
 import CountryCodeSelector from '~/shared/components/ui/country-code-selector.vue'
+import { onMounted, watch } from 'vue'
 
 const authStore = useAuthStore()
 
@@ -553,8 +555,43 @@ const seekingOptions = [
 ]
 
 // Reactive data
+// Defensive: Only use route and router on client
+const route = process.client ? useRoute() : null
+const router = process.client ? useRouter() : null
+
+const validTabs = userTypes.map(t => t.value)
+
 const selectedUserType = ref('seeker')
 const isSubmitting = ref(false)
+
+// Sync tab from URL on mount
+onMounted(() => {
+    if (!process.client || !route) return
+    const tab = route.query.tab
+    if (typeof tab === 'string' && validTabs.includes(tab)) {
+        selectedUserType.value = tab
+    } else {
+        selectedUserType.value = 'seeker'
+    }
+})
+
+// Watch for tab changes in URL
+watch(
+    () => (route ? route.query.tab : undefined),
+    (tab) => {
+        if (typeof tab === 'string' && validTabs.includes(tab)) {
+            selectedUserType.value = tab
+        }
+    }
+)
+
+// Update URL when tab changes
+watch(selectedUserType, (val) => {
+    if (!process.client || !route || !router) return
+    if (route.query.tab !== val) {
+        router.replace({ query: { ...route.query, tab: val } })
+    }
+})
 
 // Form data
 const seekerForm = ref({

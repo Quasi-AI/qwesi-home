@@ -79,46 +79,42 @@
                         </button>
                     </div>
                 </div>
-
-                <!-- Mobile Menu -->
-                <div v-if="mobileMenuOpen" class="md:hidden border-t border-gray-200/50 bg-white/90 backdrop-blur-md">
-                    <div class="px-2 pt-2 pb-3 space-y-1">
-                        <a href="#" @click="scrollToTop" :class="[
-                            activeSection === 'home'
-                                ? 'block px-3 py-2 text-green-600 font-medium hover:bg-gray-50/50 rounded'
-                                : 'block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50/50 rounded'
-                        ]" class="cursor-pointer transition-colors duration-200">Home</a>
-                        <a href="#features" @click="scrollToFeatures" :class="[
-                            activeSection === 'features'
-                                ? 'block px-3 py-2 text-green-600 font-medium hover:bg-gray-50/50 rounded'
-                                : 'block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50/50 rounded'
-                        ]" class="cursor-pointer transition-colors duration-200">How I work</a>
-
-                        <NuxtLink v-if="!isLoggedIn" to="/auth/login"
-                            class="w-full bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow-md flex items-center justify-center space-x-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1">
-                                </path>
-                            </svg>
-                            <span>Login</span>
-                        </NuxtLink>
-                        <NuxtLink v-else to="/dashboard"
-                            class="w-full bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow-md flex items-center justify-center space-x-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z">
-                                </path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z">
-                                </path>
-                            </svg>
-                            <span>Dashboard</span>
-                        </NuxtLink>
-                    </div>
-                </div>
             </div>
         </header>
+        <!-- Mobile Menu -->
+        <div v-if="mobileMenuOpen"
+            class="md:hidden border-t border-gray-200/50 bg-white backdrop-blur-md z-50 fixed top-16 left-0 w-full pb-2">
+            <div class="flex flex-col px-4 pt-4 pb-2 gap-2">
+                <a href="#" @click="scrollToTop"
+                    :class="['menu-link !rounded-lg', activeSection === 'home' ? 'active' : '']">Home</a>
+                <a href="#features" @click="scrollToFeatures"
+                    :class="['menu-link !rounded-lg', activeSection === 'features' ? 'active' : '']">How I work</a>
+                <NuxtLink v-if="!isLoggedIn" to="/auth/login" class="menu-link login !rounded-lg">Login</NuxtLink>
+                <NuxtLink v-else to="/dashboard" class="menu-link dashboard !rounded-lg">Dashboard</NuxtLink>
+            </div>
+        </div>
+        <!-- Ads Banner: Invite to Pitch/Challenge (full width, below navbar, more intuitive) -->
+        <div
+            v-if="showPitchBanner"
+            class="w-full bg-blue-600 text-white text-center shadow-md flex flex-col md:flex-row items-center justify-center gap-3 relative z-40 border-b border-blue-700 mobile-pitch-banner"
+        >
+            <span class="flex items-center justify-center text-xl md:text-3xl mr-0 md:mr-3 pt-3 md:pt-0" aria-hidden="true">
+                <!-- Trophy Icon for Pitch/Challenge -->
+                <svg class="w-7 h-7 md:w-8 md:h-8 text-yellow-300 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17 3a1 1 0 0 1 1 1v2h1a1 1 0 0 1 1 1v2a5 5 0 0 1-4 4.9V15a5 5 0 0 1-4 4.9V21h3a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2h3v-1.1A5 5 0 0 1 7 15v-2.1A5 5 0 0 1 3 7V5a1 1 0 0 1 1-1h1V4a1 1 0 0 1 1-1h12zm-1 2H8v2a3 3 0 0 0 6 0V5zm-8 2v2a3 3 0 0 0 2 2.83V7H6zm10 0h-2v4.83A3 3 0 0 0 18 9V7z" />
+                </svg>
+            </span>
+            <div class="flex-1 text-left">
+                <span class="block font-bold text-base md:text-xl">Pitch/Challenge Submissions Open!</span>
+                <span class="block text-xs md:text-base">Have a great idea, startup, or challenge? Submit it for competitions and get noticed!</span>
+            </div>
+            <NuxtLink to="/dashboard/get-started?tab=pitch" class="mt-2 md:mt-0 bg-yellow-300 text-blue-900 font-bold px-4 py-2 rounded-lg shadow hover:bg-yellow-400 transition-colors text-xs md:text-base focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2">
+                Submit Your Pitch
+            </NuxtLink>
+            <button @click="closePitchBanner" aria-label="Close banner" class="absolute top-2 right-2 md:static md:ml-4 text-white hover:text-yellow-300 text-lg md:text-2xl focus:outline-none">
+                &times;
+            </button>
+        </div>
 
         <!-- Hero Section -->
         <section class="pt-8 pb-12 sm:pt-16 sm:pb-20 lg:py-20 bg-white">
@@ -593,6 +589,7 @@ const demoModalOpen = ref(false);
 const activeSection = ref('home');
 const statsAnimated = ref(false);
 const featuresAnimated = ref(false);
+const showPitchBanner = ref(true)
 
 // Computed property to safely check login status
 const isLoggedIn = computed(() => {
@@ -849,6 +846,7 @@ onMounted(() => {
 
             observer.observe(featuresSection);
         }
+        showPitchBanner.value = localStorage.getItem('hide_pitch_banner') !== 'true'
     }
 });
 
@@ -859,6 +857,13 @@ onUnmounted(() => {
         stopAutoScroll(); // Stop auto-scrolling on unmount
     }
 });
+
+function closePitchBanner() {
+    showPitchBanner.value = false
+    if (process.client) {
+        localStorage.setItem('hide_pitch_banner', 'true')
+    }
+}
 </script>
 
 <style scoped>
@@ -894,5 +899,58 @@ onUnmounted(() => {
 
 .animate-breathing {
     animation: breathing 4s ease-in-out infinite;
+}
+
+.mobile-pitch-banner {
+    margin-top: 0 !important;
+    padding: 0.5rem 1rem 0.5rem 1rem;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+}
+
+@media (max-width: 768px) {
+    .mobile-pitch-banner {
+        margin-top: 0 !important;
+        font-size: 0.95rem;
+        padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+        border-radius: 0 0 12px 12px;
+    }
+}
+
+.menu-link {
+    display: block;
+    width: 100%;
+    text-align: center;
+    border-radius: 0;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    font-size: 1rem;
+    background: white;
+    color: #1e293b;
+    transition: background 0.2s, color 0.2s;
+}
+
+.menu-link:last-child {
+    border-bottom: none;
+}
+
+.menu-link.active {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.menu-link.login {
+    background: #16a34a;
+    color: white;
+}
+
+.menu-link.login:hover,
+.menu-link.dashboard:hover {
+    background: #15803d;
+}
+
+.menu-link.dashboard {
+    background: #16a34a;
+    color: white;
 }
 </style>

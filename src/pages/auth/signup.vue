@@ -163,7 +163,6 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAuthStore } from '~/features/auth/stores/auth.store'
 import BackButton from '@/shared/components/ui/back-button.vue'
 import AuthSidebar from '~/features/auth/components/auth-sidebar.vue'
