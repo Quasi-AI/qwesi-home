@@ -593,6 +593,13 @@ watch(selectedUserType, (val) => {
     }
 })
 
+// Watch for selectedUserType to set localStorage
+watch(selectedUserType, (val) => {
+    if (process.client && val === 'pitch' && authStore.isAuthenticated) {
+        localStorage.setItem('hide_pitch_banner', 'true')
+    }
+})
+
 // Form data
 const seekerForm = ref({
     name: '',
