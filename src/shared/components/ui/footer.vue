@@ -59,9 +59,10 @@
                         Follow us for AI insights, news, and updates.
                     </p>
                     <div class="flex space-x-3">
-                        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                        <a href="https://www.linkedin.com/company/108025422/" target="_blank" rel="noopener noreferrer"
+                            class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
                             <span class="text-white font-bold text-sm">in</span>
-                        </div>
+                        </a>
                     </div>
                 </div>
             </div>
