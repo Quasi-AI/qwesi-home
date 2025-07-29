@@ -120,9 +120,9 @@
                     <Table v-else title="Team Members" description="People working on your projects"
                         :columns="peopleColumns" :data="people" />
                 </div>
-                <!-- Pitch Banner (responsive, mobile-friendly) -->
+                <!-- Pitch Banner (responsive, mobile-friendly, no shadow, persistent close) -->
                 <div v-if="FEATURE_SWITCH.showPitchBanner && showPitchBanner"
-                    class="relative flex flex-col sm:flex-row items-center sm:items-center gap-4 p-4 sm:p-6 bg-white border-l-8 border-blue-600 rounded-lg shadow-md mb-8 text-center sm:text-left">
+                    class="relative flex flex-col sm:flex-row items-center sm:items-center gap-4 p-4 sm:p-6 bg-white border-l-8 border-blue-600 border border-blue-200 rounded-lg mb-8 text-center sm:text-left">
                     <!-- Close button for mobile (absolute top right) -->
                     <button @click="closePitchBanner" aria-label="Close banner"
                         class="absolute top-2 right-2 sm:static sm:ml-2 text-gray-400 hover:text-blue-600 transition-colors rounded-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-200">
@@ -145,7 +145,7 @@
                             it for competitions and get noticed!</div>
                     </div>
                     <NuxtLink to="/dashboard/get-started?tab=pitch"
-                        class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold px-4 py-2 rounded-lg shadow transition-colors text-xs sm:text-base focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 mt-3 sm:mt-0">
+                        class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold px-4 py-2 rounded-lg transition-colors text-xs sm:text-base focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 mt-3 sm:mt-0">
                         Submit Your Pitch
                     </NuxtLink>
                 </div>
@@ -266,7 +266,7 @@ const showPitchBanner = ref(true)
 function closePitchBanner() {
     showPitchBanner.value = false
     if (process.client) {
-        localStorage.setItem('hide_pitch_banner', 'true')
+        localStorage.setItem('hide_pitch_banner_dashboard', 'true')
     }
 }
 
@@ -283,6 +283,12 @@ onMounted(async () => {
 
     // Fetch subscription data to ensure we have the latest status
     await subscriptionStore.fetchSubscription()
+})
+
+onMounted(() => {
+    if (process.client) {
+        showPitchBanner.value = localStorage.getItem('hide_pitch_banner_dashboard') !== 'true'
+    }
 })
 
 // Set page title
