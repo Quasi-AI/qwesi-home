@@ -1,7 +1,7 @@
 <template>
     <div class="min-h-screen bg-white overflow-x-hidden pt-16">
         <!-- Header/Navigation -->
-        <header class="bg-white/80 backdrop-blur-md border-b border-gray-200/50 fixed top-0 left-0 w-full z-50">
+        <header class="bg-white/80 backdrop-blur-md fixed top-0 left-0 w-full z-50">
             <div class="px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16">
                     <!-- Logo -->
@@ -25,14 +25,17 @@
 
                     <!-- Desktop CTA Buttons -->
                     <div class="hidden md:flex items-center space-x-3">
-                        <a href="tel:+12019790148"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors shadow-sm">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path
-                                    d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                            </svg>
-                            <span>Call Me</span>
-                        </a>
+                        <div class="relative w-10 h-10 flex items-center justify-center rounded-full">
+                            <span class="absolute inset-0 bg-blue-600 rounded-full animate-ping opacity-20"></span>
+                            <a href="tel:+12019790148"
+                                class="p-2 rounded-full hover:bg-blue-50 transition-colors relative z-10"
+                                aria-label="Call Me">
+                                <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                                </svg>
+                            </a>
+                        </div>
                         <NuxtLink v-if="!isLoggedIn" to="/auth/login"
                             class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow-md">
                             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,18 +45,42 @@
                             </svg>
                             Login
                         </NuxtLink>
-                        <NuxtLink v-else to="/dashboard"
-                            class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow-md">
-                            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z">
-                                </path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z">
-                                </path>
-                            </svg>
-                            Dashboard
-                        </NuxtLink>
+                        <!-- User Dropdown for logged in users -->
+                        <div v-else class="relative">
+                            <button @click="userMenuOpen = !userMenuOpen" data-user-button
+                                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow-md flex items-center space-x-2">
+                                <div v-if="user.profileImage"
+                                    class="w-6 h-6 object-cover rounded-full overflow-hidden border border-white">
+                                    <img :src="user.profileImage" alt="Profile Picture" class="w-6 h-6 object-cover" />
+                                </div>
+                                <div v-else class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-medium text-xs">{{ userInitials }}</span>
+                                </div>
+                                <span>Dashboard</span>
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </button>
+
+                            <!-- User Menu -->
+                            <div v-if="userMenuOpen" data-user-menu
+                                class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
+                                <NuxtLink to="/dashboard"
+                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    Dashboard
+                                </NuxtLink>
+                                <NuxtLink to="/dashboard/profile"
+                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    Edit Profile
+                                </NuxtLink>
+                                <button @click="handleLogout"
+                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    Sign Out
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Mobile Menu Button -->
@@ -627,10 +654,20 @@ import { FEATURE_SWITCH } from '~/shared/constants/feature-switch'
 const authStore = useAuthStore();
 const mobileMenuOpen = ref(false);
 const demoModalOpen = ref(false);
+const userMenuOpen = ref(false);
 const activeSection = ref('home');
 const statsAnimated = ref(false);
 const featuresAnimated = ref(false);
 const showPitchBanner = ref(true);
+
+// User state
+const user = computed(() => authStore.getUser || {})
+
+// Computed
+const userInitials = computed(() => {
+    const name = user.value.name || ''
+    return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2)
+})
 
 // Computed property to safely check login status
 const isLoggedIn = computed(() => {
@@ -777,6 +814,22 @@ const closeDemoModal = () => {
     demoModalOpen.value = false;
 };
 
+const handleLogout = async () => {
+    try {
+        await authStore.logout();
+        userMenuOpen.value = false;
+        // Redirect to home page after logout
+        await navigateTo('/');
+    } catch (error) {
+        console.error('Logout failed:', error);
+    }
+};
+
+// Close user menu when clicking outside
+const closeUserMenu = () => {
+    userMenuOpen.value = false;
+};
+
 const animatedStats = ref({
     jobSeekers: 0,
     jobsSent: 0,
@@ -829,6 +882,16 @@ onMounted(() => {
         window.addEventListener("scroll", handleScroll);
         window.addEventListener("keydown", handleKeydown);
         startAutoScroll(); // Start auto-scrolling on mount
+
+        // Add click outside handler for user menu
+        document.addEventListener('click', (event) => {
+            const userMenu = document.querySelector('[data-user-menu]');
+            const userButton = document.querySelector('[data-user-button]');
+            
+            if (userMenu && userButton && !userButton.contains(event.target) && !userMenu.contains(event.target)) {
+                userMenuOpen.value = false;
+            }
+        });
 
         // Set up Intersection Observer for stats animation
         const statsSection = document.getElementById('stats');
