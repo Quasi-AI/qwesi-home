@@ -76,59 +76,5 @@
                 </div>
             </div>
         </div>
-
-        <!-- Scroll to Top Button (only show on landing page) -->
-        <button v-if="showScrollTop" @click="scrollToTop" :class="[
-            'fixed bottom-8 right-8 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-all duration-300 ease-in-out',
-            showScrollTopButton
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-0 translate-y-4 pointer-events-none',
-        ]">
-            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd"
-                    d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z"
-                    clipRule="evenodd" />
-            </svg>
-        </button>
     </footer>
 </template>
-
-<script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-
-// Props
-const props = defineProps({
-    showScrollTop: {
-        type: Boolean,
-        default: false
-    }
-})
-
-// Reactive variables
-const showScrollTopButton = ref(false)
-
-// Methods
-const scrollToTop = () => {
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-    })
-}
-
-const handleScroll = () => {
-    showScrollTopButton.value = window.scrollY > 300
-}
-
-// Lifecycle
-onMounted(() => {
-    if (props.showScrollTop) {
-        window.addEventListener("scroll", handleScroll)
-    }
-})
-
-onUnmounted(() => {
-    if (props.showScrollTop) {
-        window.removeEventListener("scroll", handleScroll)
-    }
-})
-</script>

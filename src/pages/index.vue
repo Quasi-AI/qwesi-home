@@ -539,8 +539,21 @@
             </div>
         </section>
 
+        <!-- Scroll to Top Button (now on landing page) -->
+        <button v-if="showScrollTopButton" @click="scrollToTop" :class="[
+            'fixed bottom-8 right-8 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-all duration-300 ease-in-out z-50',
+            showScrollTopButton
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-4 pointer-events-none',
+        ]">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                    d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z"
+                    clip-rule="evenodd" />
+            </svg>
+        </button>
         <!-- Footer -->
-        <Footer :show-scroll-top="true" />
+        <Footer />
 
         <!-- Demo Modal -->
         <DemoModal :is-open="demoModalOpen" @close="closeDemoModal" />
@@ -706,43 +719,6 @@ const closeDemoModal = () => {
     demoModalOpen.value = false;
 };
 
-const handleScroll = () => {
-    if (!process.client) return;
-
-    // Detect active section based on scroll position
-    const scrollY = window.scrollY;
-    const featuresSection = document.getElementById('features');
-    const statsSection = document.getElementById('stats');
-
-    if (featuresSection) {
-        const featuresTop = featuresSection.offsetTop;
-        const featuresBottom = featuresTop + featuresSection.offsetHeight;
-
-        if (scrollY >= featuresTop - 100 && scrollY < featuresBottom - 100) {
-            activeSection.value = 'features';
-        } else if (statsSection && scrollY >= statsSection.offsetTop - 200 && scrollY < statsSection.offsetTop + statsSection.offsetHeight - 100) {
-            activeSection.value = 'stats';
-            // Trigger animation when stats section is approaching viewport
-            if (!statsAnimated.value && scrollY >= statsSection.offsetTop - 100) {
-                animateStats();
-            }
-        } else {
-            activeSection.value = 'home';
-        }
-    }
-};
-
-const scrollToFeatures = () => {
-    const featuresSection = document.getElementById('features');
-    if (featuresSection) {
-        featuresSection.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-        });
-        activeSection.value = 'features';
-    }
-};
-
 const animatedStats = ref({
     jobSeekers: 0,
     jobsSent: 0,
@@ -775,6 +751,19 @@ const animateStats = () => {
     };
 
     requestAnimationFrame(animate);
+};
+
+const showScrollTopButton = ref(false);
+
+const scrollToTop = () => {
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+    });
+};
+
+const handleScroll = () => {
+    showScrollTopButton.value = window.scrollY > 300;
 };
 
 onMounted(() => {
