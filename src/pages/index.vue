@@ -37,7 +37,7 @@
                             </a>
                         </div>
                         <NuxtLink v-if="!isLoggedIn" to="/auth/login"
-                            class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow-md">
+                            class="bg-white border text-gray-600 px-6 py-2 rounded-xl hover:bg-gray-50 transition-colors font-medium shadow-sm hover:shadow-md">
                             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1">
@@ -48,13 +48,13 @@
                         <!-- User Dropdown for logged in users -->
                         <div v-else class="relative">
                             <button @click="userMenuOpen = !userMenuOpen" data-user-button
-                                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow-md flex items-center space-x-2">
+                                class="bg-white border text-gray-600 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors font-medium shadow-sm hover:shadow-md flex items-center space-x-2">
                                 <div v-if="user.profileImage"
-                                    class="w-6 h-6 object-cover rounded-full overflow-hidden border border-white">
-                                    <img :src="user.profileImage" alt="Profile Picture" class="w-6 h-6 object-cover" />
+                                    class="w-8 h-8 object-cover rounded-full overflow-hidden border-2 border-gray-200">
+                                    <img :src="user.profileImage" alt="Profile Picture" class="w-8 h-8 object-cover" />
                                 </div>
-                                <div v-else class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                                    <span class="text-white font-medium text-xs">{{ userInitials }}</span>
+                                <div v-else class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <span class="text-blue-600 font-medium text-sm">{{ userInitials }}</span>
                                 </div>
                                 <span>Dashboard</span>
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -143,7 +143,7 @@
                                         </svg>
                                         <span>WhatsApp</span>
                                     </a>
-                                    <a href="https://m.me/12019790148" target="_blank" rel="noopener noreferrer"
+                                    <a href="https://m.me/61577053655499" target="_blank" rel="noopener noreferrer"
                                         class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-700 transition-colors">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                             <path
@@ -887,7 +887,7 @@ onMounted(() => {
         document.addEventListener('click', (event) => {
             const userMenu = document.querySelector('[data-user-menu]');
             const userButton = document.querySelector('[data-user-button]');
-            
+
             if (userMenu && userButton && !userButton.contains(event.target) && !userMenu.contains(event.target)) {
                 userMenuOpen.value = false;
             }
