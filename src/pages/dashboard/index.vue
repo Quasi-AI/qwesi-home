@@ -129,7 +129,7 @@
                 </div>
 
                 <!-- Quick Actions Bar -->
-                <div class="mb-8 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <!-- <div class="mb-8 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         <button @click="navigateTo('/dashboard/tasks/create')"
@@ -161,7 +161,7 @@
                             <span class="text-sm font-medium text-gray-700">Help</span>
                         </button>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Stats Grid -->
                 <div class="mb-8">
