@@ -13,7 +13,7 @@
                  isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full',
                  // Desktop styles
                  'bg-white border-r border-gray-200 min-h-screen flex flex-col',
-                 isCollapsed && !isMobile ? 'w-16' : 'w-64'
+                 isCollapsed && !isMobile ? 'w-16' : 'w-80'
              ]">
             
             <!-- Logo Section -->
@@ -53,7 +53,7 @@
             </div>
 
             <!-- Navigation -->
-            <nav class="flex-1" :class="(isCollapsed && !isMobile) ? 'p-2' : 'p-6'">
+            <nav class="flex-1 overflow-y-auto" :class="(isCollapsed && !isMobile) ? 'p-2' : 'p-6'">
                 <ul class="space-y-2">
                     <li v-for="item in navigationItems" :key="item.path">
                         <NuxtLink :to="item.path" 
@@ -114,6 +114,106 @@
                         </NuxtLink>
                     </li>
                 </ul>
+
+                <!-- AI Qwesi Capabilities Section -->
+                <div v-if="!isCollapsed || isMobile" class="mt-8">
+                    <div class="mb-4">
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wide">AI Qwesi Capabilities</h3>
+                        <p class="text-xs text-gray-500 mt-1">Your 24/7 Career Assistant</p>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <!-- Smart Job Matching -->
+                        <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200 hover:from-blue-100 hover:to-blue-200 transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
+                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <h4 class="font-semibold text-blue-900 text-sm">Smart Job Matching</h4>
+                            </div>
+                            <p class="text-xs text-blue-700 leading-relaxed">
+                                Finds and emails job opportunities based on your skills—no more endless searching.
+                            </p>
+                        </div>
+
+                        <!-- 24/7 Assistant -->
+                        <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-3 border border-green-200 hover:from-green-100 hover:to-green-200 transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
+                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <h4 class="font-semibold text-green-900 text-sm">24/7 Support</h4>
+                            </div>
+                            <p class="text-xs text-green-700 leading-relaxed">
+                                Always ready to assist with questions or help preparing for work, day or night.
+                            </p>
+                        </div>
+
+                        <!-- Investor Matching -->
+                        <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg p-3 border border-yellow-200 hover:from-yellow-100 hover:to-yellow-200 transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
+                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" />
+                                    </svg>
+                                </div>
+                                <h4 class="font-semibold text-yellow-900 text-sm">Investor Connections</h4>
+                            </div>
+                            <p class="text-xs text-yellow-700 leading-relaxed">
+                                Helps you meet the right investors who align with your project and vision.
+                            </p>
+                        </div>
+
+                        <!-- Professional Networking -->
+                        <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-3 border border-purple-200 hover:from-purple-100 hover:to-purple-200 transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
+                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+                                    </svg>
+                                </div>
+                                <h4 class="font-semibold text-purple-900 text-sm">Network Growth</h4>
+                            </div>
+                            <p class="text-xs text-purple-700 leading-relaxed">
+                                Grow your network with professionals from industry-leading organizations.
+                            </p>
+                        </div>
+
+                        <!-- Voice & WhatsApp Support -->
+                        <div class="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-3 border border-red-200 hover:from-red-100 hover:to-red-200 transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
+                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <h4 class="font-semibold text-red-900 text-sm">Voice & WhatsApp</h4>
+                            </div>
+                            <p class="text-xs text-red-700 leading-relaxed">
+                                Smart conversations through voice commands and WhatsApp integration.
+                            </p>
+                        </div>
+
+                        <!-- Academic & Business Support -->
+                        <div class="bg-gradient-to-r from-cyan-50 to-cyan-100 rounded-lg p-3 border border-cyan-200 hover:from-cyan-100 hover:to-cyan-200 transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
+                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                                    </svg>
+                                </div>
+                                <h4 class="font-semibold text-cyan-900 text-sm">Academic & Business</h4>
+                            </div>
+                            <p class="text-xs text-cyan-700 leading-relaxed">
+                                Helps with homework, research, customer emails, proposals, and marketing plans.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </nav>
 
             <!-- User Section (Mobile) -->
