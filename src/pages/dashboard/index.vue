@@ -809,7 +809,7 @@ const handleLogout = async () => {
 
 const copyReferralCode = async () => {
     try {
-        await navigator.clipboard.writeText(`${window.location.origin}/register?ref=${referralCode.value}`)
+        await navigator.clipboard.writeText(`${window.location.origin}/auth/signup?ref=${referralCode.value}`)
         copied.value = true
         setTimeout(() => {
             copied.value = false
