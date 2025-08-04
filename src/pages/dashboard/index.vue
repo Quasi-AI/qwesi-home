@@ -823,9 +823,9 @@ const shareReferral = async () => {
     const shareData = {
         title: 'Join QWESI AI',
         text: `Join me on QWESI AI and get 50 points welcome bonus!`,
-        url: `${window.location.origin}/register?ref=${referralCode.value}`
+        url: `${window.location.origin}/auth/signup?ref=${referralCode.value}`
     }
-    
+
     if (navigator.share) {
         try {
             await navigator.share(shareData)
