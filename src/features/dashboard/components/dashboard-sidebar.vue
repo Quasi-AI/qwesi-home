@@ -66,9 +66,50 @@
                                   ]" 
                                   :title="(isCollapsed && !isMobile) ? item.title : ''"
                                   @click="handleNavigation(item.path)">
-                            <component :is="item.icon" 
-                                      class="w-6 h-6 flex-shrink-0"
-                                      :class="$route.path === item.path ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-600'" />
+                            <!-- Inline SVG icons -->
+                            <svg v-if="item.key === 'dashboard'"
+                                 class="w-6 h-6 flex-shrink-0"
+                                 :class="$route.path === item.path ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-600'"
+                                 fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                            </svg>
+                            
+                            <svg v-else-if="item.key === 'get-started'"
+                                 class="w-6 h-6 flex-shrink-0"
+                                 :class="$route.path === item.path ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-600'"
+                                 fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
+                            </svg>
+                            
+                            <svg v-else-if="item.key === 'profile'"
+                                 class="w-6 h-6 flex-shrink-0"
+                                 :class="$route.path === item.path ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-600'"
+                                 fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                            </svg>
+                            
+                            <svg v-else-if="item.key === 'subscription'"
+                                 class="w-6 h-6 flex-shrink-0"
+                                 :class="$route.path === item.path ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-600'"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                            </svg>
+                            
+                            <svg v-else-if="item.key === 'investors'"
+                                 class="w-6 h-6 flex-shrink-0"
+                                 :class="$route.path === item.path ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-600'"
+                                 fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
+                            </svg>
+                            
+                            <svg v-else-if="item.key === 'jobs'"
+                                 class="w-6 h-6 flex-shrink-0"
+                                 :class="$route.path === item.path ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-600'"
+                                 fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd" />
+                                <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" />
+                            </svg>
+                            
                             <span v-if="!isCollapsed || isMobile" class="ml-3 truncate">{{ item.title }}</span>
                         </NuxtLink>
                     </li>
@@ -105,46 +146,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-
-// Icons as inline SVG components for better performance
-const DashboardIcon = {
-    template: `<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-    </svg>`
-}
-
-const GetStartedIcon = {
-    template: `<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
-    </svg>`
-}
-
-const ProfileIcon = {
-    template: `<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-    </svg>`
-}
-
-const SubscriptionIcon = {
-    template: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-    </svg>`
-}
-
-const InvestorsIcon = {
-    template: `<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
-    </svg>`
-}
-
-const JobsIcon = {
-    template: `<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd" />
-        <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" />
-    </svg>`
-}
 
 const props = defineProps({
     user: {
@@ -153,14 +156,14 @@ const props = defineProps({
     }
 })
 
-// Navigation items
+// Navigation items with unique keys for icon identification
 const navigationItems = [
-    { path: '/dashboard', title: 'Dashboard', icon: DashboardIcon },
-    { path: '/dashboard/get-started', title: 'Get Started', icon: GetStartedIcon },
-    { path: '/dashboard/profile', title: 'Profile', icon: ProfileIcon },
-    { path: '/dashboard/subscription', title: 'Subscription', icon: SubscriptionIcon },
-    { path: '/dashboard/investors', title: 'Investors', icon: InvestorsIcon },
-    { path: '/dashboard/jobs', title: 'Jobs', icon: JobsIcon }
+    { path: '/dashboard', title: 'Dashboard', key: 'dashboard' },
+    { path: '/dashboard/get-started', title: 'Get Started', key: 'get-started' },
+    { path: '/dashboard/profile', title: 'Profile', key: 'profile' },
+    { path: '/dashboard/subscription', title: 'Subscription', key: 'subscription' },
+    { path: '/dashboard/investors', title: 'Investors', key: 'investors' },
+    { path: '/dashboard/jobs', title: 'Jobs', key: 'jobs' }
 ]
 
 // Reactive state
