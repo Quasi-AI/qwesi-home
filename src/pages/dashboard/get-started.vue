@@ -505,12 +505,7 @@ const employerOptions = [
 
 // Pitch competition options
 const pitchTypes = [
-    { value: 'startup_pitch', label: 'Startup Pitch' },
-    { value: 'innovation_challenge', label: 'Innovation Challenge' },
-    { value: 'social_impact', label: 'Social Impact Project' },
-    { value: 'tech_competition', label: 'Technology Competition' },
     { value: 'business_plan', label: 'Business Plan Competition' },
-    { value: 'other', label: 'Other' }
 ]
 
 const industries = [
@@ -542,16 +537,7 @@ const projectStages = [
 ]
 
 const seekingOptions = [
-    { value: 'funding', label: 'Funding/Investment' },
-    { value: 'mentorship', label: 'Mentorship' },
-    { value: 'partnerships', label: 'Strategic Partnerships' },
-    { value: 'team_members', label: 'Team Members' },
-    { value: 'customers', label: 'Early Customers' },
-    { value: 'feedback', label: 'Feedback & Validation' },
-    { value: 'technical_support', label: 'Technical Support' },
-    { value: 'market_access', label: 'Market Access' },
-    { value: 'networking', label: 'Networking Opportunities' },
-    { value: 'recognition', label: 'Recognition/Awards' }
+    { value: 'funding', label: 'Funding/Investment' }
 ]
 
 // Reactive data
