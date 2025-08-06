@@ -695,7 +695,7 @@ const enhancedStats = computed(() => {
 const fetchUserPoints = async () => {
     try {
         const token = authStore.getToken
-        const response = await $fetch('https://dark-caldron-448714-u5.uc.r.appspot.com/user-points', {
+        const response = await $fetch(`https://dark-caldron-448714-u5.uc.r.appspot.com/user-points/${user.value.email}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -721,6 +721,7 @@ const redeemPoints = async (amount, description) => {
                 'Content-Type': 'application/json'
             },
             body: {
+                email: user?.value.email,
                 amount,
                 description
             }

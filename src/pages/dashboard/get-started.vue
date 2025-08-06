@@ -537,7 +537,8 @@ const projectStages = [
 ]
 
 const seekingOptions = [
-    { value: 'funding', label: 'Funding/Investment' }
+    { value: 'funding', label: 'Funding/Investment' },
+
 ]
 
 // Reactive data
