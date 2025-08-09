@@ -120,7 +120,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
-// import BaseModal from './BaseModal.vue'
+import BaseModal from '~/pages/modals/BaseModal.vue'
 // import { reportsService } from '../services/reportsService'
 
 const props = defineProps({

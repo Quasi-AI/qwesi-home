@@ -170,7 +170,7 @@
 </template>
 
 <script setup>
-import BaseModal from './BaseModal.vue'
+import BaseModal from '~/pages/modals/BaseModal.vue'
 
 defineProps({
   show: Boolean

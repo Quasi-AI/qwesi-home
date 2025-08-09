@@ -161,19 +161,23 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-// import BaseModal from './BaseModal.vue'
-// import { teamService } from '../services/teamService'
+import BaseModal from '~/pages/modals/BaseModal.vue'
+import { teamService } from '~/services/teamService'
+import { useAuthStore } from '~/features/auth/stores/auth.store'
 
+
+const authStore = useAuthStore()
 const props = defineProps({
   show: Boolean
 })
-
+const teamMembers = ref([])
 const emit = defineEmits(['update:show', 'member-invited'])
 
 const loading = ref(false)
-
+const currentUser = authStore.getUser
 const form = reactive({
   name: '',
+  sender: currentUser?.email,
   email: '',
   role: 'member',
   department: '',
@@ -192,7 +196,11 @@ const submitInvite = async () => {
   Object.keys(errors).forEach(key => delete errors[key])
 
   try {
-    const response = await teamService.inviteMember(form)
+
+    const teamData = {
+      ...form
+    }
+    const response = await teamService.createTeamMember(teamData)
     
     if (response.success) {
       emit('member-invited', response.data)
@@ -222,4 +230,19 @@ const resetForm = () => {
     welcomeMessage: ''
   })
 }
+
+const loadTeamMembers = async () => {
+  try {
+    const response = await taskService.getTeamMembers()
+    if (response.success) {
+      teamMembers.value = response.data
+    }
+  } catch (error) {
+    console.error('Failed to load team members:', error)
+  }
+}
+
+onMounted(() => {
+  loadTeamMembers()
+})
 </script>

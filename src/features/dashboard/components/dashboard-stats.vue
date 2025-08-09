@@ -72,7 +72,7 @@
                 <div class="ml-4">
                     <p
                         class="text-sm font-medium text-gray-600 group-hover:text-blue-600 transition-colors duration-300">
-                        People</p>
+                        Team Members</p>
                     <p
                         class="text-2xl font-bold text-gray-900 group-hover:text-blue-900 transition-colors duration-300">
                         {{ stats.people }}</p>

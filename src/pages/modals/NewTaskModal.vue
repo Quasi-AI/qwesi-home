@@ -137,17 +137,19 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-// import BaseModal from './BaseModal.vue'
-// import { taskService } from '../services/taskService'
+import BaseModal from '~/pages/modals/BaseModal.vue'
+import { taskService } from '~/services/taskService'
+import { useAuthStore } from '~/features/auth/stores/auth.store'
 
 const props = defineProps({
   show: Boolean
 })
 
+const authStore = useAuthStore()
+
 const emit = defineEmits(['update:show', 'task-created'])
 
 const loading = ref(false)
-const teamMembers = ref([])
 
 const form = reactive({
   title: '',
@@ -159,7 +161,7 @@ const form = reactive({
 })
 
 const errors = reactive({})
-
+const currentUser = authStore.getUser
 const submitTask = async () => {
   loading.value = true
   Object.keys(errors).forEach(key => delete errors[key])
@@ -167,6 +169,7 @@ const submitTask = async () => {
   try {
     const taskData = {
       ...form,
+      email: currentUser.email,
       tags: form.tags ? form.tags.split(',').map(tag => tag.trim()) : []
     }
 
@@ -197,18 +200,4 @@ const resetForm = () => {
   })
 }
 
-const loadTeamMembers = async () => {
-  try {
-    const response = await taskService.getTeamMembers()
-    if (response.success) {
-      teamMembers.value = response.data
-    }
-  } catch (error) {
-    console.error('Failed to load team members:', error)
-  }
-}
-
-onMounted(() => {
-  loadTeamMembers()
-})
 </script>
