@@ -169,7 +169,7 @@ const submitTask = async () => {
   try {
     const taskData = {
       ...form,
-      email: currentUser.email,
+      email: currentUser?.email,
       tags: form.tags ? form.tags.split(',').map(tag => tag.trim()) : []
     }
 
