@@ -132,36 +132,65 @@
                 <!-- <div class="mb-8 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <button @click="navigateTo('/dashboard/tasks/create')"
-                            class="flex flex-col items-center p-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors group">
-                            <svg class="w-6 h-6 text-blue-600 mb-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            <span class="text-sm font-medium text-gray-700">New Task</span>
+                        <button @click="openNewTaskModal"
+                        class="flex flex-col items-center p-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors group">
+                        <svg class="w-6 h-6 text-blue-600 mb-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span class="text-sm font-medium text-gray-700">New Task</span>
                         </button>
-                        <button @click="navigateTo('/dashboard/team/invite')"
-                            class="flex flex-col items-center p-3 rounded-lg bg-green-50 hover:bg-green-100 transition-colors group">
-                            <svg class="w-6 h-6 text-green-600 mb-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                            </svg>
-                            <span class="text-sm font-medium text-gray-700">Invite Team</span>
+                        
+                        <button @click="openInviteTeamModal"
+                        class="flex flex-col items-center p-3 rounded-lg bg-green-50 hover:bg-green-100 transition-colors group">
+                        <svg class="w-6 h-6 text-green-600 mb-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                        <span class="text-sm font-medium text-gray-700">Invite Team</span>
                         </button>
-                        <button @click="navigateTo('/dashboard/reports')"
-                            class="flex flex-col items-center p-3 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors group">
-                            <svg class="w-6 h-6 text-purple-600 mb-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                            <span class="text-sm font-medium text-gray-700">Reports</span>
+                        
+                        <button @click="openReportsModal"
+                        class="flex flex-col items-center p-3 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors group">
+                        <svg class="w-6 h-6 text-purple-600 mb-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span class="text-sm font-medium text-gray-700">Reports</span>
                         </button>
+                        
                         <button @click="showTipsModal = true"
-                            class="flex flex-col items-center p-3 rounded-lg bg-orange-50 hover:bg-orange-100 transition-colors group">
-                            <svg class="w-6 h-6 text-orange-600 mb-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span class="text-sm font-medium text-gray-700">Help</span>
+                        class="flex flex-col items-center p-3 rounded-lg bg-orange-50 hover:bg-orange-100 transition-colors group">
+                        <svg class="w-6 h-6 text-orange-600 mb-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-sm font-medium text-gray-700">Help</span>
                         </button>
                     </div>
-                </div> -->
+                </div>
+
+                <NewTaskModal 
+                v-model:show="modals.newTask" 
+                @task-created="handleTaskCreated"
+                />
+                
+                <InviteTeamModal 
+                v-model:show="modals.inviteTeam"
+                @member-invited="handleMemberInvited"
+                />
+                
+                <ReportsModal 
+                v-model:show="modals.reports"
+                />
+                
+                <HelpModal 
+                v-model:show="showTipsModal"
+                />
+
+
+                <Notification 
+                v-if="notification.show"
+                :type="notification.type"
+                :message="notification.message"
+                @close="hideNotification"
+                /> -->
 
                 <!-- Stats Grid -->
                 <div class="mb-8">
@@ -1027,6 +1056,61 @@ onMounted(async () => {
         showPitchBanner.value = localStorage.getItem('hide_pitch_banner_dashboard') !== 'true'
     }
 })
+
+// import NewTaskModal from '~/pages/modals/NewTaskModal.vue'
+// import InviteTeamModal from '~/pages/modals/InviteTeamModal.vue'
+// import ReportsModal from '~/pages/modals/ReportsModal.vue'
+// import HelpModal from '~/pages/modals/HelpModal.vue'
+// import Notification from '~/pages/modals/Notification.vue'
+
+
+const modals = reactive({
+  newTask: false,
+  inviteTeam: false,
+  reports: false
+})
+
+const notification = reactive({
+  show: false,
+  type: 'success',
+  message: ''
+})
+
+// Methods
+const openNewTaskModal = () => {
+  modals.newTask = true
+}
+
+const openInviteTeamModal = () => {
+  modals.inviteTeam = true
+}
+
+const openReportsModal = () => {
+  modals.reports = true
+}
+
+const handleTaskCreated = (task) => {
+  showNotification('success', `Task "${task.title}" created successfully!`)
+}
+
+const handleMemberInvited = (member) => {
+  showNotification('success', `Invitation sent to ${member.email}!`)
+}
+
+const showNotification = (type, message) => {
+  notification.type = type
+  notification.message = message
+  notification.show = true
+  
+  setTimeout(() => {
+    notification.show = false
+  }, 5000)
+}
+
+const hideNotification = () => {
+  notification.show = false
+}
+
 
 // Set page title
 useHead({

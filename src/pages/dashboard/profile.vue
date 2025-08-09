@@ -12,18 +12,38 @@
                         <h1 class="text-2xl font-bold text-gray-900">Profile Settings</h1>
                         <p class="text-sm text-gray-600">Manage your account information and preferences</p>
                     </div>
-                    <button @click="saveProfile" :disabled="loading || uploading"
-                        class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-medium">
-                        <svg v-if="loading || uploading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                    <button 
+                        @click="saveProfile" 
+                        :disabled="loading || uploading" 
+                        class="relative bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-80 disabled:cursor-not-allowed transition-all duration-200 ease-in-out flex items-center justify-center gap-2 font-medium min-w-[120px]"
+                        >
+                        <!-- Loading/Uploading Spinner (always present but hidden when inactive) -->
+                        <svg 
+                            v-show="loading || uploading" 
+                            class="animate-spin h-5 w-5 text-white" 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            fill="none" 
+                            viewBox="0 0 24 24"
+                        >
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span v-if="loading">Saving...</span>
-                        <span v-else-if="uploading">Uploading...</span>
-                        <span v-else>Save Changes</span>
+
+                        <!-- Text states (with smooth transitions) -->
+                        <span class="transition-opacity duration-200" :class="{ 'opacity-0': loading || uploading, 'opacity-100': !loading && !uploading }">
+                            Save Changes
+                        </span>
+                        <span v-if="loading" class="absolute transition-opacity duration-200">
+                            Saving...
+                        </span>
+                        <span v-if="uploading" class="absolute transition-opacity duration-200">
+                            Uploading...
+                        </span>
                     </button>
                 </div>
             </header>
+
+            <MessagePopup ref="alertRef" />
 
             <!-- Main Content Area -->
             <main class="flex-1 p-6">
@@ -81,8 +101,10 @@
                                 <div class="flex-1">
                                     <p class="text-sm font-medium text-blue-800">Uploading profile picture...</p>
                                     <div class="mt-1 bg-blue-200 rounded-full h-2">
-                                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                                            :style="{ width: `${uploadProgress}%` }"></div>
+                                        <div 
+                                            class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                            :style="{ width: `${uploadProgress}%` }"
+                                        ></div>
                                     </div>
                                 </div>
                                 <span class="text-sm font-medium text-blue-600">{{ uploadProgress }}%</span>
@@ -231,50 +253,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Quick Stats -->
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-                                <div class="px-6 py-4 border-b border-gray-200">
-                                    <h3 class="text-lg font-semibold text-gray-900">Quick Stats</h3>
-                                </div>
-                                <div class="p-6 space-y-4">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-6 16h8a2 2 0 002-2V11a2 2 0 00-2-2H10a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                                </svg>
-                                            </div>
-                                            <span class="text-sm text-gray-600">Account Age</span>
-                                        </div>
-                                        <span class="text-sm font-medium text-gray-900">{{ accountAge }}</span>
-                                    </div>
-                                    
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                </svg>
-                                            </div>
-                                            <span class="text-sm text-gray-600">Profile Complete</span>
-                                        </div>
-                                        <span class="text-sm font-medium text-gray-900">{{ profileCompleteness }}%</span>
-                                    </div>
-                                    
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"/>
-                                                </svg>
-                                            </div>
-                                            <span class="text-sm text-gray-600">Security Level</span>
-                                        </div>
-                                        <span class="text-sm font-medium text-green-600">High</span>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -288,16 +266,27 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-
 import { useAuthStore } from '~/features/auth/stores/auth.store'
 import { useSubscriptionStore } from '~/features/subscription/stores/subscription.store'
 import { useImageUpload } from '~/shared/composables/use-image-upload'
 import Sidebar from '@/features/dashboard/components/dashboard-sidebar.vue'
+import MessagePopup from '~/shared/components/message/MessagePopup.vue'
 
-
+const alertRef = ref(null)
 const authStore = useAuthStore()
 const subscriptionStore = useSubscriptionStore()
-const { uploadImage, validateImage, compressImage, uploading, uploadProgress } = useImageUpload()
+
+// Initialize image upload composable only on client side
+let imageUploadComposable = null
+const uploading = ref(false)
+const uploadProgress = ref(0)
+
+onMounted(() => {
+  // Initialize image upload on client side
+  if (process.client) {
+    imageUploadComposable = useImageUpload()
+  }
+})
 
 const loading = ref(false)
 const error = ref('')
@@ -325,39 +314,140 @@ const clearSelectedImage = () => {
     }
 }
 
-const handleImageUpload = async (event) => {
-    const file = event.target.files[0]
-    if (!file) return
-
-    // Validate file
-    if (!validateImage(file)) {
-        error.value = 'Please select a valid image file (JPEG, PNG, WebP) under 5MB'
-        setTimeout(() => error.value = '', 5000)
-        return
-    }
-
+// Replace the relevant part of your script setup
+onMounted(async () => {
+  console.log('🎯 Profile page mounted')
+  
+  // Initialize image upload composable only after mount and if Firebase is available
+  if (process.client) {
+    console.log('🖥️  Client-side initialization')
+    
+    // Wait a bit for plugins to be fully loaded
+    await nextTick()
+    
     try {
-        // Show preview immediately
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            profileImage.value = e.target.result
-        }
-        reader.readAsDataURL(file)
-
-        // Compress image and store for later upload
-        const compressedFile = await compressImage(file)
-        selectedFile.value = compressedFile
-
-        success.value = 'Profile picture updated! Click "Save Changes" to save your profile.'
-        setTimeout(() => success.value = '', 5000)
-
-    } catch (err) {
-        console.error('Image processing error:', err)
-        error.value = 'Failed to process image. Please try again.'
-        setTimeout(() => error.value = '', 5000)
-        // Reset preview
-        profileImage.value = user.value?.profileImage || ''
+      const nuxtApp = useNuxtApp()
+      console.log('Nuxt app available keys:', Object.keys(nuxtApp))
+      console.log('$firebase available:', !!nuxtApp.$firebase)
+      
+      if (nuxtApp.$firebase) {
+        console.log('🔥 Firebase is available, initializing image upload...')
+        imageUploadComposable = useImageUpload()
+        console.log('✅ Image upload composable initialized')
+      } else {
+        console.warn('⚠️  Firebase not available yet, will try during image upload')
+      }
+    } catch (error) {
+      console.error('Failed to initialize image upload on mount:', error)
     }
+  }
+
+  try {
+    // Load existing user data from auth store
+    const currentUser = authStore.getUser
+    if (currentUser) {
+      form.value = {
+        name: currentUser.name || '',
+        email: currentUser.email || '',
+        phone: currentUser.phone || '',
+        dob: formatDateForInput(currentUser.dob || '')
+      }
+      profileImage.value = currentUser.profileImage || ''
+    } else {
+      // If no user data, try to fetch it
+      await authStore.fetchUser()
+      const fetchedUser = authStore.getUser
+      if (fetchedUser) {
+        form.value = {
+          name: fetchedUser.name || '',
+          email: fetchedUser.email || '',
+          phone: fetchedUser.phone || '',
+          dob: formatDateForInput(fetchedUser.dob || '')
+        }
+        profileImage.value = fetchedUser.profileImage || ''
+      }
+    }
+
+    // Fetch subscription data to ensure we have the latest status
+    await subscriptionStore.fetchSubscription()
+  } catch (err) {
+    console.error('Error loading user data:', err)
+    error.value = 'Failed to load user data'
+  }
+})
+
+// Updated handleImageUpload function
+const handleImageUpload = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  console.log('📁 File selected:', file.name, file.type, file.size)
+
+  // Clear previous errors
+  error.value = ''
+  success.value = ''
+
+  // Check if we're on client side
+  if (!process.client) {
+    error.value = 'Image upload is only available on the client side.'
+    return
+  }
+
+  // Try to initialize image upload composable if not already done
+  if (!imageUploadComposable) {
+    try {
+      console.log('🔄 Trying to initialize image upload composable...')
+      
+      // Wait a moment for Firebase to be ready
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      imageUploadComposable = useImageUpload()
+      console.log('✅ Image upload composable initialized successfully')
+    } catch (initError) {
+      console.error('❌ Failed to initialize image upload:', initError)
+      error.value = 'Image upload service is not available. Please refresh the page and try again.'
+      setTimeout(() => error.value = '', 10000)
+      return
+    }
+  }
+
+  // Validate file
+  if (!imageUploadComposable.validateImage(file)) {
+    error.value = 'Please select a valid image file (JPEG, PNG, WebP) under 5MB'
+    setTimeout(() => error.value = '', 5000)
+    return
+  }
+
+  try {
+    // Show preview immediately
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      if (e.target && e.target.result) {
+        profileImage.value = e.target.result
+      }
+    }
+    reader.readAsDataURL(file)
+
+    // Compress image and store for later upload
+    console.log('🗜️  Compressing image...')
+    const compressedFile = await imageUploadComposable.compressImage(file, {
+      maxWidth: 1200,
+      maxHeight: 1200,
+      quality: 0.8
+    })
+    selectedFile.value = compressedFile
+
+    console.log('✅ Image compressed successfully')
+    success.value = 'Profile picture updated! Click "Save Changes" to save your profile.'
+    setTimeout(() => success.value = '', 5000)
+
+  } catch (err) {
+    console.error('❌ Image processing error:', err)
+    error.value = 'Failed to process image. Please try again.'
+    setTimeout(() => error.value = '', 5000)
+    // Reset preview
+    profileImage.value = user.value?.profileImage || ''
+  }
 }
 
 // Computed
@@ -369,134 +459,228 @@ const userInitials = computed(() => {
 })
 
 const memberSince = computed(() => {
-    if (!user.value || !user.value.date_joined) return 'N/A'
-    const date = new Date(user.value.date_joined)
-    return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short' })
-})
-
-const accountAge = computed(() => {
-    if (!user.value || !user.value.date_joined) return 'N/A'
-    const joinDate = new Date(user.value.date_joined)
-    const now = new Date()
-    const diffTime = Math.abs(now - joinDate)
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
-    if (diffDays < 30) return `${diffDays} days`
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months`
-    return `${Math.floor(diffDays / 365)} years`
-})
-
-const profileCompleteness = computed(() => {
-    let completed = 0
-    const total = 4
-    
-    if (form.value.name) completed++
-    if (form.value.email) completed++
-    if (form.value.dob) completed++
-    if (profileImage.value) completed++
-    
-    return Math.round((completed / total) * 100)
+    if (!user.value?.date_joined) return 'N/A'
+    try {
+        const date = new Date(user.value.date_joined)
+        return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short' })
+    } catch {
+        return 'N/A'
+    }
 })
 
 const isSubscribe = computed(() => {
-    return !!(user.value && user.value.isSubscribe)
+    return !!(user.value?.isSubscribe)
 })
 
 // Format date for display (convert from DD/MM/YYYY to YYYY-MM-DD)
 const formatDateForInput = (dateString) => {
     if (!dateString) return ''
-    const parts = dateString.split('/')
-    if (parts.length === 3) {
-        return `${parts[2]}-${parts[1]}-${parts[0]}`
+    try {
+        const parts = dateString.split('/')
+        if (parts.length === 3) {
+            const day = parts[0]
+            const month = parts[1]
+            const year = parts[2]
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+        }
+        return dateString
+    } catch {
+        return ''
     }
-    return dateString
 }
 
 // Format date for API (convert from YYYY-MM-DD to DD/MM/YYYY)
 const formatDateForAPI = (dateString) => {
     if (!dateString) return ''
-    const date = new Date(dateString)
-    const day = String(date.getDate()).padStart(2, '0')
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const year = date.getFullYear()
-    return `${day}/${month}/${year}`
+    try {
+        const date = new Date(dateString)
+        const day = String(date.getDate()).padStart(2, '0')
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const year = date.getFullYear()
+        return `${day}/${month}/${year}`
+    } catch {
+        return ''
+    }
 }
 
 const saveProfile = async () => {
     loading.value = true
     error.value = ''
     success.value = ''
-
+    
     try {
-        let finalProfileImage = profileImage.value
+        // 1. Validate form data
+        if (!form.value.name?.trim()) {
+            throw new Error('Full name is required')
+        }
 
-        // If there's a selected file, upload it first
-        if (selectedFile.value) {
+        // 2. Handle image upload if a new file was selected
+        let finalProfileImage = profileImage.value
+        if (selectedFile.value && imageUploadComposable) {
             try {
-                const downloadURL = await uploadImage(selectedFile.value, 'profile-images')
+                // Set uploading state
+                uploading.value = true
+                
+                // Upload the image
+                const downloadURL = await imageUploadComposable.uploadImage(selectedFile.value, 'profile-images')
                 finalProfileImage = downloadURL
-                selectedFile.value = null // Clear the selected file after upload
+                
+                // Clear the selected file after successful upload
+                selectedFile.value = null
+                
+                // Show success feedback via MessagePopup
+                if (alertRef.value?.success) {
+                    alertRef.value.success('Profile picture uploaded successfully!', {
+                        title: 'Upload Complete',
+                        duration: 3000
+                    })
+                }
             } catch (uploadErr) {
                 console.error('Image upload error:', uploadErr)
-                error.value = 'Failed to upload image. Please try again.'
-                setTimeout(() => error.value = '', 5000)
-                return
+                
+                let uploadErrorMsg = 'Failed to upload image. Please try again.'
+                if (uploadErr instanceof Error) {
+                    uploadErrorMsg = uploadErr.message
+                }
+                
+                if (alertRef.value?.error) {
+                    alertRef.value.error(uploadErrorMsg, {
+                        title: 'Upload Failed',
+                        duration: 5000
+                    })
+                }
+                return // Stop execution if upload fails
+            } finally {
+                uploading.value = false
             }
         }
 
+        // 3. Prepare profile data
         const profileData = {
-            name: form.value.name,
-            email: form.value.email,
-            dob: formatDateForAPI(form.value.dob),
+            name: form.value.name.trim(),
+            email: form.value.email, // Assuming email is read-only
+            dob: form.value.dob ? formatDateForAPI(form.value.dob) : null,
             profileImage: finalProfileImage
-        };
+        }
 
+        // 4. Update profile in the backend
         const result = await authStore.updateProfile(profileData)
 
-        if (result.success) {
-            success.value = 'Profile updated successfully! Your changes have been saved.'
-            setTimeout(() => success.value = '', 5000)
-        } else {
-            error.value = result.error || 'Profile update failed. Please try again.'
-            setTimeout(() => error.value = '', 5000)
+        if (!result?.success) {
+            throw new Error(result?.error || 'Profile update failed')
         }
+
+        // 5. Show success message
+        if (alertRef.value?.success) {
+            alertRef.value.success('Profile updated successfully!', {
+                title: 'Success',
+                duration: 4000
+            })
+        } else {
+            success.value = 'Profile updated successfully!'
+            setTimeout(() => success.value = '', 4000)
+        }
+
+        // 6. Optionally refresh user data
+        await authStore.fetchUser()
+
     } catch (err) {
-        console.error('Error updating profile:', err)
-        error.value = 'An unexpected error occurred. Please try again.'
-        setTimeout(() => error.value = '', 5000)
+        console.error('Error in saveProfile:', err)
+        
+        // Handle different error types
+        let errorMessage = 'Failed to save profile. Please try again.'
+        let errorTitle = 'Error'
+        let duration = 5000
+
+        if (err instanceof Error) {
+            errorMessage = err.message
+            
+            // Specific error cases
+            if (err.message.includes('email already exists')) {
+                errorTitle = 'Email Conflict'
+                duration = 0 // Persistent error
+            } else if (err.message.includes('validation')) {
+                errorTitle = 'Invalid Data'
+            } else if (err.message.includes('unauthorized') || err.message.includes('auth')) {
+                errorTitle = 'Session Expired'
+                errorMessage = 'Your session has expired. Please log in again.'
+                duration = 0
+                
+                // Optionally redirect to login
+                setTimeout(() => navigateTo('/login'), 3000)
+            }
+        } else if (err?.response?.status) {
+            // Handle HTTP error codes
+            switch (err.response.status) {
+                case 400:
+                    errorTitle = 'Bad Request'
+                    errorMessage = 'Please check your information and try again.'
+                    break
+                case 401:
+                    errorTitle = 'Unauthorized'
+                    errorMessage = 'Your session has expired. Please log in again.'
+                    duration = 0
+                    break
+                case 409:
+                    errorTitle = 'Conflict'
+                    errorMessage = 'This email is already registered.'
+                    duration = 0
+                    break
+                case 500:
+                    errorTitle = 'Server Error'
+                    errorMessage = 'Our servers are experiencing issues. Please try again later.'
+                    break
+            }
+        }
+
+        if (alertRef.value?.error) {
+            alertRef.value.error(errorMessage, {
+                title: errorTitle,
+                duration
+            })
+        } else {
+            error.value = errorMessage
+            setTimeout(() => error.value = '', duration || 5000)
+        }
+
     } finally {
         loading.value = false
     }
 }
 
 onMounted(async () => {
-    // Load existing user data from auth store
-    const currentUser = authStore.getUser
-    if (currentUser) {
-        form.value = {
-            name: currentUser.name || '',
-            email: currentUser.email || '',
-            phone: currentUser.phone || '',
-            dob: formatDateForInput(currentUser.dob || '')
-        }
-        profileImage.value = currentUser.profileImage || ''
-    } else {
-        // If no user data, try to fetch it
-        await authStore.fetchUser()
-        const fetchedUser = authStore.getUser
-        if (fetchedUser) {
+    try {
+        // Load existing user data from auth store
+        const currentUser = authStore.getUser
+        if (currentUser) {
             form.value = {
-                name: fetchedUser.name || '',
-                email: fetchedUser.email || '',
-                phone: fetchedUser.phone || '',
-                dob: formatDateForInput(fetchedUser.dob || '')
+                name: currentUser.name || '',
+                email: currentUser.email || '',
+                phone: currentUser.phone || '',
+                dob: formatDateForInput(currentUser.dob || '')
             }
-            profileImage.value = fetchedUser.profileImage || ''
+            profileImage.value = currentUser.profileImage || ''
+        } else {
+            // If no user data, try to fetch it
+            await authStore.fetchUser()
+            const fetchedUser = authStore.getUser
+            if (fetchedUser) {
+                form.value = {
+                    name: fetchedUser.name || '',
+                    email: fetchedUser.email || '',
+                    phone: fetchedUser.phone || '',
+                    dob: formatDateForInput(fetchedUser.dob || '')
+                }
+                profileImage.value = fetchedUser.profileImage || ''
+            }
         }
-    }
 
-    // Fetch subscription data to ensure we have the latest status
-    await subscriptionStore.fetchSubscription()
+        // Fetch subscription data to ensure we have the latest status
+        await subscriptionStore.fetchSubscription()
+    } catch (err) {
+        console.error('Error loading user data:', err)
+        error.value = 'Failed to load user data'
+    }
 })
 
 // Set page title

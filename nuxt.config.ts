@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   srcDir: "src/",
   modules: ["@nuxtjs/tailwindcss", "@pinia/nuxt"],
   css: ["~/assets/css/main.css"],
-  plugins: ["~/shared/plugins/pinia-persistedstate.client.ts"],
+  plugins: ["~/shared/plugins/pinia-persistedstate.client.ts", "~/shared/plugins/firebase.client.ts"],
   app: {
     head: {
       title: `QWESI AI - Your 24/7 Career & Recruitment Assistant`,
@@ -45,3 +45,5 @@ export default defineNuxtConfig({
     },
   },
 });
+
+
