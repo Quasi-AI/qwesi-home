@@ -15,10 +15,11 @@
                 </div>
             </header>
 
+            <MessagePopup ref="alertRef" />
+
             <!-- Main Content Area -->
             <main class="flex-1 p-6 flex flex-col">
                 <div class="max-w-7xl mx-auto w-full">
-
                     <!-- User Type Selector -->
                     <div class="mb-8">
                         <label class="block text-sm font-medium text-gray-700 mb-3">I am a:</label>
@@ -123,7 +124,7 @@
                             <div class="flex justify-end">
                                 <button type="submit" :disabled="isSubmitting"
                                     class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+                                    {{ isSubmitting ? 'Submit' : 'Submit' }}
                                 </button>
                             </div>
                         </form>
@@ -186,7 +187,7 @@
                             <div class="flex justify-end">
                                 <button type="submit" :disabled="isSubmitting"
                                     class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+                                    {{ isSubmitting ? 'Submit' : 'Submit' }}
                                 </button>
                             </div>
                         </form>
@@ -198,8 +199,8 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                                    <input v-model="employerForm.name" type="text" placeholder="Full Name"
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Job Title</label>
+                                    <input v-model="employerForm.name" type="text" placeholder="Job Title"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         required />
                                 </div>
@@ -218,6 +219,13 @@
                                     <input v-model="employerForm.email" type="email" placeholder="Business Email"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         required />
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Website</label>
+                                    <input v-model="employerForm.url" type="email" placeholder="Website link"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        />
                                 </div>
 
                                 <div>
@@ -259,7 +267,7 @@
                             <div class="flex justify-end">
                                 <button type="submit" :disabled="isSubmitting"
                                     class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+                                    {{ isSubmitting ? 'Submit' : 'Submit' }}
                                 </button>
                             </div>
                         </form>
@@ -434,6 +442,7 @@
                                     class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
                                     {{ isSubmitting ? 'Submit Pitch' : 'Submit Pitch' }}
                                 </button>
+                                
                             </div>
                         </form>
                     </div>
@@ -453,6 +462,8 @@ import BuildingOfficeIcon from '~/shared/components/icons/building-office-icon.v
 import TrophyIcon from '~/shared/components/icons/trophy-icon.vue'
 import CountryCodeSelector from '~/shared/components/ui/country-code-selector.vue'
 import { onMounted, watch } from 'vue'
+import MessagePopup from '~/shared/components/message/MessagePopup.vue'
+const alertRef = ref(null)
 
 const authStore = useAuthStore()
 
@@ -613,6 +624,7 @@ const employerForm = ref({
     companyName: '',
     email: '',
     phone: '',
+    url: '',
     countryCode: '+233',
     employerDetails: [],
     description: ''
@@ -639,6 +651,8 @@ const pitchForm = ref({
 // Submit functions
 const submitSeekerForm = async () => {
     isSubmitting.value = true
+    let response = null // Declare response outside try block
+    
     try {
         const payload = {
             userType: 'seeker',
@@ -651,17 +665,57 @@ const submitSeekerForm = async () => {
             goals: seekerForm.value.goals
         }
 
-        const response = await $fetch(API_ROUTES.REGISTER_ON_PAGE, {
+        response = await $fetch(API_ROUTES.REGISTER_ON_PAGE, {
             method: 'POST',
-            body: payload
+            body: payload,
+            throw: false // <- prevents it from throwing on 4xx/5xx
         })
 
-        // Handle success
-        alert('Registration submitted successfully!')
-        resetSeekerForm()
+        console.log(response, response.message)
+
+        if (response.success) {
+            alertRef.value.success('Job Seeker Registration Successful!', {
+                title: 'Success',
+                duration: 4000
+            })
+            resetSeekerForm()
+        } else {
+            // Handle API errors (when throw: false is used)
+            alertRef.value.error(response.message || 'Registration failed', {
+                title: 'Error',
+                duration: 0
+            })
+        }
+
     } catch (error) {
-        console.error('Error submitting form:', error)
-        alert('Error submitting form. Please try again.')
+        // Handle network errors or other exceptions
+        console.error('Registration error:', error)
+        
+        let errorMessage = 'Registration failed. Please try again.'
+        let errorTitle = 'Error'
+        
+        // Handle specific HTTP status codes
+        if (error.response?.status === 409 || error.statusCode === 409) {
+            errorMessage = 'An account with this email already exists. Please use a different email or try logging in.'
+            errorTitle = 'Account Already Exists'
+        } else if (error.response?.status === 400 || error.statusCode === 400) {
+            errorMessage = 'Please check your information and try again.'
+            errorTitle = 'Invalid Information'
+        } else if (error.response?.status === 500 || error.statusCode === 500) {
+            errorMessage = 'Server error. Please try again later.'
+            errorTitle = 'Server Error'
+        }
+        
+        // Try to get message from error response
+        const serverMessage = error.data?.message || error.response?.data?.message
+        if (serverMessage) {
+            errorMessage = serverMessage
+        }
+        
+        alertRef.value.error(errorMessage, {
+            title: errorTitle,
+            duration: 0
+        })
     } finally {
         isSubmitting.value = false
     }
@@ -669,6 +723,8 @@ const submitSeekerForm = async () => {
 
 const submitInvestorForm = async () => {
     isSubmitting.value = true
+    let response = null // Declare response outside try block
+    
     try {
         const payload = {
             userType: 'investor',
@@ -679,17 +735,57 @@ const submitInvestorForm = async () => {
             description: investorForm.value.description
         }
 
-        const response = await $fetch(API_ROUTES.REGISTER_ON_PAGE, {
+        response = await $fetch(API_ROUTES.REGISTER_ON_PAGE, {
             method: 'POST',
-            body: payload
+            body: payload,
+            throw: false
         })
 
-        // Handle success
-        alert('Registration submitted successfully!')
-        resetInvestorForm()
+        console.log('Investor Response:', response)
+
+        if (response.success) {
+            alertRef.value.success('Investor Registration Successful!', {
+                title: 'Success',
+                duration: 4000
+            })
+            resetInvestorForm()
+        } else {
+            // Handle API errors (when throw: false is used)
+            alertRef.value.error(response.message || 'Registration failed', {
+                title: 'Error',
+                duration: 0
+            })
+        }
+
     } catch (error) {
-        console.error('Error submitting form:', error)
-        alert('Error submitting form. Please try again.')
+        // Handle network errors or other exceptions
+        console.error('Investor registration error:', error)
+        
+        let errorMessage = 'Registration failed. Please try again.'
+        let errorTitle = 'Error'
+        
+        // Handle specific HTTP status codes
+        if (error.response?.status === 409 || error.statusCode === 409) {
+            errorMessage = 'An account with this email already exists. Please use a different email or try logging in.'
+            errorTitle = 'Account Already Exists'
+        } else if (error.response?.status === 400 || error.statusCode === 400) {
+            errorMessage = 'Please check your information and try again.'
+            errorTitle = 'Invalid Information'
+        } else if (error.response?.status === 500 || error.statusCode === 500) {
+            errorMessage = 'Server error. Please try again later.'
+            errorTitle = 'Server Error'
+        }
+        
+        // Try to get message from error response
+        const serverMessage = error.data?.message || error.response?.data?.message
+        if (serverMessage) {
+            errorMessage = serverMessage
+        }
+        
+        alertRef.value.error(errorMessage, {
+            title: errorTitle,
+            duration: 0
+        })
     } finally {
         isSubmitting.value = false
     }
@@ -697,6 +793,8 @@ const submitInvestorForm = async () => {
 
 const submitEmployerForm = async () => {
     isSubmitting.value = true
+    let response = null // Declare response outside try block
+    
     try {
         const payload = {
             userType: 'employer',
@@ -708,17 +806,57 @@ const submitEmployerForm = async () => {
             description: employerForm.value.description
         }
 
-        const response = await $fetch(API_ROUTES.REGISTER_ON_PAGE, {
+        response = await $fetch(API_ROUTES.REGISTER_ON_PAGE, {
             method: 'POST',
-            body: payload
+            body: payload,
+            throw: false
         })
 
-        // Handle success
-        alert('Registration submitted successfully!')
-        resetEmployerForm()
+        console.log('Employer Response:', response)
+
+        if (response.success) {
+            alertRef.value.success('Employer Registration Successful!', {
+                title: 'Success',
+                duration: 4000
+            })
+            resetEmployerForm()
+        } else {
+            // Handle API errors (when throw: false is used)
+            alertRef.value.error(response.message || 'Registration failed', {
+                title: 'Error',
+                duration: 0
+            })
+        }
+
     } catch (error) {
-        console.error('Error submitting form:', error)
-        alert('Error submitting form. Please try again.')
+        // Handle network errors or other exceptions
+        console.error('Employer registration error:', error)
+        
+        let errorMessage = 'Registration failed. Please try again.'
+        let errorTitle = 'Error'
+        
+        // Handle specific HTTP status codes
+        if (error.response?.status === 409 || error.statusCode === 409) {
+            errorMessage = 'An account with this email already exists. Please use a different email or try logging in.'
+            errorTitle = 'Account Already Exists'
+        } else if (error.response?.status === 400 || error.statusCode === 400) {
+            errorMessage = 'Please check your information and try again.'
+            errorTitle = 'Invalid Information'
+        } else if (error.response?.status === 500 || error.statusCode === 500) {
+            errorMessage = 'Server error. Please try again later.'
+            errorTitle = 'Server Error'
+        }
+        
+        // Try to get message from error response
+        const serverMessage = error.data?.message || error.response?.data?.message
+        if (serverMessage) {
+            errorMessage = serverMessage
+        }
+        
+        alertRef.value.error(errorMessage, {
+            title: errorTitle,
+            duration: 0
+        })
     } finally {
         isSubmitting.value = false
     }
@@ -726,6 +864,8 @@ const submitEmployerForm = async () => {
 
 const submitPitchForm = async () => {
     isSubmitting.value = true
+    let response = null // Declare response outside try block
+    
     try {
         const payload = {
             userType: 'pitch',
@@ -745,17 +885,57 @@ const submitPitchForm = async () => {
             seeking: pitchForm.value.seeking
         }
 
-        const response = await $fetch(API_ROUTES.REGISTER_ON_PAGE, {
+        response = await $fetch(API_ROUTES.REGISTER_ON_PAGE, {
             method: 'POST',
-            body: payload
+            body: payload,
+            throw: false
         })
 
-        // Handle success
-        alert('Pitch submitted successfully! We will review your submission and get back to you soon.')
-        resetPitchForm()
+        console.log('Pitch Response:', response)
+
+        if (response.success) {
+            alertRef.value.success('Pitch submitted successfully! We will review your submission and get back to you soon.', {
+                title: 'Success',
+                duration: 4000
+            })
+            resetPitchForm()
+        } else {
+            // Handle API errors (when throw: false is used)
+            alertRef.value.error(response.message || 'Submission failed', {
+                title: 'Error',
+                duration: 0
+            })
+        }
+
     } catch (error) {
-        console.error('Error submitting pitch:', error)
-        alert('Error submitting pitch. Please try again.')
+        // Handle network errors or other exceptions
+        console.error('Pitch submission error:', error)
+        
+        let errorMessage = 'Pitch submission failed. Please try again.'
+        let errorTitle = 'Error'
+        
+        // Handle specific HTTP status codes
+        if (error.response?.status === 409 || error.statusCode === 409) {
+            errorMessage = 'A pitch with this project name or email already exists. Please use different details.'
+            errorTitle = 'Duplicate Submission'
+        } else if (error.response?.status === 400 || error.statusCode === 400) {
+            errorMessage = 'Please check your information and try again.'
+            errorTitle = 'Invalid Information'
+        } else if (error.response?.status === 500 || error.statusCode === 500) {
+            errorMessage = 'Server error. Please try again later.'
+            errorTitle = 'Server Error'
+        }
+        
+        // Try to get message from error response
+        const serverMessage = error.data?.message || error.response?.data?.message
+        if (serverMessage) {
+            errorMessage = serverMessage
+        }
+        
+        alertRef.value.error(errorMessage, {
+            title: errorTitle,
+            duration: 0
+        })
     } finally {
         isSubmitting.value = false
     }

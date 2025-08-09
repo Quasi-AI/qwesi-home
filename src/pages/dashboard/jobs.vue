@@ -6,6 +6,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="py-6">
           <div class="flex items-center justify-between">
+            <BackButton class="mb-4" />
             <div>
               <h1 class="text-2xl font-bold text-gray-900">Job Opportunities</h1>
               <p class="mt-1 text-sm text-gray-500">
@@ -445,7 +446,8 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-
+import BackButton from '@/shared/components/ui/back-button.vue'
+const { $message } = useNuxtApp()
 // Page metadata
 definePageMeta({
   layout: 'dashboard'
@@ -648,25 +650,259 @@ const saveJob = (job) => {
   localStorage.setItem('savedJobs', JSON.stringify(savedJobs.value))
 }
 
+
+// Enhanced version with better email template based on job details
 const applyToJob = async (job) => {
   try {
-    // Here you would integrate with your application system
-    // For now, we'll show a success message and redirect to email or external URL
-    
-    if (job.url) {
+    // Priority 1: External application URL
+    if (job.url && job.url.trim()) {
+      // Track application attempt (optional)
+      trackJobApplication(job.id, 'external_url')
+      
       window.open(job.url, '_blank')
-    } else if (job.email) {
-      const subject = encodeURIComponent(`Application for ${job.title}`)
-      const body = encodeURIComponent(`Dear ${job.employer},\n\nI am interested in applying for the ${job.title} position.\n\nBest regards`)
-      window.location.href = `mailto:${job.email}?subject=${subject}&body=${body}`
-    } else {
-      // You might want to show a modal with application form or redirect to your application page
-      alert('Application submitted! The employer will be notified.')
+      
+      // Show success message
+      showNotification('Application opened in new tab!', 'success')
+      return
     }
+    
+    // Priority 2: Email application with enhanced template
+    if (job.email && job.email.trim()) {
+      // Track application attempt (optional)
+      trackJobApplication(job.id, 'email')
+      
+      const emailData = createEmailApplication(job)
+      
+      // Create mailto link
+      const mailtoLink = `mailto:${job.email}?subject=${emailData.subject}&body=${emailData.body}`
+      
+      // Check if mailto link is too long (some email clients have limits)
+      if (mailtoLink.length > 2000) {
+        // Use shorter template
+        const shortMailto = `mailto:${job.email}?subject=${encodeURIComponent(`Application for ${job.title}`)}`
+        window.location.href = shortMailto
+      } else {
+        window.location.href = mailtoLink
+      }
+      
+      // Show instructions modal
+      showEmailInstructions(job)
+      return
+    }
+    
+    // Priority 3: Phone application
+    if (job.phone && job.phone.trim()) {
+      const confirmCall = confirm(`Would you like to call ${job.employer || 'the employer'} at ${job.phone}?`)
+      if (confirmCall) {
+        window.location.href = `tel:${job.phone}`
+      }
+      return
+    }
+    
+    // Priority 4: Internal application system
+    if (job.id) {
+      showApplicationModal(job)
+      return
+    }
+    
+    // Priority 5: No application method available
+    showErrorModal('No application method available', 'Please contact support for assistance with this job application.')
+    
   } catch (err) {
     console.error('Error applying to job:', err)
-    alert('Error submitting application. Please try again.')
+    showErrorModal('Application Error', 'Error submitting application. Please try again.')
   }
+}
+
+// Helper function to create email application content
+const createEmailApplication = (job) => {
+  const subject = encodeURIComponent(`Application for ${job.title} Position`)
+  
+  const bodyTemplate = `Dear ${job.employer || 'Hiring Manager'},
+
+I am writing to apply for the ${job.title} position at ${job.company || 'your company'}.
+
+${job.location ? `I am particularly interested in this ${job.location} based opportunity.` : ''}
+
+Key qualifications I bring:
+• Strong background in relevant skills
+• Enthusiasm for ${job.industry || 'the industry'}
+• Commitment to excellence and team collaboration
+
+${job.salary ? `I understand the position offers ${job.salary} compensation.` : ''}
+
+I have attached my resume and would welcome the opportunity to discuss how my experience aligns with your needs. I am available for an interview at your convenience.
+
+Thank you for considering my application.
+
+Best regards,
+[Your Name]
+[Your Phone Number]
+[Your Email Address]
+
+---
+Applied via Qwesi Job Portal
+Job Reference: ${job.id || 'N/A'}`
+
+  return {
+    subject,
+    body: encodeURIComponent(bodyTemplate)
+  }
+}
+
+// Helper function to show email instructions
+const showEmailInstructions = (job) => {
+  const modal = document.createElement('div')
+  modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'
+  modal.innerHTML = `
+    <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+      <h3 class="text-lg font-semibold mb-4">Email Application Opened!</h3>
+      <p class="text-gray-600 mb-4">
+        Your email client should have opened with a pre-filled application email to <strong>${job.email}</strong>.
+      </p>
+      <p class="text-sm text-gray-500 mb-4">
+        If your email client didn't open automatically, please send an email to:<br>
+        <a href="mailto:${job.email}" class="text-blue-600 underline">${job.email}</a>
+      </p>
+      <div class="flex space-x-3">
+        <button onclick="this.closest('.fixed').remove()" 
+                class="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+          Close
+        </button>
+        <button onclick="window.location.href='mailto:${job.email}'; this.closest('.fixed').remove()" 
+                class="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          Open Email Again
+        </button>
+      </div>
+    </div>
+  `
+  document.body.appendChild(modal)
+  
+  // Auto remove after 10 seconds
+  setTimeout(() => {
+    if (document.body.contains(modal)) {
+      modal.remove()
+    }
+  }, 10000)
+}
+
+// Helper function to show application modal for internal applications
+const showApplicationModal = (job) => {
+  const modal = document.createElement('div')
+  modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'
+  modal.innerHTML = `
+    <div class="bg-white rounded-lg p-6 max-w-lg mx-4">
+      <h3 class="text-lg font-semibold mb-4">Apply for ${job.title}</h3>
+      <form id="applicationForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Full Name</label>
+          <input type="text" name="name" required class="w-full border rounded px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Email</label>
+          <input type="email" name="email" required class="w-full border rounded px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Phone</label>
+          <input type="tel" name="phone" class="w-full border rounded px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Cover Message</label>
+          <textarea name="message" rows="4" class="w-full border rounded px-3 py-2" 
+                    placeholder="Tell us why you're interested in this position..."></textarea>
+        </div>
+        <div class="flex space-x-3">
+          <button type="button" onclick="this.closest('.fixed').remove()" 
+                  class="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+            Cancel
+          </button>
+          <button type="submit" 
+                  class="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Submit Application
+          </button>
+        </div>
+      </form>
+    </div>
+  `
+  document.body.appendChild(modal)
+  
+  // Handle form submission
+  document.getElementById('applicationForm').addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const formData = new FormData(e.target)
+    
+    try {
+      // Submit application to your backend
+      const response = await fetch('/api/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: job.id,
+          applicantName: formData.get('name'),
+          applicantEmail: formData.get('email'),
+          applicantPhone: formData.get('phone'),
+          message: formData.get('message')
+        })
+      })
+      
+      if (response.ok) {
+        modal.remove()
+        showNotification('Application submitted successfully!', 'success')
+      } else {
+        throw new Error('Failed to submit application')
+      }
+    } catch (error) {
+      showNotification('Error submitting application. Please try again.', 'error')
+    }
+  })
+}
+
+// Helper functions for notifications and error handling
+const showNotification = (message, type = 'info') => {
+  $message.success(
+    'Information',
+    `${message}`,
+    {
+      duration: 6000,
+      actions: [
+        {
+          label: 'View Details',
+          callback: () => console.log('Viewing details...'),
+        }
+      ]
+    }
+  )
+}
+
+
+
+const showErrorModal = (title, message) => {
+    $message.error(
+    `${title}`,
+    `${message}`,
+    {
+      persistent: false,
+      duration: 8000,
+      actions: [
+        {
+          label: 'Retry',
+          callback: () => console.log('Retrying...'),
+        },
+        {
+          label: 'Cancel',
+          callback: () => console.log('Cancelled'),
+        }
+      ]
+    }
+  )
+}
+
+const trackJobApplication = (jobId, method) => {
+  // Optional: Track application attempts for analytics
+  console.log(`Job application: ${jobId} via ${method}`)
+  
+  // You can send this to your analytics service
+  // analytics.track('job_application_started', { jobId, method })
 }
 
 const openExternalLink = (url) => {

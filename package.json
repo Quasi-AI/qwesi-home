@@ -9,11 +9,13 @@
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
+    "@firebase/storage-types": "^0.8.3",
     "@nuxt/devtools": "latest",
     "@types/jsonwebtoken": "^9.0.10",
     "nuxt": "^3.14.159"
   },
   "dependencies": {
+    "@heroicons/vue": "^2.2.0",
     "@nuxtjs/tailwindcss": "^6.12.2",
     "@pinia/nuxt": "^0.11.1",
     "bcryptjs": "^2.4.3",
