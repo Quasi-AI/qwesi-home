@@ -1,442 +1,479 @@
 <!-- pages/dashboard/jobs.vue -->
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <div class="bg-white shadow-sm border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="py-6">
-          <div class="flex items-center justify-between">
-            <BackButton class="mb-4" />
-            <div>
-              <h1 class="text-2xl font-bold text-gray-900">Job Opportunities</h1>
-              <p class="mt-1 text-sm text-gray-500">
-                Discover your next career opportunity
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <Sidebar :user="user" />
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Ultra-Modern Header -->
+      <div class="modern-header">
+        <div class="header-backdrop"></div>
+        <div class="header-content">
+          <div class="header-info">
+            <div class="welcome-section">
+              <h1 class="dashboard-title">Job Opportunities</h1>
+              <p class="welcome-message">
+                Discover your next <span class="user-highlight">career opportunity</span>
               </p>
             </div>
+            <!-- Floating decorative elements -->
+            <div class="header-decorations">
+              <div class="floating-orb orb-1"></div>
+              <div class="floating-orb orb-2"></div>
+              <div class="floating-orb orb-3"></div>
+            </div>
+          </div>
+          
+          <div class="header-actions">
+            <!-- Search Input -->
+            <div class="relative">
+              <div class="absolute inset-0 bg-white/60 rounded-2xl backdrop-blur-xl border border-white/40"></div>
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search jobs..."
+                class="relative z-10 w-72 pl-12 pr-4 py-3 bg-transparent border-0 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:outline-none placeholder-slate-500 font-medium text-slate-700"
+                @input="handleSearch"
+              />
+              <Search class="absolute left-4 top-3.5 h-5 w-5 text-slate-400 z-10" />
+            </div>
+
+            <!-- Filters Button -->
+            <button
+              @click="showFilters = !showFilters"
+              class="action-btn tips-btn"
+            >
+              <div class="btn-bg"></div>
+              <div class="btn-content">
+                <Filter class="btn-icon" />
+                <span>Filters</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters Panel -->
+      <div v-if="showFilters" class="relative">
+        <div class="absolute inset-0 bg-white/70 backdrop-blur-xl border-b border-slate-200/60"></div>
+        <div class="relative z-10 px-6 py-6">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <!-- Location Filter -->
+            <div class="filter-group">
+              <label class="filter-label">Location</label>
+              <div class="filter-select-wrapper">
+                <select v-model="filters.location" @change="applyFilters" class="filter-select">
+                  <option value="">All Locations</option>
+                  <option v-for="location in uniqueLocations" :key="location" :value="location">
+                    {{ location }}
+                  </option>
+                </select>
+                <MapPin class="filter-icon" />
+              </div>
+            </div>
+
+            <!-- Sector Filter -->
+            <div class="filter-group">
+              <label class="filter-label">Sector</label>
+              <div class="filter-select-wrapper">
+                <select v-model="filters.sector" @change="applyFilters" class="filter-select">
+                  <option value="">All Sectors</option>
+                  <option v-for="sector in uniqueSectors" :key="sector" :value="sector">
+                    {{ sector }}
+                  </option>
+                </select>
+                <Building class="filter-icon" />
+              </div>
+            </div>
+
+            <!-- Experience Level Filter -->
+            <div class="filter-group">
+              <label class="filter-label">Experience Level</label>
+              <div class="filter-select-wrapper">
+                <select v-model="filters.experience_level" @change="applyFilters" class="filter-select">
+                  <option value="">All Levels</option>
+                  <option v-for="level in uniqueExperienceLevels" :key="level" :value="level">
+                    {{ level }}
+                  </option>
+                </select>
+                <Zap class="filter-icon" />
+              </div>
+            </div>
+
+            <!-- Clear Filters -->
+            <div class="flex items-end">
+              <button
+                @click="clearFilters"
+                class="w-full px-6 py-3 text-sm font-medium text-slate-600 bg-white/60 backdrop-blur-xl border border-white/40 rounded-2xl hover:bg-slate-50/70 transition-all duration-300 hover:scale-105"
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="relative">
+        <div class="absolute inset-0 bg-white/50 backdrop-blur-xl border-b border-slate-200/40"></div>
+        <div class="relative z-10 px-6 py-4">
+          <div class="flex items-center justify-between text-sm">
+            <div class="flex items-center space-x-6">
+              <span class="font-bold text-slate-900">
+                {{ filteredJobs.length }} job{{ filteredJobs.length !== 1 ? 's' : '' }} found
+              </span>
+              <div class="h-4 w-px bg-slate-300"></div>
+              <div class="flex items-center space-x-2 text-slate-600">
+                <Clock class="w-4 h-4" />
+                <span>Updated {{ new Date().toLocaleDateString() }}</span>
+              </div>
+            </div>
+            
             <div class="flex items-center space-x-4">
+              <span class="font-medium text-slate-600">Sort by:</span>
               <div class="relative">
-                <input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Search jobs..."
-                  class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  @input="handleSearch"
-                />
-                <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <select 
+                  v-model="sortBy" 
+                  @change="applySorting" 
+                  class="appearance-none bg-white/60 backdrop-blur-xl border border-white/40 rounded-xl px-4 py-2 text-sm font-medium text-slate-700 focus:ring-4 focus:ring-blue-500/20 focus:outline-none cursor-pointer"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="title">Job Title A-Z</option>
+                  <option value="company">Company A-Z</option>
+                </select>
+                <ChevronRight class="absolute right-2 top-2.5 w-4 h-4 text-slate-400 rotate-90 pointer-events-none" />
               </div>
-              <button
-                @click="showFilters = !showFilters"
-                class="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                Filters
-              </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Filters Panel -->
-    <div v-if="showFilters" class="bg-white border-b border-gray-200 shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <!-- Location Filter -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
-            <select v-model="filters.location" @change="applyFilters" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option value="">All Locations</option>
-              <option v-for="location in uniqueLocations" :key="location" :value="location">
-                {{ location }}
-              </option>
-            </select>
+      <!-- Main Dashboard Content -->
+      <div class="dashboard-main">
+        <!-- Loading State -->
+        <div v-if="loading" class="loading-state">
+          <div class="loading-spinner"></div>
+          <p class="loading-text">Discovering opportunities...</p>
+        </div>
+
+        <!-- Error State -->
+        <div v-else-if="error" class="error-state">
+          <div class="error-icon">
+            <X class="w-8 h-8" />
           </div>
+          <h3 class="text-lg font-bold text-red-700 mb-2">Error Loading Jobs</h3>
+          <p class="error-message mb-4">{{ error }}</p>
+          <button
+            @click="fetchJobs"
+            class="px-6 py-3 bg-red-600 text-white rounded-2xl hover:bg-red-700 transition-all duration-300 font-medium"
+          >
+            Try Again
+          </button>
+        </div>
 
-          <!-- Sector Filter -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Sector</label>
-            <select v-model="filters.sector" @change="applyFilters" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option value="">All Sectors</option>
-              <option v-for="sector in uniqueSectors" :key="sector" :value="sector">
-                {{ sector }}
-              </option>
-            </select>
+        <!-- Empty State -->
+        <div v-else-if="filteredJobs.length === 0" class="text-center py-12">
+          <div class="relative mx-auto w-24 h-24 mb-6">
+            <div class="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200 rounded-3xl"></div>
+            <div class="relative z-10 w-full h-full flex items-center justify-center">
+              <Briefcase class="w-12 h-12 text-slate-400" />
+            </div>
           </div>
+          <h3 class="text-xl font-bold text-slate-900 mb-2">No Jobs Found</h3>
+          <p class="text-slate-500 mb-6 max-w-md mx-auto">
+            {{ searchQuery || Object.values(filters).some(f => f) ? 'Try adjusting your search criteria or filters to find more opportunities.' : 'No job listings available at the moment. Check back soon for new opportunities!' }}
+          </p>
+          <button
+            v-if="searchQuery || Object.values(filters).some(f => f)"
+            @click="clearAllFilters"
+            class="px-6 py-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all duration-300 font-medium hover:scale-105"
+          >
+            Clear All Filters
+          </button>
+        </div>
 
-          <!-- Experience Level Filter -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Experience Level</label>
-            <select v-model="filters.experience_level" @change="applyFilters" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option value="">All Levels</option>
-              <option v-for="level in uniqueExperienceLevels" :key="level" :value="level">
-                {{ level }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Clear Filters -->
-          <div class="flex items-end">
-            <button
-              @click="clearFilters"
-              class="w-full px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        <!-- Jobs Grid -->
+        <div v-else class="space-y-6">
+          <div class="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
+            <div
+              v-for="job in paginatedJobs"
+              :key="job._id"
+              class="job-card group"
             >
-              Clear Filters
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Stats Bar -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div class="flex items-center justify-between text-sm text-gray-600">
-          <span>{{ filteredJobs.length }} job{{ filteredJobs.length !== 1 ? 's' : '' }} found</span>
-          <div class="flex items-center space-x-4">
-            <span>Sort by:</span>
-            <select v-model="sortBy" @change="applySorting" class="border border-gray-300 rounded px-2 py-1 text-sm">
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="title">Job Title A-Z</option>
-              <option value="company">Company A-Z</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Loading State -->
-      <div v-if="loading" class="flex justify-center items-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-
-      <!-- Error State -->
-      <div v-else-if="error" class="text-center py-12">
-        <div class="text-red-600 mb-4">
-          <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Error Loading Jobs</h3>
-        <p class="text-gray-500 mb-4">{{ error }}</p>
-        <button
-          @click="fetchJobs"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Try Again
-        </button>
-      </div>
-
-      <!-- Empty State -->
-      <div v-else-if="filteredJobs.length === 0" class="text-center py-12">
-        <div class="text-gray-400 mb-4">
-          <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6.5" />
-          </svg>
-        </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">No Jobs Found</h3>
-        <p class="text-gray-500 mb-4">
-          {{ searchQuery || Object.values(filters).some(f => f) ? 'Try adjusting your search or filters' : 'No job listings available at the moment' }}
-        </p>
-        <button
-          v-if="searchQuery || Object.values(filters).some(f => f)"
-          @click="clearAllFilters"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Clear All Filters
-        </button>
-      </div>
-
-      <!-- Jobs Grid -->
-      <div v-else class="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        <div
-          v-for="job in paginatedJobs"
-          :key="job._id"
-          class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 hover:border-blue-200"
-        >
-          <!-- Job Card Header -->
-          <div class="p-6 pb-4">
-            <div class="flex items-start justify-between mb-3">
-              <div class="flex-1">
-                <h3 class="text-lg font-semibold text-gray-900 mb-1 line-clamp-2">
-                  {{ job.title || 'Untitled Position' }}
-                </h3>
-                <p class="text-blue-600 font-medium">{{ job.employer || 'Company Name' }}</p>
-              </div>
-              <div class="ml-4 flex-shrink-0">
-                <span v-if="job.salary" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  {{ job.salary }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Job Details -->
-            <div class="space-y-2 mb-4">
-              <div v-if="job.location" class="flex items-center text-sm text-gray-600">
-                <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                {{ job.location }}
-              </div>
+              <!-- Card Background -->
+              <div class="card-bg"></div>
+              <div class="card-glow bg-gradient-to-r from-blue-500/20 to-purple-500/20"></div>
               
-              <div v-if="job.sector" class="flex items-center text-sm text-gray-600">
-                <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-                {{ job.sector }}
+              <!-- Job Card Content -->
+              <div class="card-content">
+                <!-- Job Header -->
+                <div class="job-header">
+                  <div class="job-main-info">
+                    <h3 class="job-title">
+                      {{ job.title || 'Untitled Position' }}
+                    </h3>
+                    <p class="company-name">{{ job.employer || 'Company Name' }}</p>
+                  </div>
+                  <div v-if="job.salary" class="salary-badge">
+                    {{ job.salary }}
+                  </div>
+                </div>
+
+                <!-- Job Details -->
+                <div class="job-details">
+                  <div v-if="job.location" class="detail-item">
+                    <MapPin class="detail-icon" />
+                    <span>{{ job.location }}</span>
+                  </div>
+                  
+                  <div v-if="job.sector" class="detail-item">
+                    <Building class="detail-icon" />
+                    <span>{{ job.sector }}</span>
+                  </div>
+
+                  <div v-if="job.experience_level" class="detail-item">
+                    <Zap class="detail-icon" />
+                    <span>{{ job.experience_level }}</span>
+                  </div>
+
+                  <div v-if="job.posted" class="detail-item text-slate-500">
+                    <Clock class="detail-icon" />
+                    <span>Posted {{ formatDate(job.posted) }}</span>
+                  </div>
+                </div>
+
+                <!-- Job Description Preview -->
+                <div v-if="job.job_description" class="job-description">
+                  <p class="line-clamp-3">{{ job.job_description }}</p>
+                </div>
+
+                <!-- Tags -->
+                <div class="job-tags">
+                  <span v-if="job.field" class="tag tag-primary">
+                    {{ job.field }}
+                  </span>
+                  <span v-if="job.experience_length" class="tag tag-secondary">
+                    {{ job.experience_length }}
+                  </span>
+                </div>
+
+                <!-- Card Footer -->
+                <div class="job-footer">
+                  <button
+                    @click="selectedJob = job"
+                    class="view-details-btn"
+                  >
+                    <span>View Details</span>
+                    <ArrowRight class="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </button>
+                  
+                  <div class="job-actions">
+                    <button
+                      @click="saveJob(job)"
+                      :class="[
+                        'save-btn',
+                        savedJobs.includes(job._id) ? 'saved' : ''
+                      ]"
+                      :title="savedJobs.includes(job._id) ? 'Remove from saved' : 'Save job'"
+                    >
+                      <Heart :fill="savedJobs.includes(job._id) ? 'currentColor' : 'none'" class="w-4 h-4" />
+                    </button>
+                    
+                    <button
+                      @click="applyToJob(job)"
+                      class="apply-btn"
+                    >
+                      Apply Now
+                    </button>
+                  </div>
+                </div>
               </div>
-
-              <div v-if="job.experience_level" class="flex items-center text-sm text-gray-600">
-                <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                {{ job.experience_level }}
-              </div>
-
-              <div v-if="job.posted" class="flex items-center text-sm text-gray-500">
-                <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Posted {{ formatDate(job.posted) }}
-              </div>
-            </div>
-
-            <!-- Job Description Preview -->
-            <div v-if="job.job_description" class="mb-4">
-              <p class="text-sm text-gray-600 line-clamp-3">
-                {{ job.job_description }}
-              </p>
-            </div>
-
-            <!-- Tags -->
-            <div class="flex flex-wrap gap-2 mb-4">
-              <span v-if="job.field" class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700">
-                {{ job.field }}
-              </span>
-              <span v-if="job.experience_length" class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700">
-                {{ job.experience_length }}
-              </span>
             </div>
           </div>
 
-          <!-- Job Card Footer -->
-          <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 rounded-b-lg">
-            <div class="flex items-center justify-between">
+          <!-- Pagination -->
+          <div v-if="filteredJobs.length > jobsPerPage" class="pagination-container">
+            <div class="pagination-info">
+              Showing {{ ((currentPage - 1) * jobsPerPage) + 1 }} to {{ Math.min(currentPage * jobsPerPage, filteredJobs.length) }} of {{ filteredJobs.length }} jobs
+            </div>
+            
+            <div class="pagination-controls">
               <button
-                @click="viewJob(job)"
-                class="flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                @click="currentPage--"
+                :disabled="currentPage === 1"
+                class="pagination-btn"
               >
-                View Details
-                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
+                <ChevronLeft class="w-4 h-4" />
+                <span>Previous</span>
               </button>
               
-              <div class="flex items-center space-x-2">
+              <div class="pagination-numbers">
                 <button
-                  @click="saveJob(job)"
+                  v-for="page in visiblePages"
+                  :key="page"
+                  @click="currentPage = page"
                   :class="[
-                    'p-2 rounded-full transition-colors',
-                    savedJobs.includes(job._id)
-                      ? 'text-red-600 hover:text-red-700'
-                      : 'text-gray-400 hover:text-red-600'
+                    'page-btn',
+                    page === currentPage ? 'active' : ''
                   ]"
-                  :title="savedJobs.includes(job._id) ? 'Remove from saved' : 'Save job'"
                 >
-                  <svg class="w-4 h-4" :fill="savedJobs.includes(job._id) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                </button>
-                
-                <button
-                  @click="applyToJob(job)"
-                  class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Apply Now
+                  {{ page }}
                 </button>
               </div>
+              
+              <button
+                @click="currentPage++"
+                :disabled="currentPage === totalPages"
+                class="pagination-btn"
+              >
+                <span>Next</span>
+                <ChevronRight class="w-4 h-4" />
+              </button>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Pagination -->
-      <div v-if="filteredJobs.length > jobsPerPage" class="mt-8 flex items-center justify-between">
-        <div class="text-sm text-gray-700">
-          Showing {{ ((currentPage - 1) * jobsPerPage) + 1 }} to {{ Math.min(currentPage * jobsPerPage, filteredJobs.length) }} of {{ filteredJobs.length }} jobs
-        </div>
-        
-        <div class="flex items-center space-x-2">
-          <button
-            @click="currentPage--"
-            :disabled="currentPage === 1"
-            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Previous
-          </button>
-          
-          <div class="flex items-center space-x-1">
-            <button
-              v-for="page in visiblePages"
-              :key="page"
-              @click="currentPage = page"
-              :class="[
-                'px-3 py-2 text-sm font-medium rounded-lg',
-                page === currentPage
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-              ]"
-            >
-              {{ page }}
-            </button>
-          </div>
-          
-          <button
-            @click="currentPage++"
-            :disabled="currentPage === totalPages"
-            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Next
-          </button>
         </div>
       </div>
     </div>
 
     <!-- Job Details Modal -->
-    <div v-if="selectedJob" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" @click="closeModal">
-      <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-lg bg-white" @click.stop>
+    <div v-if="selectedJob" class="modal-overlay" @click="selectedJob = null">
+      <div class="job-modal" @click.stop>
+        <div class="modal-backdrop"></div>
+        
         <!-- Modal Header -->
-        <div class="flex items-center justify-between pb-4 border-b border-gray-200">
-          <div>
-            <h3 class="text-2xl font-bold text-gray-900">{{ selectedJob.title }}</h3>
-            <p class="text-lg text-blue-600 font-medium">{{ selectedJob.employer }}</p>
+        <div class="modal-header">
+          <div class="modal-title-section">
+            <h3 class="modal-title">{{ selectedJob.title }}</h3>
+            <p class="modal-company">{{ selectedJob.employer }}</p>
+            <div class="title-decoration"></div>
           </div>
-          <button @click="closeModal" class="text-gray-400 hover:text-gray-600 transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button @click="selectedJob = null" class="modal-close">
+            <X class="w-6 h-6" />
           </button>
         </div>
 
         <!-- Modal Content -->
-        <div class="py-6 max-h-96 overflow-y-auto">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Job Details -->
-            <div>
-              <h4 class="text-lg font-semibold text-gray-900 mb-4">Job Details</h4>
-              <div class="space-y-3">
-                <div v-if="selectedJob.location">
-                  <span class="font-medium text-gray-700">Location:</span>
-                  <span class="ml-2 text-gray-600">{{ selectedJob.location }}</span>
+        <div class="modal-content">
+          <div class="modal-scroll-area">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <!-- Job Details -->
+              <div class="modal-section">
+                <h4 class="section-title">Job Details</h4>
+                <div class="details-grid">
+                  <div v-if="selectedJob.location" class="detail-row">
+                    <MapPin class="detail-row-icon" />
+                    <div>
+                      <span class="detail-label">Location</span>
+                      <span class="detail-value">{{ selectedJob.location }}</span>
+                    </div>
+                  </div>
+                  
+                  <div v-if="selectedJob.sector" class="detail-row">
+                    <Building class="detail-row-icon" />
+                    <div>
+                      <span class="detail-label">Sector</span>
+                      <span class="detail-value">{{ selectedJob.sector }}</span>
+                    </div>
+                  </div>
+                  
+                  <div v-if="selectedJob.salary" class="detail-row">
+                    <TrendingUp class="detail-row-icon" />
+                    <div>
+                      <span class="detail-label">Salary</span>
+                      <span class="detail-value">{{ selectedJob.salary }}</span>
+                    </div>
+                  </div>
+                  
+                  <div v-if="selectedJob.experience_level" class="detail-row">
+                    <Zap class="detail-row-icon" />
+                    <div>
+                      <span class="detail-label">Experience Level</span>
+                      <span class="detail-value">{{ selectedJob.experience_level }}</span>
+                    </div>
+                  </div>
+                  
+                  <div v-if="selectedJob.posted" class="detail-row">
+                    <Clock class="detail-row-icon" />
+                    <div>
+                      <span class="detail-label">Posted</span>
+                      <span class="detail-value">{{ formatDate(selectedJob.posted) }}</span>
+                    </div>
+                  </div>
                 </div>
-                <div v-if="selectedJob.sector">
-                  <span class="font-medium text-gray-700">Sector:</span>
-                  <span class="ml-2 text-gray-600">{{ selectedJob.sector }}</span>
-                </div>
-                <div v-if="selectedJob.salary">
-                  <span class="font-medium text-gray-700">Salary:</span>
-                  <span class="ml-2 text-gray-600">{{ selectedJob.salary }}</span>
-                </div>
-                <div v-if="selectedJob.experience_level">
-                  <span class="font-medium text-gray-700">Experience Level:</span>
-                  <span class="ml-2 text-gray-600">{{ selectedJob.experience_level }}</span>
-                </div>
-                <div v-if="selectedJob.experience_length">
-                  <span class="font-medium text-gray-700">Experience Required:</span>
-                  <span class="ml-2 text-gray-600">{{ selectedJob.experience_length }}</span>
-                </div>
-                <div v-if="selectedJob.field">
-                  <span class="font-medium text-gray-700">Field:</span>
-                  <span class="ml-2 text-gray-600">{{ selectedJob.field }}</span>
-                </div>
-                <div v-if="selectedJob.posted">
-                  <span class="font-medium text-gray-700">Posted:</span>
-                  <span class="ml-2 text-gray-600">{{ formatDate(selectedJob.posted) }}</span>
+              </div>
+
+              <!-- Requirements -->
+              <div class="modal-section">
+                <h4 class="section-title">Requirements</h4>
+                <div class="requirements-content">
+                  <div v-if="selectedJob.qualifications" class="requirement-item">
+                    <span class="requirement-label">Qualifications</span>
+                    <p class="requirement-text">{{ selectedJob.qualifications }}</p>
+                  </div>
+                  <div v-if="selectedJob.experience_length" class="requirement-item">
+                    <span class="requirement-label">Experience Required</span>
+                    <p class="requirement-text">{{ selectedJob.experience_length }}</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Requirements -->
-            <div>
-              <h4 class="text-lg font-semibold text-gray-900 mb-4">Requirements</h4>
-              <div class="space-y-3">
-                <div v-if="selectedJob.qualifications">
-                  <span class="font-medium text-gray-700">Qualifications:</span>
-                  <p class="mt-1 text-gray-600">{{ selectedJob.qualifications }}</p>
-                </div>
-                <div v-if="selectedJob.minimum">
-                  <span class="font-medium text-gray-700">Minimum Requirements:</span>
-                  <p class="mt-1 text-gray-600">{{ selectedJob.minimum }}</p>
-                </div>
+            <!-- Job Description -->
+            <div v-if="selectedJob.job_description" class="modal-section full-width">
+              <h4 class="section-title">Job Description</h4>
+              <div class="description-content">
+                <p class="whitespace-pre-wrap">{{ selectedJob.job_description }}</p>
               </div>
             </div>
-          </div>
 
-          <!-- Job Description -->
-          <div v-if="selectedJob.job_description" class="mt-6">
-            <h4 class="text-lg font-semibold text-gray-900 mb-4">Job Description</h4>
-            <div class="prose prose-sm max-w-none text-gray-600">
-              <p class="whitespace-pre-wrap">{{ selectedJob.job_description }}</p>
-            </div>
-          </div>
-
-          <!-- Contact Information -->
-          <div v-if="selectedJob.email" class="mt-6">
-            <h4 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h4>
-            <div class="bg-gray-50 rounded-lg p-4">
-              <div class="flex items-center">
-                <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span class="text-gray-700">{{ selectedJob.email }}</span>
+            <!-- Contact Information -->
+            <div v-if="selectedJob.email" class="modal-section full-width">
+              <h4 class="section-title">Contact Information</h4>
+              <div class="contact-card">
+                <div class="contact-info">
+                  <div class="contact-icon-wrapper">
+                    <div class="contact-icon-bg"></div>
+                    <svg class="contact-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <span class="contact-email">{{ selectedJob.email }}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Modal Footer -->
-        <div class="flex items-center justify-end pt-4 border-t border-gray-200 space-x-4">
+        <div class="modal-footer">
           <button
             @click="saveJob(selectedJob)"
             :class="[
-              'flex items-center px-4 py-2 border rounded-lg font-medium transition-colors',
-              savedJobs.includes(selectedJob._id)
-                ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100'
-                : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+              'footer-btn secondary',
+              savedJobs.includes(selectedJob._id) ? 'saved' : ''
             ]"
           >
-            <svg class="w-4 h-4 mr-2" :fill="savedJobs.includes(selectedJob._id) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            {{ savedJobs.includes(selectedJob._id) ? 'Remove from Saved' : 'Save Job' }}
+            <Heart :fill="savedJobs.includes(selectedJob._id) ? 'currentColor' : 'none'" class="w-4 h-4" />
+            <span>{{ savedJobs.includes(selectedJob._id) ? 'Remove from Saved' : 'Save Job' }}</span>
           </button>
           
           <button
             v-if="selectedJob.url"
             @click="openExternalLink(selectedJob.url)"
-            class="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            class="footer-btn tertiary"
           >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-            Visit Job Page
+            <ExternalLink class="w-4 h-4" />
+            <span>Visit Job Page</span>
           </button>
           
           <button
             @click="applyToJob(selectedJob)"
-            class="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            class="footer-btn primary"
           >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Apply Now
+            <CheckCircle class="w-4 h-4" />
+            <span>Apply Now</span>
           </button>
         </div>
       </div>
@@ -446,11 +483,21 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import BackButton from '@/shared/components/ui/back-button.vue'
+import Sidebar from '@/features/dashboard/components/dashboard-sidebar.vue'
+
 const { $message } = useNuxtApp()
+
 // Page metadata
 definePageMeta({
   layout: 'dashboard'
+})
+
+// User data (you'll need to get this from your auth system)
+const user = ref({
+  name: 'John Doe',
+  email: 'john@example.com',
+  avatar: null,
+  points: 150
 })
 
 // Reactive data
@@ -471,6 +518,107 @@ const filters = ref({
   sector: '',
   experience_level: ''
 })
+
+// Mock data
+const mockJobs = [
+  {
+    _id: '1',
+    title: 'Senior Software Engineer',
+    employer: 'TechFlow Inc',
+    location: 'Accra, Ghana',
+    sector: 'Technology',
+    experience_level: 'Senior',
+    salary: 'GHS 15,000 - 20,000',
+    field: 'Software Development',
+    experience_length: '5+ years',
+    job_description: 'We are seeking a talented Senior Software Engineer to join our growing team. You will be responsible for designing and developing scalable web applications using modern technologies like React, Node.js, and cloud platforms.',
+    qualifications: 'Bachelor\'s degree in Computer Science or related field, 5+ years of experience with React/Node.js, experience with cloud platforms (AWS/GCP)',
+    email: 'careers@techflow.com',
+    posted: '2024-08-25',
+    url: 'https://techflow.com/careers',
+    created_at: '2024-08-25'
+  },
+  {
+    _id: '2',
+    title: 'Marketing Manager',
+    employer: 'Creative Minds Agency',
+    location: 'Kumasi, Ghana',
+    sector: 'Marketing',
+    experience_level: 'Mid-Level',
+    salary: 'GHS 8,000 - 12,000',
+    field: 'Digital Marketing',
+    experience_length: '3-5 years',
+    job_description: 'Lead our marketing initiatives and drive brand growth through innovative digital strategies. Manage campaigns, analyze performance metrics, and collaborate with cross-functional teams.',
+    qualifications: 'Marketing degree, 3+ years experience in digital marketing, proficiency in Google Analytics and social media platforms',
+    email: 'hr@creativeminds.com',
+    posted: '2024-08-24',
+    created_at: '2024-08-24'
+  },
+  {
+    _id: '3',
+    title: 'Data Analyst',
+    employer: 'DataCorp Solutions',
+    location: 'Remote',
+    sector: 'Data Science',
+    experience_level: 'Junior',
+    salary: 'GHS 6,000 - 9,000',
+    field: 'Analytics',
+    experience_length: '1-3 years',
+    job_description: 'Analyze complex datasets to drive business decisions and create insightful reports. Work with SQL, Python, and visualization tools to extract meaningful insights.',
+    qualifications: 'Statistics/Mathematics degree, Python/R experience, SQL proficiency',
+    email: 'jobs@datacorp.com',
+    posted: '2024-08-23',
+    created_at: '2024-08-23'
+  },
+  {
+    _id: '4',
+    title: 'UX Designer',
+    employer: 'Design Studio Pro',
+    location: 'Takoradi, Ghana',
+    sector: 'Design',
+    experience_level: 'Mid-Level',
+    salary: 'GHS 10,000 - 14,000',
+    field: 'User Experience',
+    experience_length: '2-4 years',
+    job_description: 'Create intuitive and beautiful user experiences for web and mobile applications. Collaborate with developers and product managers to deliver exceptional user interfaces.',
+    qualifications: 'Design degree, Figma/Sketch proficiency, portfolio required, understanding of user research methods',
+    email: 'design@studiopro.com',
+    posted: '2024-08-22',
+    created_at: '2024-08-22'
+  },
+  {
+    _id: '5',
+    title: 'Financial Analyst',
+    employer: 'Ghana Banking Corp',
+    location: 'Accra, Ghana',
+    sector: 'Finance',
+    experience_level: 'Junior',
+    salary: 'GHS 7,000 - 10,000',
+    field: 'Financial Analysis',
+    experience_length: '1-2 years',
+    job_description: 'Support financial planning and analysis activities, prepare financial reports, and assist in budgeting and forecasting processes.',
+    qualifications: 'Finance or Accounting degree, Excel proficiency, analytical mindset',
+    email: 'recruitment@ghanabankingcorp.com',
+    posted: '2024-08-21',
+    created_at: '2024-08-21'
+  },
+  {
+    _id: '6',
+    title: 'Project Manager',
+    employer: 'BuildRight Construction',
+    location: 'Tema, Ghana',
+    sector: 'Construction',
+    experience_level: 'Senior',
+    salary: 'GHS 12,000 - 18,000',
+    field: 'Project Management',
+    experience_length: '4+ years',
+    job_description: 'Oversee construction projects from inception to completion, manage teams, ensure quality standards, and maintain project timelines and budgets.',
+    qualifications: 'Engineering degree, PMP certification preferred, construction industry experience',
+    email: 'pm@buildright.gh',
+    posted: '2024-08-20',
+    created_at: '2024-08-20'
+  }
+]
 
 // Computed properties
 const uniqueLocations = computed(() => {
@@ -503,17 +651,13 @@ const filteredJobs = computed(() => {
     )
   }
 
-  // Location filter
+  // Apply filters
   if (filters.value.location) {
     filtered = filtered.filter(job => job.location === filters.value.location)
   }
-
-  // Sector filter
   if (filters.value.sector) {
     filtered = filtered.filter(job => job.sector === filters.value.sector)
   }
-
-  // Experience level filter
   if (filters.value.experience_level) {
     filtered = filtered.filter(job => job.experience_level === filters.value.experience_level)
   }
@@ -605,7 +749,7 @@ const fetchJobs = async () => {
 }
 
 const handleSearch = () => {
-  currentPage.value = 1
+  setCurrentPage(1)
 }
 
 const applyFilters = () => {
@@ -630,14 +774,6 @@ const clearAllFilters = () => {
   clearFilters()
 }
 
-const viewJob = (job) => {
-  selectedJob.value = job
-}
-
-const closeModal = () => {
-  selectedJob.value = null
-}
-
 const saveJob = (job) => {
   const index = savedJobs.value.indexOf(job._id)
   if (index > -1) {
@@ -645,264 +781,16 @@ const saveJob = (job) => {
   } else {
     savedJobs.value.push(job._id)
   }
-  
-  // Save to localStorage
-  localStorage.setItem('savedJobs', JSON.stringify(savedJobs.value))
 }
 
-
-// Enhanced version with better email template based on job details
-const applyToJob = async (job) => {
-  try {
-    // Priority 1: External application URL
-    if (job.url && job.url.trim()) {
-      // Track application attempt (optional)
-      trackJobApplication(job.id, 'external_url')
-      
-      window.open(job.url, '_blank')
-      
-      // Show success message
-      showNotification('Application opened in new tab!', 'success')
-      return
-    }
-    
-    // Priority 2: Email application with enhanced template
-    if (job.email && job.email.trim()) {
-      // Track application attempt (optional)
-      trackJobApplication(job.id, 'email')
-      
-      const emailData = createEmailApplication(job)
-      
-      // Create mailto link
-      const mailtoLink = `mailto:${job.email}?subject=${emailData.subject}&body=${emailData.body}`
-      
-      // Check if mailto link is too long (some email clients have limits)
-      if (mailtoLink.length > 2000) {
-        // Use shorter template
-        const shortMailto = `mailto:${job.email}?subject=${encodeURIComponent(`Application for ${job.title}`)}`
-        window.location.href = shortMailto
-      } else {
-        window.location.href = mailtoLink
-      }
-      
-      // Show instructions modal
-      showEmailInstructions(job)
-      return
-    }
-    
-    // Priority 3: Phone application
-    if (job.phone && job.phone.trim()) {
-      const confirmCall = confirm(`Would you like to call ${job.employer || 'the employer'} at ${job.phone}?`)
-      if (confirmCall) {
-        window.location.href = `tel:${job.phone}`
-      }
-      return
-    }
-    
-    // Priority 4: Internal application system
-    if (job.id) {
-      showApplicationModal(job)
-      return
-    }
-    
-    // Priority 5: No application method available
-    showErrorModal('No application method available', 'Please contact support for assistance with this job application.')
-    
-  } catch (err) {
-    console.error('Error applying to job:', err)
-    showErrorModal('Application Error', 'Error submitting application. Please try again.')
+const applyToJob = (job) => {
+  if (job.url) {
+    window.open(job.url, '_blank')
+  } else if (job.email) {
+    const subject = encodeURIComponent(`Application for ${job.title} Position`)
+    const body = encodeURIComponent(`Dear ${job.employer || 'Hiring Manager'},\n\nI am writing to apply for the ${job.title} position.\n\nBest regards,\n[Your Name]`)
+    window.location.href = `mailto:${job.email}?subject=${subject}&body=${body}`
   }
-}
-
-// Helper function to create email application content
-const createEmailApplication = (job) => {
-  const subject = encodeURIComponent(`Application for ${job.title} Position`)
-  
-  const bodyTemplate = `Dear ${job.employer || 'Hiring Manager'},
-
-I am writing to apply for the ${job.title} position at ${job.company || 'your company'}.
-
-${job.location ? `I am particularly interested in this ${job.location} based opportunity.` : ''}
-
-Key qualifications I bring:
-• Strong background in relevant skills
-• Enthusiasm for ${job.industry || 'the industry'}
-• Commitment to excellence and team collaboration
-
-${job.salary ? `I understand the position offers ${job.salary} compensation.` : ''}
-
-I have attached my resume and would welcome the opportunity to discuss how my experience aligns with your needs. I am available for an interview at your convenience.
-
-Thank you for considering my application.
-
-Best regards,
-[Your Name]
-[Your Phone Number]
-[Your Email Address]
-
----
-Applied via Qwesi Job Portal
-Job Reference: ${job.id || 'N/A'}`
-
-  return {
-    subject,
-    body: encodeURIComponent(bodyTemplate)
-  }
-}
-
-// Helper function to show email instructions
-const showEmailInstructions = (job) => {
-  const modal = document.createElement('div')
-  modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'
-  modal.innerHTML = `
-    <div class="bg-white rounded-lg p-6 max-w-md mx-4">
-      <h3 class="text-lg font-semibold mb-4">Email Application Opened!</h3>
-      <p class="text-gray-600 mb-4">
-        Your email client should have opened with a pre-filled application email to <strong>${job.email}</strong>.
-      </p>
-      <p class="text-sm text-gray-500 mb-4">
-        If your email client didn't open automatically, please send an email to:<br>
-        <a href="mailto:${job.email}" class="text-blue-600 underline">${job.email}</a>
-      </p>
-      <div class="flex space-x-3">
-        <button onclick="this.closest('.fixed').remove()" 
-                class="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
-          Close
-        </button>
-        <button onclick="window.location.href='mailto:${job.email}'; this.closest('.fixed').remove()" 
-                class="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-          Open Email Again
-        </button>
-      </div>
-    </div>
-  `
-  document.body.appendChild(modal)
-  
-  // Auto remove after 10 seconds
-  setTimeout(() => {
-    if (document.body.contains(modal)) {
-      modal.remove()
-    }
-  }, 10000)
-}
-
-// Helper function to show application modal for internal applications
-const showApplicationModal = (job) => {
-  const modal = document.createElement('div')
-  modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'
-  modal.innerHTML = `
-    <div class="bg-white rounded-lg p-6 max-w-lg mx-4">
-      <h3 class="text-lg font-semibold mb-4">Apply for ${job.title}</h3>
-      <form id="applicationForm" class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium mb-2">Full Name</label>
-          <input type="text" name="name" required class="w-full border rounded px-3 py-2">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-2">Email</label>
-          <input type="email" name="email" required class="w-full border rounded px-3 py-2">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-2">Phone</label>
-          <input type="tel" name="phone" class="w-full border rounded px-3 py-2">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-2">Cover Message</label>
-          <textarea name="message" rows="4" class="w-full border rounded px-3 py-2" 
-                    placeholder="Tell us why you're interested in this position..."></textarea>
-        </div>
-        <div class="flex space-x-3">
-          <button type="button" onclick="this.closest('.fixed').remove()" 
-                  class="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
-            Cancel
-          </button>
-          <button type="submit" 
-                  class="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Submit Application
-          </button>
-        </div>
-      </form>
-    </div>
-  `
-  document.body.appendChild(modal)
-  
-  // Handle form submission
-  document.getElementById('applicationForm').addEventListener('submit', async (e) => {
-    e.preventDefault()
-    const formData = new FormData(e.target)
-    
-    try {
-      // Submit application to your backend
-      const response = await fetch('/api/apply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jobId: job.id,
-          applicantName: formData.get('name'),
-          applicantEmail: formData.get('email'),
-          applicantPhone: formData.get('phone'),
-          message: formData.get('message')
-        })
-      })
-      
-      if (response.ok) {
-        modal.remove()
-        showNotification('Application submitted successfully!', 'success')
-      } else {
-        throw new Error('Failed to submit application')
-      }
-    } catch (error) {
-      showNotification('Error submitting application. Please try again.', 'error')
-    }
-  })
-}
-
-// Helper functions for notifications and error handling
-const showNotification = (message, type = 'info') => {
-  $message.success(
-    'Information',
-    `${message}`,
-    {
-      duration: 6000,
-      actions: [
-        {
-          label: 'View Details',
-          callback: () => console.log('Viewing details...'),
-        }
-      ]
-    }
-  )
-}
-
-
-
-const showErrorModal = (title, message) => {
-    $message.error(
-    `${title}`,
-    `${message}`,
-    {
-      persistent: false,
-      duration: 8000,
-      actions: [
-        {
-          label: 'Retry',
-          callback: () => console.log('Retrying...'),
-        },
-        {
-          label: 'Cancel',
-          callback: () => console.log('Cancelled'),
-        }
-      ]
-    }
-  )
-}
-
-const trackJobApplication = (jobId, method) => {
-  // Optional: Track application attempts for analytics
-  console.log(`Job application: ${jobId} via ${method}`)
-  
-  // You can send this to your analytics service
-  // analytics.track('job_application_started', { jobId, method })
 }
 
 const openExternalLink = (url) => {
@@ -929,45 +817,596 @@ const formatDate = (dateString) => {
   }
 }
 
+// Lifecycle
+onMounted(() => {
+  fetchJobs()
+})
+
 // Watchers
 watch(() => filteredJobs.value.length, () => {
   if (currentPage.value > totalPages.value) {
     currentPage.value = Math.max(1, totalPages.value)
   }
 })
-
-// Lifecycle
-onMounted(() => {
-  fetchJobs()
-  
-  // Load saved jobs from localStorage
-  const saved = localStorage.getItem('savedJobs')
-  if (saved) {
-    try {
-      savedJobs.value = JSON.parse(saved)
-    } catch {
-      savedJobs.value = []
-    }
-  }
-})
 </script>
 
 <style scoped>
+/* Base Layout - Inherit from dashboard */
+.dashboard-container {
+    @apply min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex;
+    position: relative;
+    overflow-x: hidden;
+    height: 100vh;
+}
+
+.main-content {
+    @apply flex-1 flex flex-col;
+    min-width: 0;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.main-content-adjusted {
+    margin-left: 320px;
+}
+
+/* Ultra-Modern Header */
+.modern-header {
+    @apply relative border-b border-slate-200/60;
+    backdrop-filter: blur(20px);
+}
+
+.header-backdrop {
+    @apply absolute inset-0 bg-gradient-to-r from-white/95 via-white/90 to-blue-50/80;
+}
+
+.header-content {
+    @apply relative z-10 px-6 py-6 flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0;
+}
+
+.header-info {
+    @apply relative;
+}
+
+.welcome-section {
+    @apply text-center lg:text-left;
+}
+
+.dashboard-title {
+    @apply text-3xl font-black bg-gradient-to-r from-slate-900 via-blue-800 to-purple-800 bg-clip-text text-transparent;
+    font-variant: small-caps;
+    letter-spacing: -0.025em;
+}
+
+.welcome-message {
+    @apply text-sm font-medium text-slate-600 mt-1;
+}
+
+.user-highlight {
+    @apply font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+}
+
+.header-decorations {
+    @apply absolute -inset-4 pointer-events-none;
+}
+
+.floating-orb {
+    @apply absolute w-1 h-1 rounded-full opacity-20;
+    animation: float 6s ease-in-out infinite;
+}
+
+.orb-1 {
+    @apply bg-blue-400 top-2 right-8;
+    animation-delay: 0s;
+}
+
+.orb-2 {
+    @apply bg-purple-400 top-8 right-4;
+    animation-delay: 2s;
+}
+
+.orb-3 {
+    @apply bg-emerald-400 top-6 right-12;
+    animation-delay: 4s;
+}
+
+.header-actions {
+    @apply flex items-center space-x-4;
+}
+
+.action-btn {
+    @apply relative px-4 py-2 rounded-2xl font-medium text-sm transition-all duration-300;
+    @apply hover:scale-105 hover:shadow-lg;
+    backdrop-filter: blur(12px);
+}
+
+.btn-bg {
+    @apply absolute inset-0 rounded-2xl transition-all duration-300;
+}
+
+.tips-btn .btn-bg {
+    @apply bg-gradient-to-r from-slate-100/80 to-slate-200/60;
+}
+
+.btn-content {
+    @apply relative z-10 flex items-center space-x-2;
+}
+
+.btn-icon {
+    @apply w-4 h-4;
+}
+
+.tips-btn {
+    @apply text-slate-700 hover:text-slate-900;
+}
+
+/* Filter Styles */
+.filter-group {
+    @apply space-y-2;
+}
+
+.filter-label {
+    @apply block text-sm font-bold text-slate-700;
+}
+
+.filter-select-wrapper {
+    @apply relative;
+}
+
+.filter-select {
+    @apply w-full appearance-none bg-white/60 backdrop-blur-xl border border-white/40 rounded-2xl px-4 py-3 pl-12 text-sm font-medium text-slate-700 focus:ring-4 focus:ring-blue-500/20 focus:outline-none cursor-pointer transition-all duration-300;
+}
+
+.filter-icon {
+    @apply absolute left-4 top-3.5 w-4 h-4 text-slate-400 pointer-events-none;
+}
+
+/* Main Dashboard Content */
+.dashboard-main {
+    @apply flex-1 p-6 flex flex-col space-y-8;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: 2rem;
+}
+
+/* Job Cards */
+.job-card {
+    @apply relative rounded-3xl transition-all duration-500 cursor-pointer;
+    @apply hover:-translate-y-2 hover:scale-[1.02];
+    backdrop-filter: blur(20px);
+}
+
+.card-bg {
+    @apply absolute inset-0 rounded-3xl bg-white/70 border border-white/60;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+}
+
+.card-glow {
+    @apply absolute -inset-px rounded-3xl opacity-0 transition-all duration-500;
+    filter: blur(12px);
+}
+
+.job-card:hover .card-glow {
+    @apply opacity-100;
+}
+
+.card-content {
+    @apply relative z-10 p-6 space-y-6;
+}
+
+.job-header {
+    @apply flex items-start justify-between;
+}
+
+.job-main-info {
+    @apply flex-1 min-w-0;
+}
+
+.job-title {
+    @apply text-lg font-bold text-slate-900 mb-1 line-clamp-2;
+}
+
+.company-name {
+    @apply text-blue-600 font-semibold;
+}
+
+.salary-badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25;
+}
+
+.job-details {
+    @apply space-y-2;
+}
+
+.detail-item {
+    @apply flex items-center text-sm text-slate-600;
+}
+
+.detail-icon {
+    @apply w-4 h-4 mr-3 flex-shrink-0;
+}
+
+.job-description {
+    @apply text-sm text-slate-600 leading-relaxed;
+}
+
+.job-tags {
+    @apply flex flex-wrap gap-2;
+}
+
+.tag {
+    @apply inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium;
+}
+
+.tag-primary {
+    @apply bg-blue-100 text-blue-700;
+}
+
+.tag-secondary {
+    @apply bg-slate-100 text-slate-700;
+}
+
+.job-footer {
+    @apply flex items-center justify-between;
+}
+
+.view-details-btn {
+    @apply flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700 transition-all duration-200 space-x-2;
+}
+
+.job-actions {
+    @apply flex items-center space-x-3;
+}
+
+.save-btn {
+    @apply p-2 rounded-full transition-all duration-300 text-slate-400 hover:text-red-500;
+}
+
+.save-btn.saved {
+    @apply text-red-500;
+}
+
+.apply-btn {
+    @apply px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-bold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg shadow-blue-500/25 hover:scale-105;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    @apply fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50;
+    backdrop-filter: blur(8px);
+}
+
+.job-modal {
+    @apply relative bg-white/95 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-backdrop {
+    @apply absolute inset-0 bg-white/80 backdrop-blur-xl;
+}
+
+.modal-header {
+    @apply relative z-10 flex items-center justify-between p-8 border-b border-slate-200/60;
+}
+
+.modal-title-section {
+    @apply space-y-2;
+}
+
+.modal-title {
+    @apply text-2xl font-black text-slate-900;
+}
+
+.modal-company {
+    @apply text-lg font-semibold text-blue-600;
+}
+
+.title-decoration {
+    @apply w-16 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full;
+}
+
+.modal-close {
+    @apply p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100/70 transition-all duration-200;
+}
+
+.modal-content {
+    @apply relative z-10 flex-1 overflow-hidden;
+}
+
+.modal-scroll-area {
+    @apply h-96 overflow-y-auto p-8 space-y-8;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+}
+
+.modal-scroll-area::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-scroll-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-scroll-area::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.5));
+    border-radius: 3px;
+}
+
+.modal-section {
+    @apply space-y-4;
+}
+
+.modal-section.full-width {
+    @apply col-span-full;
+}
+
+.section-title {
+    @apply text-lg font-bold text-slate-900 flex items-center space-x-2;
+}
+
+.details-grid {
+    @apply space-y-4;
+}
+
+.detail-row {
+    @apply flex items-start space-x-3 p-4 bg-slate-50/70 rounded-2xl backdrop-blur-xl;
+}
+
+.detail-row-icon {
+    @apply w-5 h-5 text-slate-500 mt-0.5;
+}
+
+.detail-label {
+    @apply block text-xs font-bold text-slate-500 uppercase tracking-wide;
+}
+
+.detail-value {
+    @apply block text-sm font-semibold text-slate-900;
+}
+
+.requirements-content {
+    @apply space-y-4;
+}
+
+.requirement-item {
+    @apply p-4 bg-slate-50/70 rounded-2xl backdrop-blur-xl;
+}
+
+.requirement-label {
+    @apply block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2;
+}
+
+.requirement-text {
+    @apply text-sm text-slate-700 leading-relaxed;
+}
+
+.description-content {
+    @apply p-6 bg-slate-50/70 rounded-2xl backdrop-blur-xl;
+}
+
+.contact-card {
+    @apply p-6 bg-gradient-to-r from-slate-50/70 to-blue-50/70 rounded-2xl backdrop-blur-xl border border-white/40;
+}
+
+.contact-info {
+    @apply flex items-center space-x-4;
+}
+
+.contact-icon-wrapper {
+    @apply relative w-12 h-12;
+}
+
+.contact-icon-bg {
+    @apply absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl;
+}
+
+.contact-icon {
+    @apply relative z-10 w-6 h-6 text-white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.contact-email {
+    @apply text-slate-700 font-semibold;
+}
+
+.modal-footer {
+    @apply relative z-10 flex items-center justify-end pt-6 px-8 pb-8 border-t border-slate-200/60 space-x-4;
+}
+
+.footer-btn {
+    @apply flex items-center space-x-2 px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 hover:scale-105;
+}
+
+.footer-btn.primary {
+    @apply bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/25 hover:from-blue-700 hover:to-blue-800;
+}
+
+.footer-btn.secondary {
+    @apply bg-white/60 text-slate-700 border border-white/40 backdrop-blur-xl hover:bg-slate-50/70;
+}
+
+.footer-btn.secondary.saved {
+    @apply text-red-600 hover:text-red-700 border-red-200;
+}
+
+.footer-btn.tertiary {
+    @apply bg-slate-100/70 text-slate-600 hover:bg-slate-200/70;
+}
+
+/* Pagination */
+.pagination-container {
+    @apply flex items-center justify-between mt-8 p-6 bg-white/60 backdrop-blur-xl rounded-3xl border border-white/40;
+}
+
+.pagination-info {
+    @apply text-sm font-medium text-slate-600;
+}
+
+.pagination-controls {
+    @apply flex items-center space-x-2;
+}
+
+.pagination-btn {
+    @apply flex items-center space-x-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white/60 border border-white/40 rounded-xl hover:bg-slate-50/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 backdrop-blur-xl;
+}
+
+.pagination-numbers {
+    @apply flex items-center space-x-1;
+}
+
+.page-btn {
+    @apply px-3 py-2 text-sm font-bold rounded-xl transition-all duration-300 backdrop-blur-xl;
+}
+
+.page-btn:not(.active) {
+    @apply text-slate-600 bg-white/60 border border-white/40 hover:bg-slate-50/70;
+}
+
+.page-btn.active {
+    @apply bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/25;
+}
+
+/* Loading States */
+.loading-state {
+    @apply flex flex-col items-center justify-center py-16 space-y-4;
+}
+
+.loading-spinner {
+    @apply w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full;
+    animation: spin 1s linear infinite;
+}
+
+.loading-text {
+    @apply text-slate-600 font-semibold text-lg;
+}
+
+.error-state {
+    @apply flex flex-col items-center justify-center py-16 space-y-4 bg-red-50/70 rounded-3xl mx-6 border border-red-200/60 backdrop-blur-xl;
+}
+
+/* Utilities */
 .line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.prose {
-  max-width: none;
+/* Custom Scrollbar */
+.main-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+}
+
+.main-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.main-content::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.5));
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.5), rgba(148, 163, 184, 0.7));
+}
+
+.dashboard-main {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+}
+
+.dashboard-main::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dashboard-main::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+}
+
+.dashboard-main::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.5));
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.dashboard-main::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.5), rgba(148, 163, 184, 0.7));
+}
+
+/* Animations */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .main-content-adjusted {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .dashboard-title {
+        @apply text-2xl;
+    }
+    
+    .header-content {
+        @apply flex-col space-y-4;
+    }
+    
+    .header-actions {
+        @apply flex-col w-full space-y-3 space-x-0;
+    }
+    
+    .header-actions > * {
+        @apply w-full;
+    }
+    
+    .pagination-container {
+        @apply flex-col space-y-4;
+    }
+    
+    .pagination-controls {
+        @apply w-full justify-center;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .floating-orb,
+    .job-card,
+    .footer-btn,
+    .apply-btn {
+        animation: none;
+    }
+    
+    .job-card:hover {
+        transform: none;
+    }
 }
 </style>

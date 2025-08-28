@@ -2,39 +2,41 @@
     <div>
         <!-- Mobile Overlay -->
         <div v-if="isMobileMenuOpen" 
-             class="fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity md:hidden"
+             class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-all duration-300 md:hidden"
              @click="closeMobileMenu"></div>
 
         <!-- Sidebar -->
-        <div class="fixed inset-y-0 left-0 z-50 transition-all duration-300 ease-in-out"
+        <div class="fixed inset-y-0 left-0 z-50 transition-all duration-300 ease-out flex flex-col"
              :class="[
                  // Mobile styles
                  'md:relative md:translate-x-0',
-                 isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full',
+                 isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
                  // Desktop styles
-                 'bg-white border-r border-gray-200 min-h-screen flex flex-col',
-                 isCollapsed && !isMobile ? 'w-16' : 'w-80'
+                 'bg-gradient-to-b from-slate-50 to-white border-r border-slate-200/60 min-h-screen shadow-xl',
+                 isCollapsed && !isMobile ? 'w-20' : 'w-80'
              ]">
             
             <!-- Logo Section -->
-            <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-                <NuxtLink to="/" class="hover:opacity-80 transition-opacity">
+            <div class="flex-shrink-0 p-6 border-b border-slate-200/60 flex items-center justify-between bg-white/50 backdrop-blur-sm">
+                <NuxtLink to="/" class="hover:opacity-80 transition-all duration-200 transform hover:scale-105">
                     <img v-if="!isCollapsed || isMobile" 
                          src="~/assets/images/logo.png" 
                          alt="QWESI AI Logo" 
-                         class="w-32 h-auto" />
+                         class="w-36 h-auto drop-shadow-sm" />
                     <img v-else 
                          src="~/assets/images/logo.png" 
                          alt="QWESI AI Logo" 
-                         class="w-8 h-auto" />
+                         class="w-10 h-auto drop-shadow-sm" />
                 </NuxtLink>
                 
                 <!-- Desktop collapse button -->
                 <button v-if="!isMobile"
                         @click="toggleCollapse" 
-                        class="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                        class="p-2.5 rounded-xl hover:bg-slate-100/70 transition-all duration-200 flex-shrink-0 group"
                         :class="isCollapsed ? 'ml-0' : 'ml-2'">
-                    <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20"
+                    <svg class="w-4 h-4 text-slate-600 transition-all duration-300 group-hover:text-slate-800" 
+                         fill="currentColor" 
+                         viewBox="0 0 20 20"
                          :class="isCollapsed ? 'rotate-180' : ''">
                         <path fill-rule="evenodd"
                               d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
@@ -45,190 +47,227 @@
                 <!-- Mobile close button -->
                 <button v-if="isMobile"
                         @click="closeMobileMenu"
-                        class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="p-2.5 rounded-xl hover:bg-slate-100/70 transition-all duration-200 flex-shrink-0">
+                    <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
 
-            <!-- Navigation -->
-            <nav class="flex-1 overflow-y-auto" :class="(isCollapsed && !isMobile) ? 'p-2' : 'p-6'">
-                <ul class="space-y-2">
-                    <li v-for="item in navigationItems" :key="item.path">
-                        <NuxtLink :to="item.path" 
-                                  class="flex items-center text-sm font-medium rounded-lg transition-colors group"
-                                  :class="[
-                                      $route.path === item.path
-                                          ? 'bg-blue-50 text-blue-700'
-                                          : 'text-gray-700 hover:bg-gray-50',
-                                      (isCollapsed && !isMobile) ? 'justify-center p-3' : 'px-3 py-2'
-                                  ]" 
-                                  :title="(isCollapsed && !isMobile) ? item.title : ''"
-                                  @click="handleNavigation(item.path)">
-                            <!-- Inline SVG icons -->
-                            <svg v-if="item.key === 'dashboard'"
-                                 class="w-6 h-6 flex-shrink-0"
-                                 :class="$route.path === item.path ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-600'"
-                                 fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-                            </svg>
-                            
-                            <svg v-else-if="item.key === 'get-started'"
-                                 class="w-6 h-6 flex-shrink-0"
-                                 :class="$route.path === item.path ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-600'"
-                                 fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
-                            </svg>
-                            
-                            <svg v-else-if="item.key === 'profile'"
-                                 class="w-6 h-6 flex-shrink-0"
-                                 :class="$route.path === item.path ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-600'"
-                                 fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                            </svg>
-                            
-                            <svg v-else-if="item.key === 'subscription'"
-                                 class="w-6 h-6 flex-shrink-0"
-                                 :class="$route.path === item.path ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-600'"
-                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                            </svg>
-                            
-                            <svg v-else-if="item.key === 'investors'"
-                                 class="w-6 h-6 flex-shrink-0"
-                                 :class="$route.path === item.path ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-600'"
-                                 fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
-                            </svg>
-                            
-                            <svg v-else-if="item.key === 'jobs'"
-                                 class="w-6 h-6 flex-shrink-0"
-                                 :class="$route.path === item.path ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-600'"
-                                 fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd" />
-                                <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" />
-                            </svg>
-                            
-                            <span v-if="!isCollapsed || isMobile" class="ml-3 truncate">{{ item.title }}</span>
-                        </NuxtLink>
-                    </li>
-                </ul>
-
-                <!-- AI Qwesi Capabilities Section -->
-                <div v-if="!isCollapsed || isMobile" class="mt-8">
-                    <div class="mb-4">
-                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wide">AI Qwesi Capabilities</h3>
-                        <p class="text-xs text-gray-500 mt-1">Your 24/7 Career Assistant</p>
-                    </div>
+            <!-- Navigation - Scrollable Container -->
+            <div class="flex-1 flex flex-col min-h-0">
+                <nav class="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar" 
+                     :class="(isCollapsed && !isMobile) ? 'p-3' : 'p-6'">
                     
-                    <div class="space-y-3">
-                        <!-- Smart Job Matching -->
-                        <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200 hover:from-blue-100 hover:to-blue-200 transition-all duration-300 cursor-pointer group">
-                            <div class="flex items-center mb-2">
-                                <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <h4 class="font-semibold text-blue-900 text-sm">Smart Job Matching</h4>
-                            </div>
-                            <p class="text-xs text-blue-700 leading-relaxed">
-                                Finds and emails job opportunities based on your skills—no more endless searching.
-                            </p>
+                    <!-- Main Navigation -->
+                    <div class="space-y-6">
+                        <!-- Dashboard Section -->
+                        <div>
+                            <h3 v-if="!isCollapsed || isMobile" class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 pl-4">Main</h3>
+                            <ul class="space-y-2">
+                                <li v-for="item in mainNavigation" :key="item.path">
+                                    <NuxtLink :to="item.path" 
+                                              class="flex items-center text-sm font-medium rounded-2xl transition-all duration-200 group w-full relative overflow-hidden"
+                                              :class="[
+                                                  $route.path === item.path
+                                                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25'
+                                                      : 'text-slate-700 hover:bg-slate-100/70 hover:shadow-md',
+                                                  (isCollapsed && !isMobile) ? 'justify-center p-4' : 'px-4 py-3'
+                                              ]" 
+                                              :title="(isCollapsed && !isMobile) ? item.title : ''"
+                                              @click="handleNavigation(item.path)">
+                                        
+                                        <!-- Active indicator -->
+                                        <div v-if="$route.path === item.path" 
+                                             class="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-600/20 animate-pulse"></div>
+                                        
+                                        <!-- Dashboard Icon -->
+                                        <svg v-if="item.key === 'dashboard'"
+                                             class="w-5 h-5 flex-shrink-0 transition-all duration-200 relative z-10"
+                                             :class="$route.path === item.path ? 'text-white drop-shadow-sm' : 'text-slate-500 group-hover:text-slate-700'"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                                        </svg>
+                                        
+                                        <!-- Get Started Icon -->
+                                        <svg v-else-if="item.key === 'get-started'"
+                                             class="w-5 h-5 flex-shrink-0 transition-all duration-200 relative z-10"
+                                             :class="$route.path === item.path ? 'text-white drop-shadow-sm' : 'text-slate-500 group-hover:text-slate-700'"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                        </svg>
+                                        
+                                        <!-- Profile Icon -->
+                                        <svg v-else-if="item.key === 'profile'"
+                                             class="w-5 h-5 flex-shrink-0 transition-all duration-200 relative z-10"
+                                             :class="$route.path === item.path ? 'text-white drop-shadow-sm' : 'text-slate-500 group-hover:text-slate-700'"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                        </svg>
+                                        
+                                        <!-- Subscription Icon -->
+                                        <svg v-else-if="item.key === 'subscription'"
+                                             class="w-5 h-5 flex-shrink-0 transition-all duration-200 relative z-10"
+                                             :class="$route.path === item.path ? 'text-white drop-shadow-sm' : 'text-slate-500 group-hover:text-slate-700'"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-4h2v2h-2zm1.61-9.96c-2.06-.3-3.88.97-4.43 2.79-.18.58.26 1.17.87 1.17h.2c.41 0 .74-.29.88-.67.32-.89 1.27-1.5 2.3-1.28.95.2 1.65 1.13 1.57 2.1-.1 1.34-1.62 1.63-2.45 2.88 0 .01-.01.01-.01.02-.01.02-.02.03-.02.05C11.38 15.33 11.24 16 11.99 16h.26c.83 0 1.26-.58 1.72-1.24.12-.18.25-.34.41-.49.49-.46.98-1.05 1.12-1.79.15-.86-.28-1.76-.99-2.30-.49-.38-1.1-.58-1.73-.65-.27-.03-.55-.04-.83-.01z"/>
+                                        </svg>
+                                        
+                                        <span v-if="!isCollapsed || isMobile" 
+                                              class="ml-3 truncate transition-all duration-200 relative z-10 font-medium">
+                                            {{ item.title }}
+                                        </span>
+
+                                        <!-- Hover effect -->
+                                        <div class="absolute inset-0 bg-gradient-to-r from-slate-100/50 to-slate-200/50 opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-2xl"></div>
+                                    </NuxtLink>
+                                </li>
+                            </ul>
                         </div>
 
-                        <!-- 24/7 Assistant -->
-                        <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-3 border border-green-200 hover:from-green-100 hover:to-green-200 transition-all duration-300 cursor-pointer group">
-                            <div class="flex items-center mb-2">
-                                <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <h4 class="font-semibold text-green-900 text-sm">24/7 Support</h4>
-                            </div>
-                            <p class="text-xs text-green-700 leading-relaxed">
-                                Always ready to assist with questions or help preparing for work, day or night.
-                            </p>
+                        <!-- Discover Section -->
+                        <div>
+                            <h3 v-if="!isCollapsed || isMobile" class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 pl-4">Discover</h3>
+                            <ul class="space-y-2">
+                                <li v-for="item in discoverNavigation" :key="item.path">
+                                    <NuxtLink :to="item.path" 
+                                              class="flex items-center text-sm font-medium rounded-2xl transition-all duration-200 group w-full relative overflow-hidden"
+                                              :class="[
+                                                  $route.path === item.path
+                                                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25'
+                                                      : 'text-slate-700 hover:bg-slate-100/70 hover:shadow-md',
+                                                  (isCollapsed && !isMobile) ? 'justify-center p-4' : 'px-4 py-3'
+                                              ]" 
+                                              :title="(isCollapsed && !isMobile) ? item.title : ''"
+                                              @click="handleNavigation(item.path)">
+                                        
+                                        <!-- Active indicator -->
+                                        <div v-if="$route.path === item.path" 
+                                             class="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-600/20 animate-pulse"></div>
+                                        
+                                        <!-- Investors Icon -->
+                                        <svg v-if="item.key === 'investors'"
+                                             class="w-5 h-5 flex-shrink-0 transition-all duration-200 relative z-10"
+                                             :class="$route.path === item.path ? 'text-white drop-shadow-sm' : 'text-slate-500 group-hover:text-slate-700'"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                                        </svg>
+                                        
+                                        <!-- Jobs Icon -->
+                                        <svg v-else-if="item.key === 'jobs'"
+                                             class="w-5 h-5 flex-shrink-0 transition-all duration-200 relative z-10"
+                                             :class="$route.path === item.path ? 'text-white drop-shadow-sm' : 'text-slate-500 group-hover:text-slate-700'"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M20 6h-2.18c.11-.31.18-.65.18-1a2.996 2.996 0 0 0-5.5-1.65l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z"/>
+                                        </svg>
+                                        
+                                        <span v-if="!isCollapsed || isMobile" 
+                                              class="ml-3 truncate transition-all duration-200 relative z-10 font-medium">
+                                            {{ item.title }}
+                                        </span>
+
+                                        <!-- Hover effect -->
+                                        <div class="absolute inset-0 bg-gradient-to-r from-slate-100/50 to-slate-200/50 opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-2xl"></div>
+                                    </NuxtLink>
+                                </li>
+                            </ul>
                         </div>
 
-                        <!-- Investor Matching -->
-                        <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg p-3 border border-yellow-200 hover:from-yellow-100 hover:to-yellow-200 transition-all duration-300 cursor-pointer group">
-                            <div class="flex items-center mb-2">
-                                <div class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" />
-                                    </svg>
-                                </div>
-                                <h4 class="font-semibold text-yellow-900 text-sm">Investor Connections</h4>
-                            </div>
-                            <p class="text-xs text-yellow-700 leading-relaxed">
-                                Helps you meet the right investors who align with your project and vision.
-                            </p>
-                        </div>
+                        <!-- Registration Section -->
+                        <div>
+                            <h3 v-if="!isCollapsed || isMobile" class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 pl-4">Registration</h3>
+                            <ul class="space-y-2">
+                                <li v-for="item in registrationNavigation" :key="item.path">
+                                    <NuxtLink :to="item.path" 
+                                              class="flex items-center text-sm font-medium rounded-2xl transition-all duration-200 group w-full relative overflow-hidden"
+                                              :class="[
+                                                  $route.path === item.path
+                                                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25'
+                                                      : 'text-slate-700 hover:bg-slate-100/70 hover:shadow-md',
+                                                  (isCollapsed && !isMobile) ? 'justify-center p-4' : 'px-4 py-3'
+                                              ]" 
+                                              :title="(isCollapsed && !isMobile) ? item.title : ''"
+                                              @click="handleNavigation(item.path)">
+                                        
+                                        <!-- Active indicator -->
+                                        <div v-if="$route.path === item.path" 
+                                             class="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-600/20 animate-pulse"></div>
+                                        
+                                        <!-- Job Seeker Icon -->
+                                        <svg v-if="item.key === 'job'"
+                                             class="w-5 h-5 flex-shrink-0 transition-all duration-200 relative z-10"
+                                             :class="$route.path === item.path ? 'text-white drop-shadow-sm' : 'text-slate-500 group-hover:text-slate-700'"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.998 1.998 0 0 0 18.06 7c-.8 0-1.54.5-1.85 1.26l-1.92 5.75c-.34 1.05.28 2.17 1.33 2.51.18.06.38.09.58.08.26 0 .51-.05.75-.15L18 17v5h2zM12.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5S11 9.17 11 10s.67 1.5 1.5 1.5zm1.5 1h-4c-.83 0-1.5.67-1.5 1.5v6h2v7h3v-7h2v-6c0-.83-.67-1.5-1.5-1.5z"/>
+                                        </svg>
 
-                        <!-- Professional Networking -->
-                        <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-3 border border-purple-200 hover:from-purple-100 hover:to-purple-200 transition-all duration-300 cursor-pointer group">
-                            <div class="flex items-center mb-2">
-                                <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-                                    </svg>
-                                </div>
-                                <h4 class="font-semibold text-purple-900 text-sm">Network Growth</h4>
-                            </div>
-                            <p class="text-xs text-purple-700 leading-relaxed">
-                                Grow your network with professionals from industry-leading organizations.
-                            </p>
-                        </div>
+                                        <!-- Investor Registration Icon -->
+                                        <svg v-else-if="item.key === 'investor-reg'"
+                                             class="w-5 h-5 flex-shrink-0 transition-all duration-200 relative z-10"
+                                             :class="$route.path === item.path ? 'text-white drop-shadow-sm' : 'text-slate-500 group-hover:text-slate-700'"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM7.07 18.28c.43-.9 3.05-1.78 4.93-1.78s4.51.88 4.93 1.78C15.57 19.36 13.86 20 12 20s-3.57-.64-4.93-1.72zm11.29-1.45c-1.43-1.74-4.9-2.33-6.36-2.33s-4.93.59-6.36 2.33C4.62 15.49 4 13.82 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8c0 1.82-.62 3.49-1.64 4.83zM12 6c-1.94 0-3.5 1.56-3.5 3.5S10.06 13 12 13s3.5-1.56 3.5-3.5S13.94 6 12 6zm0 5c-.83 0-1.5-.67-1.5-1.5S11.17 8 12 8s1.5.67 1.5 1.5S12.83 11 12 11z"/>
+                                        </svg>
 
-                        <!-- Voice & WhatsApp Support -->
-                        <div class="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-3 border border-red-200 hover:from-red-100 hover:to-red-200 transition-all duration-300 cursor-pointer group">
-                            <div class="flex items-center mb-2">
-                                <div class="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <h4 class="font-semibold text-red-900 text-sm">Voice & WhatsApp</h4>
-                            </div>
-                            <p class="text-xs text-red-700 leading-relaxed">
-                                Smart conversations through voice commands and WhatsApp integration.
-                            </p>
-                        </div>
+                                        <!-- Employer Registration Icon -->
+                                        <svg v-else-if="item.key === 'employer-reg'"
+                                             class="w-5 h-5 flex-shrink-0 transition-all duration-200 relative z-10"
+                                             :class="$route.path === item.path ? 'text-white drop-shadow-sm' : 'text-slate-500 group-hover:text-slate-700'"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/>
+                                        </svg>
 
-                        <!-- Academic & Business Support -->
-                        <div class="bg-gradient-to-r from-cyan-50 to-cyan-100 rounded-lg p-3 border border-cyan-200 hover:from-cyan-100 hover:to-cyan-200 transition-all duration-300 cursor-pointer group">
-                            <div class="flex items-center mb-2">
-                                <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-                                    </svg>
-                                </div>
-                                <h4 class="font-semibold text-cyan-900 text-sm">Academic & Business</h4>
-                            </div>
-                            <p class="text-xs text-cyan-700 leading-relaxed">
-                                Helps with homework, research, customer emails, proposals, and marketing plans.
-                            </p>
+                                        <!-- Pitch Competition Icon -->
+                                        <svg v-else-if="item.key === 'pitch-reg'"
+                                             class="w-5 h-5 flex-shrink-0 transition-all duration-200 relative z-10"
+                                             :class="$route.path === item.path ? 'text-white drop-shadow-sm' : 'text-slate-500 group-hover:text-slate-700'"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                        </svg>
+                                        
+                                        <span v-if="!isCollapsed || isMobile" 
+                                              class="ml-3 truncate transition-all duration-200 relative z-10 font-medium">
+                                            {{ item.title }}
+                                        </span>
+
+                                        <!-- Hover effect -->
+                                        <div class="absolute inset-0 bg-gradient-to-r from-slate-100/50 to-slate-200/50 opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-2xl"></div>
+                                    </NuxtLink>
+                                </li>
+                            </ul>
                         </div>
                     </div>
-                </div>
-            </nav>
+
+                    <!-- AI Qwesi Capabilities Section -->
+                    <!-- <div v-if="!isCollapsed || isMobile" class="mt-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100/60">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 16.5v-9l7 4.5-7 4.5z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-slate-800">AI-Powered Features</h4>
+                                <p class="text-xs text-slate-600 mt-1">Smart matching, screening, and recruitment tools</p>
+                            </div>
+                        </div>
+                    </div> -->
+                </nav>
+            </div>
 
             <!-- User Section (Mobile) -->
-            <div v-if="isMobile" class="p-6 border-t border-gray-200">
+            <div v-if="isMobile" class="flex-shrink-0 p-6 border-t border-slate-200/60 bg-white/70 backdrop-blur-sm">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span class="text-sm font-medium text-blue-600">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+                            <span class="text-sm font-bold text-white drop-shadow-sm">
                                 {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
                             </span>
                         </div>
                     </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium text-gray-900 truncate">{{ user?.name || 'User' }}</p>
-                        <p class="text-xs text-gray-500 truncate">{{ user?.email || 'user@example.com' }}</p>
+                    <div class="ml-4 min-w-0 flex-1">
+                        <p class="text-sm font-bold text-slate-900 truncate">{{ user?.name || 'User' }}</p>
+                        <p class="text-xs text-slate-500 truncate">{{ user?.email || 'user@example.com' }}</p>
                     </div>
                 </div>
             </div>
@@ -237,9 +276,9 @@
         <!-- Mobile Menu Button -->
         <button v-if="isMobile"
                 @click="openMobileMenu"
-                class="fixed top-4 left-4 z-30 p-2 rounded-lg bg-white shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors md:hidden">
-            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                class="fixed top-6 left-6 z-30 p-3 rounded-2xl bg-white/90 backdrop-blur-sm shadow-2xl border border-slate-200/60 hover:bg-white transition-all duration-200 md:hidden group">
+            <svg class="w-6 h-6 text-slate-700 group-hover:text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
         </button>
     </div>
@@ -256,14 +295,24 @@ const props = defineProps({
     }
 })
 
-// Navigation items with unique keys for icon identification
-const navigationItems = [
+// Categorized navigation items
+const mainNavigation = [
     { path: '/dashboard', title: 'Dashboard', key: 'dashboard' },
     { path: '/dashboard/get-started', title: 'Get Started', key: 'get-started' },
     { path: '/dashboard/profile', title: 'Profile', key: 'profile' },
-    { path: '/dashboard/subscription', title: 'Subscription', key: 'subscription' },
-    { path: '/dashboard/investors', title: 'Investors', key: 'investors' },
-    { path: '/dashboard/jobs', title: 'Jobs', key: 'jobs' }
+    { path: '/dashboard/subscription', title: 'Subscription Plan', key: 'subscription' }
+]
+
+const discoverNavigation = [
+    { path: '/dashboard/investors', title: 'Find Investors', key: 'investors' },
+    { path: '/dashboard/jobs', title: 'All Jobs', key: 'jobs' }
+]
+
+const registrationNavigation = [
+    { path: '/dashboard/job-seeker', title: 'Job Seeker Registration', key: 'job' },
+    { path: '/dashboard/investor-registration', title: 'Investor Registration', key: 'investor-reg' },
+    { path: '/dashboard/employer-registration', title: 'Employer Registration', key: 'employer-reg' },
+    { path: '/dashboard/pitch', title: 'Pitch Competition', key: 'pitch-reg' }
 ]
 
 // Reactive state
@@ -282,13 +331,9 @@ const updateWindowWidth = () => {
 // Initialize from localStorage and set up resize listener
 onMounted(() => {
     if (process.client) {
-        // Initialize window width
         windowWidth.value = window.innerWidth
-        
-        // Add resize listener
         window.addEventListener('resize', updateWindowWidth)
         
-        // Initialize collapsed state from localStorage (desktop only)
         const saved = localStorage.getItem('sidebar-collapsed')
         if (saved !== null) {
             isCollapsed.value = JSON.parse(saved)
@@ -315,7 +360,6 @@ const toggleCollapse = () => {
 
 const openMobileMenu = () => {
     isMobileMenuOpen.value = true
-    // Prevent body scroll when menu is open
     if (process.client) {
         document.body.style.overflow = 'hidden'
     }
@@ -323,7 +367,6 @@ const openMobileMenu = () => {
 
 const closeMobileMenu = () => {
     isMobileMenuOpen.value = false
-    // Restore body scroll
     if (process.client) {
         document.body.style.overflow = ''
     }
@@ -332,7 +375,6 @@ const closeMobileMenu = () => {
 // Handle navigation
 const router = useRouter()
 const handleNavigation = async (path) => {
-    // Close mobile menu when navigating
     if (isMobile.value) {
         closeMobileMenu()
     }
@@ -373,27 +415,106 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Ensure smooth transitions */
+/* Custom scrollbar styling */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.5));
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.5), rgba(148, 163, 184, 0.7));
+}
+
+/* Smooth transitions */
 .transition-all {
     transition-property: all;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Custom scrollbar for navigation */
-nav::-webkit-scrollbar {
-    width: 4px;
+/* Advanced hover effects */
+@keyframes subtle-bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
 }
 
-nav::-webkit-scrollbar-track {
-    background: transparent;
+.group:hover .animate-bounce-subtle {
+    animation: subtle-bounce 0.6s ease-in-out;
 }
 
-nav::-webkit-scrollbar-thumb {
-    background: rgba(156, 163, 175, 0.5);
-    border-radius: 2px;
+/* Backdrop blur support */
+@supports (backdrop-filter: blur(12px)) {
+    .backdrop-blur-sm {
+        backdrop-filter: blur(12px);
+    }
 }
 
-nav::-webkit-scrollbar-thumb:hover {
-    background: rgba(156, 163, 175, 0.7);
+/* Focus states for accessibility */
+.focus-visible:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+    border-radius: 0.75rem;
+}
+
+/* Mobile optimizations */
+@media (max-width: 767px) {
+    .sidebar-mobile {
+        transform: translateX(0) !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .border-slate-200\/60 {
+        border-color: #64748b;
+    }
+    
+    .bg-gradient-to-b {
+        background: #f8fafc;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .transition-all,
+    .transition-transform,
+    .transition-colors {
+        transition: none;
+    }
+    
+    .animate-pulse {
+        animation: none;
+    }
+}
+
+/* Loading skeleton */
+.skeleton {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Ensure consistent height for scrollable container */
+.min-h-0 {
+    min-height: 0;
 }
 </style>
