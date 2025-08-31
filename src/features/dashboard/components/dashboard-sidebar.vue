@@ -311,7 +311,7 @@ const discoverNavigation = [
 const registrationNavigation = [
     { path: '/dashboard/job-seeker', title: 'Job Seeker Registration', key: 'job' },
     { path: '/dashboard/investor-registration', title: 'Investor Registration', key: 'investor-reg' },
-    { path: '/dashboard/employer-registration', title: 'Employer Registration', key: 'employer-reg' },
+    { path: '/dashboard/employer-registration', title: 'Employer', key: 'employer-reg' },
     { path: '/dashboard/pitch', title: 'Pitch Competition', key: 'pitch-reg' }
 ]
 
