@@ -17,12 +17,7 @@
                 <!-- Company Info -->
                 <div class="space-y-6">
                     <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2L2 7v10c0 5.55 3.84 9.95 9 11 5.16-1.05 9-5.45 9-11V7l-10-5z"/>
-                                <path d="M8 12l2 2 4-4" stroke="white" stroke-width="2" fill="none"/>
-                            </svg>
-                        </div>
+                        
                         <img src="~/assets/images/logo.png" alt="QWESI AI Logo" class="w-28 h-auto" />
                     </div>
                     <p class="text-slate-300 text-sm leading-relaxed">
