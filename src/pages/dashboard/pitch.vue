@@ -700,7 +700,7 @@ const validationRules = {
   },
   description: (value) => {
     if (!value) return 'Project description is required'
-    if (value.length < 100) return 'Description must be at least 100 characters'
+    if (value.length < 50) return 'Description must be at least 100 characters'
     if (value.length > 2000) return 'Description must be less than 2000 characters'
     return null
   },
@@ -836,7 +836,7 @@ const submitPitchForm = async () => {
       seeking: pitchForm.value.seeking
     }
 
-    const response = await $fetch(`${API_ROUTES.SUBMISSIONS}/`, {
+    const response = await $fetch(`${API_ROUTES.SUBMISSIONS}/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
