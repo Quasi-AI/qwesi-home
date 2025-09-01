@@ -690,7 +690,7 @@ const validationRules = {
   },
   summary: (value) => {
     if (!value) return 'Project summary is required'
-    if (value.length < 50) return 'Summary must be at least 50 characters'
+    if (value.length < 30) return 'Summary must be at least 30 characters'
     if (value.length > 500) return 'Summary must be less than 500 characters'
     return null
   },
@@ -700,7 +700,7 @@ const validationRules = {
   },
   description: (value) => {
     if (!value) return 'Project description is required'
-    if (value.length < 50) return 'Description must be at least 100 characters'
+    if (value.length < 50) return 'Description must be at least 50 characters'
     if (value.length > 2000) return 'Description must be less than 2000 characters'
     return null
   },
