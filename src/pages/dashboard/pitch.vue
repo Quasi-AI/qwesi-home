@@ -782,7 +782,7 @@ const loadUserSubmissions = async () => {
   
   loadingSubmissions.value = true
   try {
-    const response = await $fetch(`${API_ROUTES.SUBMISSIONS}/${encodeURIComponent(user.value.email)}`)
+    const response = await $fetch(`${API_ROUTES.SUBMISSIONS}/user/${encodeURIComponent(user.value.email)}`)
     
     if (response.success) {
       userSubmissions.value = response.data
@@ -797,7 +797,7 @@ const loadUserSubmissions = async () => {
 
 const loadCompetitionStats = async () => {
   try {
-    const response = await $fetch(`${API_ROUTES.SUBMISSIONS}/stats`)
+    const response = await $fetch(`${API_ROUTES.SUBMISSIONS}/submissions/stats`)
     
     if (response.success) {
       competitionStats.value = response.data
