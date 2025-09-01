@@ -40,11 +40,13 @@
                             :style="{ '--row-index': index }">
                             <td v-for="column in columns" :key="column.key" class="data-cell">
                                 <!-- Status Badge -->
-                                <div v-if="column.type === 'status'" class="status-container">
-                                    <div class="status-badge" :class="getStatusClasses(item[column.key])">
-                                        <div class="status-dot"></div>
-                                        <span class="status-text">{{ item[column.key] }}</span>
-                                    </div>
+
+                                <div v-if="column.type === 'title'" class="cell-content">
+                                    <span class="cell-text">{{ item[column.key] }}</span>
+                                </div>
+
+                                <div v-if="column.type === 'role'" class="cell-content">
+                                    <span class="cell-text">{{ item[column.key] }}</span>
                                 </div>
 
                                 <!-- Avatar -->
@@ -58,6 +60,13 @@
                                             <p class="avatar-name">{{ getDisplayName(item[column.key]) }}</p>
                                             <div class="avatar-indicator"></div>
                                         </div>
+                                    </div>
+                                </div>
+
+                                <div v-else-if="column.type === 'status'" class="status-container">
+                                    <div class="status-badge" :class="getStatusClasses(item[column.key])">
+                                        <div class="status-dot"></div>
+                                        <span class="status-text">{{ item[column.key] }}</span>
                                     </div>
                                 </div>
 
@@ -493,21 +502,6 @@ const getInitials = (name) => {
     50% { 
         opacity: 1; 
         transform: scale(1.2);
-    }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    .table-backdrop {
-        @apply from-slate-900/90 to-slate-800/80;
-    }
-    
-    .table-header {
-        @apply from-slate-800/80 to-slate-900/60;
-    }
-    
-    .header-title {
-        @apply from-slate-100 to-slate-300;
     }
 }
 

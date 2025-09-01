@@ -908,60 +908,6 @@
                     <Stats v-else :stats="stats" />
                 </div>
 
-                <!-- Tables Grid -->
-                <div class="tables-section" data-onboard="activity-tables">
-                    <div class="tables-grid">
-                        <!-- Tasks Table -->
-                        <div class="table-container">
-                            <div v-if="dashboardLoading" class="table-loading">
-                                <div class="table-loading-content">
-                                    <div class="loading-spinner small"></div>
-                                    <span>Loading tasks...</span>
-                                </div>
-                            </div>
-                            <Table v-else title="Recent Tasks" description="Your latest tasks and their status"
-                                :columns="taskColumns" :data="tasks" />
-                        </div>
-
-                        <!-- People Table -->
-                        <div class="table-container">
-                            <div v-if="dashboardLoading" class="table-loading">
-                                <div class="table-loading-content">
-                                    <div class="loading-spinner small"></div>
-                                    <span>Loading team members...</span>
-                                </div>
-                            </div>
-                            <Table v-else title="Team Members" description="People working on your projects"
-                                :columns="peopleColumns" :data="people" />
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pitch Banner -->
-                <div v-if="FEATURE_SWITCH.showPitchBanner && showPitchBanner" class="pitch-banner">
-                    <div class="pitch-banner-bg"></div>
-                    <div class="pitch-content">
-                        <div class="pitch-icon">
-                            <svg fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                            </svg>
-                        </div>
-                        <div class="pitch-text">
-                            <h3 class="pitch-title">Pitch/Challenge Submissions Open!</h3>
-                            <p class="pitch-description">Have a great idea, startup, or challenge? Submit it for competitions and get noticed!</p>
-                        </div>
-                        <NuxtLink to="/dashboard/get-started?tab=pitch" class="pitch-btn">
-                            <span>Submit Your Pitch</span>
-                            <div class="pitch-sparkle">✨</div>
-                        </NuxtLink>
-                        <button @click="closePitchBanner" class="pitch-close">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
                 <!-- Component Instances -->
                 <NewTaskModal 
                     :show="modals.newTask" 
@@ -1478,7 +1424,7 @@ const stats = computed(() => {
 
 // Table data
 const taskColumns = [
-    { key: 'taskName', label: 'Task Name' },
+    { key: 'taskName', label: 'Task Name', type: 'title' },
     { key: 'assignee', label: 'Assignee', type: 'avatar' },
     { key: 'status', label: 'Status', type: 'status' },
 ]
@@ -1489,7 +1435,7 @@ const tasks = computed(() => {
 
 const peopleColumns = [
     { key: 'name', label: 'Name', type: 'avatar' },
-    { key: 'role', label: 'Role' },
+    { key: 'role', label: 'Role', type: 'role' },
     { key: 'status', label: 'Status', type: 'status' },
     { key: 'lastActive', label: 'Last Active' }
 ]
