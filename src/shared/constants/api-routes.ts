@@ -19,6 +19,8 @@ export const API_ROUTES = {
   REGISTER_ON_PAGE: "https://dark-caldron-448714-u5.appspot.com/register-on-page",
 
   JOBS: "https://dark-caldron-448714-u5.appspot.com/job",
+
+  SUBMISSIONS: "https://dark-caldron-448714-u5.uc.r.appspot.com/pitch",
 } as const;
 
 export type ApiRoute = (typeof API_ROUTES)[keyof typeof API_ROUTES];
