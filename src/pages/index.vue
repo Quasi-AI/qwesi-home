@@ -361,6 +361,69 @@
             </div>
           </div>
         </div>
+
+        <!-- Add this section after the Pitch/Challenge Banner and before the closing div of the features section -->
+        <!-- Keep everything exactly the same, just add this new banner below the existing pitch banner -->
+
+        <!-- Donation Support Banner -->
+        <div v-if="FEATURE_SWITCH.showDonationBanner && showDonationBanner"
+          class="mt-12 relative group">
+          <div class="absolute inset-0 bg-gradient-to-r from-green-400/20 to-blue-500/20 rounded-3xl blur-xl opacity-60"></div>
+          <div class="relative glass-card rounded-3xl p-8 lg:p-12 border border-green-300/30 shadow-2xl hover:shadow-green-500/20 transition-all duration-500">
+            
+            <!-- Desktop Layout -->
+            <div class="hidden md:flex items-center relative z-10">
+              <div class="flex items-center mr-6">
+                <div class="w-16 h-16 bg-gradient-to-r from-green-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-2xl">
+                  <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-black text-2xl text-gray-900 mb-2">Support Our Mission</h3>
+                <p class="text-gray-600 text-lg">Help us make AI accessible to everyone. Your donation keeps Qwesi free for students and job seekers!</p>
+              </div>
+              <button @click="handleDonation"
+                :disabled="donationLoading"
+                class="ml-8 bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-300 hover:to-blue-400 text-white font-bold px-8 py-4 rounded-2xl shadow-2xl hover:shadow-green-500/25 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span v-if="donationLoading" class="flex items-center">
+                  <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </span>
+                <span v-else>Donate Now</span>
+              </button>
+            </div>
+
+            <!-- Mobile Layout -->
+            <div class="md:hidden space-y-6 relative z-10">
+              <div class="flex items-center">
+                <div class="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-xl flex items-center justify-center mr-4 shadow-xl">
+                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                </div>
+                <h3 class="font-black text-xl text-gray-900">Support Our Mission</h3>
+              </div>
+              <p class="text-gray-600 text-base">Help us make AI accessible to everyone. Your donation keeps Qwesi free for students and job seekers!</p>
+              <button @click="handleDonation"
+                :disabled="donationLoading"
+                class="inline-block bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-300 hover:to-blue-400 text-white font-bold px-6 py-3 rounded-xl shadow-xl hover:shadow-green-500/25 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span v-if="donationLoading" class="flex items-center">
+                  <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </span>
+                <span v-else>Donate Now</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -496,7 +559,7 @@
               <div class="relative glass-card p-10 rounded-3xl border border-white/30 shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 hover:scale-105 text-center">
                 <div class="relative mb-8">
                   <div class="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-2xl"></div>
-                  <img src="~/assets/images/rexton.jpg" alt="Rexton Itsiah"
+                  <img src="~/assets/images/rexton-1.jpeg" alt="Rexton Itsiah"
                     class="relative w-48 h-48 rounded-3xl mx-auto object-cover shadow-2xl border-4 border-white group-hover:scale-105 transition-all duration-300" />
                 </div>
                 <h3 class="text-2xl font-black text-gray-900 mb-2">Rexton Itsiah</h3>
@@ -553,6 +616,7 @@ const activeSection = ref('home');
 const statsAnimated = ref(false);
 const featuresAnimated = ref(false);
 const showPitchBanner = ref(true);
+const showDonationBanner = ref(true);
 
 // User state
 const user = computed(() => authStore.getUser || {})
@@ -562,6 +626,47 @@ const userInitials = computed(() => {
   const name = user.value.name || ''
   return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2)
 })
+
+// Add these variables to your existing ref declarations in the script setup section
+const donationLoading = ref(false);
+
+// Add this method to handle donation requests
+const handleDonation = async () => {
+  donationLoading.value = true;
+  
+  try {
+    // Use logged in user's email if available, otherwise use a default
+    const donationEmail = user.value?.email || 'donor@qwesi.org';
+    
+    // Make API call to your backend
+    const response = await fetch('https://dark-caldron-448714-u5.uc.r.appspot.com/api/create-checkout-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: donationEmail,
+        type: 'donation' // This tells your backend it's a donation
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.checkoutUrl) {
+      // Redirect to Stripe checkout
+      window.location.href = data.checkoutUrl;
+    } else {
+      throw new Error(data.error || 'Failed to create donation session');
+    }
+  } catch (error) {
+    console.error('Donation error:', error);
+    
+    // Show error message to user
+    alert('Unable to process donation at this time. Please try again later.');
+  } finally {
+    donationLoading.value = false;
+  }
+};
 
 // Computed property to safely check login status
 const isLoggedIn = computed(() => {
