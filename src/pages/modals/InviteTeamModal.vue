@@ -677,36 +677,6 @@ onMounted(() => {
   }
 }
 
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  .section-title {
-    @apply from-slate-100 to-slate-300;
-  }
-  
-  .form-input,
-  .form-select,
-  .form-textarea {
-    @apply bg-slate-800/70 border-slate-600/60 text-slate-100 placeholder-slate-400;
-  }
-  
-  .permission-backdrop,
-  .actions-backdrop {
-    background: rgba(15, 23, 42, 0.8) !important;
-    border-color: rgba(71, 85, 105, 0.3) !important;
-  }
-  
-  .permission-title {
-    @apply text-slate-100;
-  }
-  
-  .permission-desc {
-    @apply text-slate-400;
-  }
-  
-  .field-label {
-    @apply text-slate-300;
-  }
-}
 
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {

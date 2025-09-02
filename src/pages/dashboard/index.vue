@@ -939,7 +939,7 @@
         <ProModal v-model="showProModal" mode="upgrade" />
         
         <!-- Enhanced Referral Modal -->
-        <div v-if="showReferralModal" class="modal-overlay">
+        <div v-if="showReferralModal" class="modal-overlay" @click.self="showReferralModal = false">
             <div class="modal-backdrop"></div>
             <div class="referral-modal">
                 <div class="modal-header">
@@ -1042,6 +1042,9 @@
                         </button>
                         <button @click="viewLeaderboard" class="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
                             Leaderboard
+                        </button>
+                        <button @click="showReferralModal = false" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium">
+                            Cancel
                         </button>
                     </div>
                     
