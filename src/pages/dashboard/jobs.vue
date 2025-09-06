@@ -375,7 +375,7 @@
         <div class="modal-header">
           <div class="modal-title-section">
             <h3 class="modal-title">Apply for Position</h3>
-            <p class="modal-company">{{ selectedJob?.title }} at {{ selectedJob?.employer }}</p>
+            <p class="modal-company">{{ selectedJob?.title || 'Position' }} at {{ selectedJob?.employer || 'Company' }}</p>
             <div class="title-decoration"></div>
           </div>
           <button @click="closeApplicationModal" class="modal-close">
@@ -513,7 +513,7 @@
                     <label for="resume-upload" class="file-upload-label">
                       <Upload class="w-8 h-8 text-slate-400 mb-2" />
                       <span class="block text-sm font-medium text-slate-700 mb-1">
-                        {{ resumeFile ? resumeFile.name : 'Click to upload resume' }}
+                        {{ resumeFile?.name || 'Click to upload resume' }}
                       </span>
                       <span class="text-xs text-slate-500">
                         PDF, DOC, or DOCX (Max 5MB)
@@ -836,15 +836,17 @@ interface ApplicationFormData {
   };
 }
 
-// Refs and composables
-const alertRef = ref<InstanceType<typeof MessagePopup> | null>(null)
+// Composables and stores
 const authStore = useAuthStore()
-
 const applicationsComposable = useApplications()
+
+// Refs
+const alertRef = ref<InstanceType<typeof MessagePopup> | null>(null)
+
 // User data
 const user = computed(() => authStore.getUser)
 
-// Reactive data
+// State management
 const loading = ref<boolean>(true)
 const error = ref<string | null>(null)
 const jobs = ref<Job[]>([])
@@ -980,11 +982,8 @@ const visiblePages = computed((): number[] => {
 
 // Modal Management Methods
 const openJobDetailsModal = (job: Job): void => {
-  // Close any existing modals first
   showApplicationModal.value = false
   selectedJob.value = null
-  
-  // Open job details modal
   viewingJob.value = job
 }
 
@@ -993,14 +992,10 @@ const closeJobDetailsModal = (): void => {
 }
 
 const openApplicationModal = (job: Job): void => {
-  // Close any existing modals first
   viewingJob.value = null
-  
-  // Setup application modal
   selectedJob.value = job
   applicationForm.value.jobId = job._id
   
-  // Pre-fill form with user data if available
   if (user.value) {
     const nameParts = (user.value.name || '').split(' ')
     applicationForm.value.applicantDetails.firstName = nameParts[0] || ''
@@ -1008,7 +1003,6 @@ const openApplicationModal = (job: Job): void => {
     applicationForm.value.applicantDetails.email = user.value.email || ''
   }
   
-  // Use nextTick to ensure clean transition
   nextTick(() => {
     showApplicationModal.value = true
   })
@@ -1016,7 +1010,6 @@ const openApplicationModal = (job: Job): void => {
 
 // Application Methods
 const applyToJob = (job: Job): void => {
-  // Check if user already applied for this job
   const existingApplication = userApplications.value.find(
     (app: Application) => app.jobId === job._id && app.status !== 'withdrawn'
   )
@@ -1033,7 +1026,6 @@ const applyToJob = (job: Job): void => {
 }
 
 const submitApplication = async (): Promise<void> => {
-  // Validate form using composable
   const validation = applicationsComposable.validateApplicationForm(applicationForm.value, resumeFile.value || undefined)
   
   if (!validation.isValid) {
@@ -1049,13 +1041,11 @@ const submitApplication = async (): Promise<void> => {
   applicationErrors.value = {}
 
   try {
-    // Format form data using composable
     const formData = applicationsComposable.formatApplicationData(
       applicationForm.value, 
       resumeFile.value || undefined
     )
 
-    // Submit application using composable
     const response = await applicationsComposable.submitApplication(formData)
 
     if (response.success) {
@@ -1065,8 +1055,6 @@ const submitApplication = async (): Promise<void> => {
       })
       
       closeApplicationModal()
-      
-      // Refresh user applications
       await fetchUserApplications()
     }
 
@@ -1080,7 +1068,6 @@ const submitApplication = async (): Promise<void> => {
       errorMessage = 'You have already applied for this position this year.'
       errorTitle = 'Duplicate Application'
     } else if (error.data?.errors) {
-      // Handle validation errors from backend
       error.data.errors.forEach((err: any) => {
         applicationErrors.value[err.field] = err.message
       })
@@ -1099,7 +1086,6 @@ const submitApplication = async (): Promise<void> => {
   }
 }
 
-// Fetch user applications using composable
 const fetchUserApplications = async (): Promise<void> => {
   if (!authStore.isAuthenticated || !user.value?.id) {
     alertRef.value?.error('Please log in to access this page', {
@@ -1120,7 +1106,7 @@ const fetchUserApplications = async (): Promise<void> => {
     })
 
     if (response.success) {
-      userApplications.value = response.data
+      userApplications.value = response.data || []
     }
   } catch (error: any) {
     console.error('Error fetching applications:', error)
@@ -1130,27 +1116,6 @@ const fetchUserApplications = async (): Promise<void> => {
     })
   } finally {
     applicationsLoading.value = false
-  }
-}
-
-// Withdraw application method
-const withdrawApplication = async (applicationId: string): Promise<void> => {
-  try {
-    await applicationsComposable.withdrawApplication(applicationId)
-    
-    alertRef.value?.success('Application withdrawn successfully', {
-      title: 'Application Withdrawn',
-      duration: 3000
-    })
-    
-    // Refresh applications
-    await fetchUserApplications()
-  } catch (error: any) {
-    console.error('Error withdrawing application:', error)
-    alertRef.value?.error('Failed to withdraw application', {
-      title: 'Error',
-      duration: 4000
-    })
   }
 }
 
@@ -1205,14 +1170,12 @@ const closeApplicationModal = (): void => {
   resetApplicationForm()
 }
 
-// Check if user has applied for a job
 const hasAppliedToJob = (jobId: string): boolean => {
   return userApplications.value.some(
     (app: Application) => app.jobId === jobId && app.status !== 'withdrawn'
   )
 }
 
-// Get application status text and styling using composable
 const getApplyButtonText = (job: Job): string => {
   if (hasAppliedToJob(job._id)) {
     const application = userApplications.value.find((app: Application) => app.jobId === job._id)
@@ -1247,7 +1210,6 @@ const fetchJobs = async (): Promise<void> => {
     const queryString = queryParams.toString()
     const url = `${API_ROUTES.BASE_URL}getjobs${queryString ? '?' + queryString : ''}`
     
-    // This is a mock API call
     const response = await $fetch<any>(url)
     
     if (response.success) {

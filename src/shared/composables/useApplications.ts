@@ -8,9 +8,6 @@ import type {
   ValidationResult 
 } from '@/shared/types/application.types'
 import { API_ROUTES } from '@/shared/constants/api-routes'
-import { useAuthStore } from '@/features/auth/stores/auth.store'
-const authStore = useAuthStore()
-
 
 export interface ApplicationFilters {
   status?: ApplicationStatus
@@ -29,16 +26,31 @@ export interface FetchApplicationsOptions {
 export const useApplications = () => {
   const config = useRuntimeConfig()
   
-  // Get base URL from your API routes constant
+  // Get auth store INSIDE the composable function, not at module level
+  const getAuthToken = () => {
+    try {
+      const { useAuthStore } = require('@/features/auth/stores/auth.store')
+      const authStore = useAuthStore()
+      return authStore.getToken
+    } catch (error) {
+      console.warn('Auth store not available:', error)
+      return null
+    }
+  }
 
   const submitApplication = async (formData: FormData): Promise<ApplicationResponse> => {
     try {
+      const token = getAuthToken()
+      const headers: Record<string, string> = {}
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+
       const response = await $fetch<ApplicationResponse>(`${API_ROUTES.BASE_URL}/applications/submit`, {
         method: 'POST',
         body: formData,
-        headers: {
-        'Authorization': `Bearer ${authStore.getToken}`
-        }
+        headers
       })
 
       if (response.success) {
@@ -65,8 +77,16 @@ export const useApplications = () => {
         ...options.filters
       }
 
+      const token = getAuthToken()
+      const headers: Record<string, string> = {}
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+
       const response = await $fetch<PaginationResponse<Application>>(`${API_ROUTES.BASE_URL}/applications/user/${userId}`, {
-        query: queryParams
+        query: queryParams,
+        headers
       })
 
       if (response.success) {
@@ -86,7 +106,16 @@ export const useApplications = () => {
 
   const getApplicationDetails = async (applicationId: string): Promise<ApplicationResponse> => {
     try {
-      const response = await $fetch<ApplicationResponse>(`${API_ROUTES.BASE_URL}/applications/${applicationId}`)
+      const token = getAuthToken()
+      const headers: Record<string, string> = {}
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+
+      const response = await $fetch<ApplicationResponse>(`${API_ROUTES.BASE_URL}/applications/${applicationId}`, {
+        headers
+      })
 
       if (response.success) {
         return { success: true, data: response.data }
@@ -101,8 +130,16 @@ export const useApplications = () => {
 
   const withdrawApplication = async (applicationId: string): Promise<{ success: boolean }> => {
     try {
+      const token = getAuthToken()
+      const headers: Record<string, string> = {}
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+
       const response = await $fetch<{ success: boolean; message: string }>(`${API_ROUTES.BASE_URL}/applications/${applicationId}/withdraw`, {
-        method: 'PUT'
+        method: 'PUT',
+        headers
       })
 
       if (response.success) {
@@ -118,7 +155,16 @@ export const useApplications = () => {
 
   const getApplicationStats = async (userId: string): Promise<{ success: boolean; data: ApplicationStats }> => {
     try {
-      const response = await $fetch<{ success: boolean; data: ApplicationStats; message?: string }>(`${API_ROUTES.BASE_URL}/applications/stats/${userId}`)
+      const token = getAuthToken()
+      const headers: Record<string, string> = {}
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+
+      const response = await $fetch<{ success: boolean; data: ApplicationStats; message?: string }>(`${API_ROUTES.BASE_URL}/applications/stats/${userId}`, {
+        headers
+      })
 
       if (response.success) {
         return { success: true, data: response.data }
@@ -132,37 +178,37 @@ export const useApplications = () => {
   }
 
   // Utility functions
-const formatApplicationData = (formData: ApplicationFormData, resumeFile?: File): FormData => {
-  const form = new FormData()
-  
-  // Add job ID
-  form.append('jobId', formData.jobId)
-  
-  // Send applicantDetails as a JSON string
-  form.append('applicantDetails', JSON.stringify(formData.applicantDetails))
-  
-  // Add other fields
-  if (formData.coverLetter) {
-    form.append('coverLetter', formData.coverLetter)
-  }
-  
-  // Add skills as JSON string
-  if (formData.skills.length > 0) {
-    form.append('skills', JSON.stringify(formData.skills))
-  }
-  
-  // Add experience as JSON string
-  if (formData.experience.years || formData.experience.description) {
-    form.append('experience', JSON.stringify(formData.experience))
-  }
-  
-  // Add resume file
-  if (resumeFile) {
-    form.append('resume', resumeFile)
-  }
+  const formatApplicationData = (formData: ApplicationFormData, resumeFile?: File): FormData => {
+    const form = new FormData()
+    
+    // Add job ID
+    form.append('jobId', formData.jobId)
+    
+    // Send applicantDetails as a JSON string
+    form.append('applicantDetails', JSON.stringify(formData.applicantDetails))
+    
+    // Add other fields
+    if (formData.coverLetter) {
+      form.append('coverLetter', formData.coverLetter)
+    }
+    
+    // Add skills as JSON string
+    if (formData.skills.length > 0) {
+      form.append('skills', JSON.stringify(formData.skills))
+    }
+    
+    // Add experience as JSON string
+    if (formData.experience.years || formData.experience.description) {
+      form.append('experience', JSON.stringify(formData.experience))
+    }
+    
+    // Add resume file
+    if (resumeFile) {
+      form.append('resume', resumeFile)
+    }
 
-  return form
-}
+    return form
+  }
 
   const getStatusColor = (status: ApplicationStatus): string => {
     const colors: Record<ApplicationStatus, string> = {
