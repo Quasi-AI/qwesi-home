@@ -288,7 +288,7 @@
                 <!-- Card Footer -->
                 <div class="job-footer">
                   <button
-                    @click="selectedJob = job"
+                    @click="openJobDetailsModal(job)"
                     class="view-details-btn"
                   >
                     <span>View Details</span>
@@ -367,7 +367,7 @@
     </div>
 
     <!-- Job Application Modal -->
-    <div v-if="showApplicationModal" class="modal-overlay" @click="closeApplicationModal">
+    <div v-if="showApplicationModal" class="application-modal-overlay" @click="closeApplicationModal">
       <div class="application-modal" @click.stop>
         <div class="modal-backdrop"></div>
         
@@ -657,8 +657,9 @@
         </div>
       </div>
     </div>
+
     <!-- Job Details Modal -->
-    <div v-if="viewingJob" class="modal-overlay" @click="viewingJob = null">
+    <div v-if="viewingJob" class="job-details-modal-overlay" @click="closeJobDetailsModal">
       <div class="job-details-modal" @click.stop>
         <div class="modal-backdrop"></div>
         
@@ -669,7 +670,7 @@
             <p class="modal-company">{{ viewingJob.employer || 'Company' }}</p>
             <div class="title-decoration"></div>
           </div>
-          <button @click="viewingJob = null" class="modal-close">
+          <button @click="closeJobDetailsModal" class="modal-close">
             <X class="w-6 h-6" />
           </button>
         </div>
@@ -738,13 +739,13 @@
               <!-- Actions -->
               <div class="details-actions">
                 <button
-                  @click="viewingJob = null"
+                  @click="closeJobDetailsModal"
                   class="btn-secondary"
                 >
                   Close
                 </button>
                 <button
-                  @click="applyToJob(viewingJob); viewingJob = null"
+                  @click="applyToJob(viewingJob)"
                   :class="getApplyButtonClass(viewingJob)"
                   :disabled="hasAppliedToJob(viewingJob._id)"
                 >
@@ -760,7 +761,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useAuthStore } from '@/features/auth/stores/auth.store'
 import { useApplications } from '@/shared/composables/useApplications'
 import MessagePopup from '~/shared/components/message/MessagePopup.vue'
@@ -977,6 +978,42 @@ const visiblePages = computed((): number[] => {
   return pages
 })
 
+// Modal Management Methods
+const openJobDetailsModal = (job: Job): void => {
+  // Close any existing modals first
+  showApplicationModal.value = false
+  selectedJob.value = null
+  
+  // Open job details modal
+  viewingJob.value = job
+}
+
+const closeJobDetailsModal = (): void => {
+  viewingJob.value = null
+}
+
+const openApplicationModal = (job: Job): void => {
+  // Close any existing modals first
+  viewingJob.value = null
+  
+  // Setup application modal
+  selectedJob.value = job
+  applicationForm.value.jobId = job._id
+  
+  // Pre-fill form with user data if available
+  if (user.value) {
+    const nameParts = (user.value.name || '').split(' ')
+    applicationForm.value.applicantDetails.firstName = nameParts[0] || ''
+    applicationForm.value.applicantDetails.lastName = nameParts.slice(1).join(' ') || ''
+    applicationForm.value.applicantDetails.email = user.value.email || ''
+  }
+  
+  // Use nextTick to ensure clean transition
+  nextTick(() => {
+    showApplicationModal.value = true
+  })
+}
+
 // Application Methods
 const applyToJob = (job: Job): void => {
   // Check if user already applied for this job
@@ -992,19 +1029,7 @@ const applyToJob = (job: Job): void => {
     return
   }
 
-  selectedJob.value = job
-  viewingJob.value = job
-  applicationForm.value.jobId = job._id
-  
-  // Pre-fill form with user data if available
-  if (user.value) {
-    const nameParts = (user.value.name || '').split(' ')
-    applicationForm.value.applicantDetails.firstName = nameParts[0] || ''
-    applicationForm.value.applicantDetails.lastName = nameParts.slice(1).join(' ') || ''
-    applicationForm.value.applicantDetails.email = user.value.email || ''
-  }
-  
-  showApplicationModal.value = true
+  openApplicationModal(job)
 }
 
 const submitApplication = async (): Promise<void> => {
@@ -1039,8 +1064,7 @@ const submitApplication = async (): Promise<void> => {
         duration: 5000
       })
       
-      showApplicationModal.value = false
-      resetApplicationForm()
+      closeApplicationModal()
       
       // Refresh user applications
       await fetchUserApplications()
@@ -1177,6 +1201,7 @@ const resetApplicationForm = (): void => {
 
 const closeApplicationModal = (): void => {
   showApplicationModal.value = false
+  selectedJob.value = null
   resetApplicationForm()
 }
 
@@ -1580,16 +1605,42 @@ filter: blur(12px);
 @apply px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-bold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg shadow-blue-500/25 hover:scale-105;
 }
 
-/* Modal Styles */
+/* Enhanced Modal Styles to Prevent Conflicts */
+
+/* Base modal overlay - ensure consistent z-index */
 .modal-overlay {
-@apply fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50;
-backdrop-filter: blur(8px);
+  @apply fixed inset-0 bg-black/60 flex items-center justify-center p-4;
+  backdrop-filter: blur(8px);
+}
+
+/* Job Details Modal - lower priority */
+.job-details-modal-overlay {
+  @apply fixed inset-0 bg-black/60 flex items-center justify-center p-4;
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+/* Application Modal - higher priority (appears on top) */
+.application-modal-overlay {
+  @apply fixed inset-0 bg-black/60 flex items-center justify-center p-4;
+  backdrop-filter: blur(8px);
+  z-index: 1010;
+  animation: modalFadeIn 0.2s ease-out;
 }
 
 .application-modal {
-@apply relative bg-white/95 rounded-3xl max-w-5xl w-full max-h-[95vh] overflow-hidden;
-backdrop-filter: blur(20px);
-border: 1px solid rgba(255, 255, 255, 0.2);
+  @apply relative bg-white/95 rounded-3xl max-w-5xl w-full max-h-[95vh] overflow-hidden;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+.job-details-modal {
+  @apply relative bg-white/95 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: modalSlideIn 0.3s ease-out;
 }
 
 .modal-backdrop {
@@ -1740,6 +1791,56 @@ backdrop-filter: blur(10px);
 @apply block text-xs font-medium text-slate-600 mt-1;
 }
 
+/* Job Details Modal Styles */
+.job-details-content {
+  @apply space-y-6;
+}
+
+.details-section {
+  @apply p-6 bg-slate-50/50 rounded-2xl border border-slate-200/60;
+  backdrop-filter: blur(10px);
+}
+
+.info-item {
+  @apply flex items-center space-x-3 text-sm;
+}
+
+.info-icon {
+  @apply w-4 h-4 text-slate-500 flex-shrink-0;
+}
+
+.info-label {
+  @apply font-semibold text-slate-700 min-w-0;
+}
+
+.info-value {
+  @apply text-slate-600 flex-1;
+}
+
+.description-content {
+  @apply text-slate-700 leading-relaxed text-sm space-y-3;
+}
+
+.description-content p {
+  @apply mb-3;
+}
+
+.description-content ul, .description-content ol {
+  @apply ml-4 space-y-1;
+}
+
+.description-content ul {
+  @apply list-disc;
+}
+
+.description-content ol {
+  @apply list-decimal;
+}
+
+.details-actions {
+  @apply flex items-center justify-end space-x-4 pt-6 border-t border-slate-200/60;
+}
+
 /* Pagination */
 .pagination-container {
 @apply flex items-center justify-between mt-8 p-6 bg-white/60 backdrop-blur-xl rounded-3xl border border-white/40;
@@ -1855,7 +1956,28 @@ transition: all 0.3s ease;
 background: linear-gradient(to bottom, rgba(148, 163, 184, 0.5), rgba(148, 163, 184, 0.7));
 }
 
-/* Animations */
+/* Modal Animations */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Other Animations */
 @keyframes float {
 0%, 100% { transform: translateY(0px); }
 50% { transform: translateY(-6px); }
@@ -1908,59 +2030,5 @@ animation: none;
 .job-card:hover {
     transform: none;
 }
-}
-/* Job Details Modal Styles */
-.job-details-modal {
-  @apply relative bg-white/95 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden;
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.job-details-content {
-  @apply space-y-6;
-}
-
-.details-section {
-  @apply p-6 bg-slate-50/50 rounded-2xl border border-slate-200/60;
-  backdrop-filter: blur(10px);
-}
-
-.info-item {
-  @apply flex items-center space-x-3 text-sm;
-}
-
-.info-icon {
-  @apply w-4 h-4 text-slate-500 flex-shrink-0;
-}
-
-.info-label {
-  @apply font-semibold text-slate-700 min-w-0;
-}
-
-.info-value {
-  @apply text-slate-600 flex-1;
-}
-
-.description-content {
-  @apply text-slate-700 leading-relaxed text-sm space-y-3;
-}
-
-.description-content p {
-  @apply mb-3;
-}
-
-.description-content ul, .description-content ol {
-  @apply ml-4 space-y-1;
-}
-
-.description-content ul {
-  @apply list-disc;
-}
-
-.description-content ol {
-  @apply list-decimal;
-}
-.details-actions {
-  @apply flex items-center justify-end space-x-4 pt-6 border-t border-slate-200/60;
 }
 </style>

@@ -592,7 +592,7 @@ const updateJob = async (payload) => {
 }
 
 const deleteJobById = async (jobId) => {
-    const response = await $fetch(`${API_ROUTES.JOBS}/delete`, {
+    const response = await $fetch(`${API_ROUTES.JOBS}/delete/${jobId}`, {
         method: 'DELETE',
         body: { id: jobId },
         throw: false

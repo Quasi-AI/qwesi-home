@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-07-17",
   devtools: { enabled: true },
   srcDir: "src/",
-  modules: ["@nuxtjs/tailwindcss", "@pinia/nuxt", "@nuxt/image"],
+  modules: ["@nuxtjs/tailwindcss", "@pinia/nuxt", "@nuxt/image", "@pinia-plugin-persistedstate/nuxt"],
   css: ["~/assets/css/main.css"],
   plugins: ["~/shared/plugins/pinia-persistedstate.client.ts", "~/shared/plugins/firebase.client.ts"],
   app: {
