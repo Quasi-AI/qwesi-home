@@ -1,4 +1,6 @@
 export const API_ROUTES = {
+
+  BASE_URL: "https://dark-caldron-448714-u5.appspot.com/",
   // Auth endpoints
   LOGIN: "https://dark-caldron-448714-u5.appspot.com/qwesi/login",
   SIGNUP: "https://dark-caldron-448714-u5.appspot.com/qwesi/signup",
@@ -19,6 +21,7 @@ export const API_ROUTES = {
   REGISTER_ON_PAGE: "https://dark-caldron-448714-u5.appspot.com/register-on-page",
 
   JOBS: "https://dark-caldron-448714-u5.appspot.com/job",
+  
 
   SUBMISSIONS: "https://dark-caldron-448714-u5.uc.r.appspot.com/pitch",
 } as const;

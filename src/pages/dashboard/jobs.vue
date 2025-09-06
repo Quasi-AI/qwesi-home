@@ -1,6 +1,8 @@
 <!-- pages/dashboard/jobs.vue -->
 <template>
   <div class="dashboard-container">
+    <MessagePopup ref="alertRef" />
+
     <!-- Sidebar -->
     <Sidebar :user="user" />
 
@@ -196,6 +198,30 @@
 
         <!-- Jobs Grid -->
         <div v-else class="space-y-6">
+          <!-- Applications Summary -->
+          <div v-if="userApplications.length > 0" class="applications-summary">
+            <div class="summary-card">
+              <div class="summary-header">
+                <Briefcase class="w-5 h-5 text-blue-600" />
+                <span class="summary-title">Your Applications</span>
+              </div>
+              <div class="summary-stats">
+                <div class="stat-item">
+                  <span class="stat-number">{{ userApplications.length }}</span>
+                  <span class="stat-label">Total Applied</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">{{ userApplications.filter(app => app.status === 'under_review').length }}</span>
+                  <span class="stat-label">Under Review</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">{{ userApplications.filter(app => app.status === 'interview_scheduled').length }}</span>
+                  <span class="stat-label">Interviews</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
             <div
               v-for="job in paginatedJobs"
@@ -281,11 +307,14 @@
                       <Heart :fill="savedJobs.includes(job._id) ? 'currentColor' : 'none'" class="w-4 h-4" />
                     </button>
                     
+                    <!-- Updated Apply Button with Status Check -->
                     <button
                       @click="applyToJob(job)"
-                      class="apply-btn"
+                      :class="getApplyButtonClass(job)"
+                      :disabled="hasAppliedToJob(job._id)"
+                      :title="hasAppliedToJob(job._id) ? 'You have already applied for this position' : 'Apply for this position'"
                     >
-                      Apply Now
+                      {{ getApplyButtonText(job) }}
                     </button>
                   </div>
                 </div>
@@ -337,19 +366,19 @@
       </div>
     </div>
 
-    <!-- Job Details Modal -->
-    <div v-if="selectedJob" class="modal-overlay" @click="selectedJob = null">
-      <div class="job-modal" @click.stop>
+    <!-- Job Application Modal -->
+    <div v-if="showApplicationModal" class="modal-overlay" @click="closeApplicationModal">
+      <div class="application-modal" @click.stop>
         <div class="modal-backdrop"></div>
         
         <!-- Modal Header -->
         <div class="modal-header">
           <div class="modal-title-section">
-            <h3 class="modal-title">{{ selectedJob.title }}</h3>
-            <p class="modal-company">{{ selectedJob.employer }}</p>
+            <h3 class="modal-title">Apply for Position</h3>
+            <p class="modal-company">{{ selectedJob?.title }} at {{ selectedJob?.employer }}</p>
             <div class="title-decoration"></div>
           </div>
-          <button @click="selectedJob = null" class="modal-close">
+          <button @click="closeApplicationModal" class="modal-close">
             <X class="w-6 h-6" />
           </button>
         </div>
@@ -357,160 +386,504 @@
         <!-- Modal Content -->
         <div class="modal-content">
           <div class="modal-scroll-area">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <!-- Job Details -->
-              <div class="modal-section">
-                <h4 class="section-title">Job Details</h4>
-                <div class="details-grid">
-                  <div v-if="selectedJob.location" class="detail-row">
-                    <MapPin class="detail-row-icon" />
-                    <div>
-                      <span class="detail-label">Location</span>
-                      <span class="detail-value">{{ selectedJob.location }}</span>
-                    </div>
+            <form @submit.prevent="submitApplication" class="space-y-6">
+              
+              <!-- Personal Information Section -->
+              <div class="form-section">
+                <h4 class="section-title">
+                  <User class="w-5 h-5 text-blue-600" />
+                  Personal Information
+                </h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- First Name -->
+                  <div class="form-group">
+                    <label class="form-label">First Name *</label>
+                    <input
+                      v-model="applicationForm.applicantDetails.firstName"
+                      type="text"
+                      class="form-input"
+                      :class="{ 'error': applicationErrors.firstName }"
+                      placeholder="Enter your first name"
+                    />
+                    <span v-if="applicationErrors.firstName" class="error-message">
+                      {{ applicationErrors.firstName }}
+                    </span>
                   </div>
-                  
-                  <div v-if="selectedJob.sector" class="detail-row">
-                    <Building class="detail-row-icon" />
-                    <div>
-                      <span class="detail-label">Sector</span>
-                      <span class="detail-value">{{ selectedJob.sector }}</span>
-                    </div>
+
+                  <!-- Last Name -->
+                  <div class="form-group">
+                    <label class="form-label">Last Name *</label>
+                    <input
+                      v-model="applicationForm.applicantDetails.lastName"
+                      type="text"
+                      class="form-input"
+                      :class="{ 'error': applicationErrors.lastName }"
+                      placeholder="Enter your last name"
+                    />
+                    <span v-if="applicationErrors.lastName" class="error-message">
+                      {{ applicationErrors.lastName }}
+                    </span>
                   </div>
-                  
-                  <div v-if="selectedJob.salary" class="detail-row">
-                    <TrendingUp class="detail-row-icon" />
-                    <div>
-                      <span class="detail-label">Salary</span>
-                      <span class="detail-value">{{ selectedJob.salary }}</span>
-                    </div>
+
+                  <!-- Email -->
+                  <div class="form-group">
+                    <label class="form-label">Email Address *</label>
+                    <input
+                      v-model="applicationForm.applicantDetails.email"
+                      type="email"
+                      class="form-input"
+                      :class="{ 'error': applicationErrors.email }"
+                      placeholder="Enter your email"
+                    />
+                    <span v-if="applicationErrors.email" class="error-message">
+                      {{ applicationErrors.email }}
+                    </span>
                   </div>
-                  
-                  <div v-if="selectedJob.experience_level" class="detail-row">
-                    <Zap class="detail-row-icon" />
-                    <div>
-                      <span class="detail-label">Experience Level</span>
-                      <span class="detail-value">{{ selectedJob.experience_level }}</span>
-                    </div>
+
+                  <!-- Phone -->
+                  <div class="form-group">
+                    <label class="form-label">Phone Number *</label>
+                    <input
+                      v-model="applicationForm.applicantDetails.phone"
+                      type="tel"
+                      class="form-input"
+                      :class="{ 'error': applicationErrors.phone }"
+                      placeholder="Enter your phone number"
+                    />
+                    <span v-if="applicationErrors.phone" class="error-message">
+                      {{ applicationErrors.phone }}
+                    </span>
                   </div>
-                  
-                  <div v-if="selectedJob.posted" class="detail-row">
-                    <Clock class="detail-row-icon" />
-                    <div>
-                      <span class="detail-label">Posted</span>
-                      <span class="detail-value">{{ formatDate(selectedJob.posted) }}</span>
-                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 mt-4">
+                  <!-- Address -->
+                  <div class="form-group">
+                    <label class="form-label">Address</label>
+                    <input
+                      v-model="applicationForm.applicantDetails.address"
+                      type="text"
+                      class="form-input"
+                      placeholder="Enter your address (optional)"
+                    />
+                  </div>
+
+                  <!-- LinkedIn -->
+                  <div class="form-group">
+                    <label class="form-label">LinkedIn Profile</label>
+                    <input
+                      v-model="applicationForm.applicantDetails.linkedin"
+                      type="url"
+                      class="form-input"
+                      placeholder="https://linkedin.com/in/yourprofile"
+                    />
+                  </div>
+
+                  <!-- Portfolio -->
+                  <div class="form-group">
+                    <label class="form-label">Portfolio Website</label>
+                    <input
+                      v-model="applicationForm.applicantDetails.portfolio"
+                      type="url"
+                      class="form-input"
+                      placeholder="https://yourportfolio.com"
+                    />
                   </div>
                 </div>
               </div>
 
-              <!-- Requirements -->
-              <div class="modal-section">
-                <h4 class="section-title">Requirements</h4>
-                <div class="requirements-content">
-                  <div v-if="selectedJob.qualifications" class="requirement-item">
-                    <span class="requirement-label">Qualifications</span>
-                    <p class="requirement-text">{{ selectedJob.qualifications }}</p>
+              <!-- Resume Upload Section -->
+              <div class="form-section">
+                <h4 class="section-title">
+                  <FileText class="w-5 h-5 text-blue-600" />
+                  Resume/CV
+                </h4>
+                
+                <div class="form-group">
+                  <label class="form-label">Upload Resume *</label>
+                  <div class="file-upload-area">
+                    <input
+                      type="file"
+                      id="resume-upload"
+                      accept=".pdf,.doc,.docx"
+                      @change="handleFileUpload"
+                      class="hidden"
+                    />
+                    <label for="resume-upload" class="file-upload-label">
+                      <Upload class="w-8 h-8 text-slate-400 mb-2" />
+                      <span class="block text-sm font-medium text-slate-700 mb-1">
+                        {{ resumeFile ? resumeFile.name : 'Click to upload resume' }}
+                      </span>
+                      <span class="text-xs text-slate-500">
+                        PDF, DOC, or DOCX (Max 5MB)
+                      </span>
+                    </label>
                   </div>
-                  <div v-if="selectedJob.experience_length" class="requirement-item">
-                    <span class="requirement-label">Experience Required</span>
-                    <p class="requirement-text">{{ selectedJob.experience_length }}</p>
+                  <span v-if="applicationErrors.resume" class="error-message">
+                    {{ applicationErrors.resume }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Skills Section -->
+              <div class="form-section">
+                <h4 class="section-title">
+                  <Zap class="w-5 h-5 text-blue-600" />
+                  Skills
+                </h4>
+                
+                <div class="form-group">
+                  <label class="form-label">Add Skills</label>
+                  <div class="flex space-x-2">
+                    <input
+                      v-model="newSkill"
+                      type="text"
+                      class="form-input flex-1"
+                      placeholder="Enter a skill"
+                      @keypress.enter.prevent="addSkill"
+                    />
+                    <button
+                      type="button"
+                      @click="addSkill"
+                      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      <Plus class="w-4 h-4" />
+                    </button>
+                  </div>
+                  
+                  <!-- Skills Tags -->
+                  <div v-if="applicationForm.skills.length > 0" class="flex flex-wrap gap-2 mt-3">
+                    <span
+                      v-for="(skill, index) in applicationForm.skills"
+                      :key="index"
+                      class="skill-tag"
+                    >
+                      {{ skill }}
+                      <button
+                        type="button"
+                        @click="removeSkill(index)"
+                        class="ml-2 text-blue-600 hover:text-blue-800"
+                      >
+                        <X class="w-3 h-3" />
+                      </button>
+                    </span>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Job Description -->
-            <div v-if="selectedJob.job_description" class="modal-section full-width">
-              <h4 class="section-title">Job Description</h4>
-              <div class="description-content">
-                <p class="whitespace-pre-wrap">{{ selectedJob.job_description }}</p>
-              </div>
-            </div>
-
-            <!-- Contact Information -->
-            <div v-if="selectedJob.email" class="modal-section full-width">
-              <h4 class="section-title">Contact Information</h4>
-              <div class="contact-card">
-                <div class="contact-info">
-                  <div class="contact-icon-wrapper">
-                    <div class="contact-icon-bg"></div>
-                    <svg class="contact-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
+              <!-- Experience Section -->
+              <div class="form-section">
+                <h4 class="section-title">
+                  <Briefcase class="w-5 h-5 text-blue-600" />
+                  Experience
+                </h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div class="form-group">
+                    <label class="form-label">Years of Experience</label>
+                    <input
+                      v-model.number="applicationForm.experience.years"
+                      type="number"
+                      min="0"
+                      max="50"
+                      class="form-input"
+                      placeholder="0"
+                    />
                   </div>
-                  <span class="contact-email">{{ selectedJob.email }}</span>
                 </div>
+                
+                <div class="form-group mt-4">
+                  <label class="form-label">Experience Summary</label>
+                  <textarea
+                    v-model="applicationForm.experience.description"
+                    rows="4"
+                    class="form-input"
+                    placeholder="Briefly describe your relevant experience..."
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- Cover Letter Section -->
+              <div class="form-section">
+                <h4 class="section-title">
+                  <MessageSquare class="w-5 h-5 text-blue-600" />
+                  Cover Letter
+                </h4>
+                
+                <div class="form-group">
+                  <label class="form-label">Cover Letter (Optional)</label>
+                  <textarea
+                    v-model="applicationForm.coverLetter"
+                    rows="6"
+                    class="form-input"
+                    placeholder="Write a personalized cover letter for this position..."
+                    maxlength="5000"
+                  ></textarea>
+                  <div class="text-xs text-slate-500 mt-1 text-right">
+                    {{ applicationForm.coverLetter.length }}/5000 characters
+                  </div>
+                </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="form-actions">
+                <button
+                  type="button"
+                  @click="closeApplicationModal"
+                  class="btn-secondary"
+                  :disabled="applicationLoading"
+                >
+                  Cancel
+                </button>
+                
+                <button
+                  type="submit"
+                  class="btn-primary"
+                  :disabled="applicationLoading"
+                >
+                  <div v-if="applicationLoading" class="flex items-center space-x-2">
+                    <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Submitting...</span>
+                  </div>
+                  <div v-else class="flex items-center space-x-2">
+                    <Send class="w-4 h-4" />
+                    <span>Submit Application</span>
+                  </div>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Job Details Modal -->
+    <div v-if="viewingJob" class="modal-overlay" @click="viewingJob = null">
+      <div class="job-details-modal" @click.stop>
+        <div class="modal-backdrop"></div>
+        
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <div class="modal-title-section">
+            <h3 class="modal-title">{{ viewingJob.title || 'Job Details' }}</h3>
+            <p class="modal-company">{{ viewingJob.employer || 'Company' }}</p>
+            <div class="title-decoration"></div>
+          </div>
+          <button @click="viewingJob = null" class="modal-close">
+            <X class="w-6 h-6" />
+          </button>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="modal-content">
+          <div class="modal-scroll-area">
+            <!-- Job Information -->
+            <div class="job-details-content space-y-6">
+              
+              <!-- Basic Info -->
+              <div class="details-section">
+                <h4 class="section-title">Job Information</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div v-if="viewingJob.location" class="info-item">
+                    <MapPin class="info-icon" />
+                    <span class="info-label">Location:</span>
+                    <span class="info-value">{{ viewingJob.location }}</span>
+                  </div>
+                  <div v-if="viewingJob.sector" class="info-item">
+                    <Building class="info-icon" />
+                    <span class="info-label">Sector:</span>
+                    <span class="info-value">{{ viewingJob.sector }}</span>
+                  </div>
+                  <div v-if="viewingJob.experience_level" class="info-item">
+                    <Zap class="info-icon" />
+                    <span class="info-label">Experience Level:</span>
+                    <span class="info-value">{{ viewingJob.experience_level }}</span>
+                  </div>
+                  <div v-if="viewingJob.salary" class="info-item">
+                    <span class="info-icon">💰</span>
+                    <span class="info-label">Salary:</span>
+                    <span class="info-value">{{ viewingJob.salary }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Job Description -->
+              <div v-if="viewingJob.job_description" class="details-section">
+                <h4 class="section-title">Job Description</h4>
+                <div class="description-content">
+                  <p class="whitespace-pre-line">{{ viewingJob.job_description }}</p>
+                </div>
+              </div>
+
+              <!-- Additional Details -->
+              <div class="details-section">
+                <h4 class="section-title">Additional Information</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div v-if="viewingJob.field" class="info-item">
+                    <span class="info-label">Field:</span>
+                    <span class="info-value">{{ viewingJob.field }}</span>
+                  </div>
+                  <div v-if="viewingJob.experience_length" class="info-item">
+                    <span class="info-label">Experience Required:</span>
+                    <span class="info-value">{{ viewingJob.experience_length }}</span>
+                  </div>
+                  <div v-if="viewingJob.posted" class="info-item">
+                    <Clock class="info-icon" />
+                    <span class="info-label">Posted:</span>
+                    <span class="info-value">{{ formatDate(viewingJob.posted) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="details-actions">
+                <button
+                  @click="viewingJob = null"
+                  class="btn-secondary"
+                >
+                  Close
+                </button>
+                <button
+                  @click="applyToJob(viewingJob); viewingJob = null"
+                  :class="getApplyButtonClass(viewingJob)"
+                  :disabled="hasAppliedToJob(viewingJob._id)"
+                >
+                  {{ getApplyButtonText(viewingJob) }}
+                </button>
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Modal Footer -->
-        <div class="modal-footer">
-          <button
-            @click="saveJob(selectedJob)"
-            :class="[
-              'footer-btn secondary',
-              savedJobs.includes(selectedJob._id) ? 'saved' : ''
-            ]"
-          >
-            <Heart :fill="savedJobs.includes(selectedJob._id) ? 'currentColor' : 'none'" class="w-4 h-4" />
-            <span>{{ savedJobs.includes(selectedJob._id) ? 'Remove from Saved' : 'Save Job' }}</span>
-          </button>
-          
-          <button
-            v-if="selectedJob.url"
-            @click="openExternalLink(selectedJob.url)"
-            class="footer-btn tertiary"
-          >
-            <ExternalLink class="w-4 h-4" />
-            <span>Visit Job Page</span>
-          </button>
-          
-          <button
-            @click="applyToJob(selectedJob)"
-            class="footer-btn primary"
-          >
-            <CheckCircle class="w-4 h-4" />
-            <span>Apply Now</span>
-          </button>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { useApplications } from '@/shared/composables/useApplications'
+import MessagePopup from '~/shared/components/message/MessagePopup.vue'
 import Sidebar from '@/features/dashboard/components/dashboard-sidebar.vue'
+import { API_ROUTES } from '@/shared/constants/api-routes'
 
-const { $message } = useNuxtApp()
+// Import icons
+import {
+  Search,
+  Filter,
+  MapPin,
+  Building,
+  Zap,
+  Clock,
+  ChevronRight,
+  ChevronLeft,
+  X,
+  Briefcase,
+  ArrowRight,
+  Heart,
+  User,
+  FileText,
+  Upload,
+  Plus,
+  MessageSquare,
+  Send
+} from 'lucide-vue-next'
 
 // Page metadata
 definePageMeta({
   layout: 'dashboard'
 })
 
-// User data (you'll need to get this from your auth system)
-const user = ref({
-  name: 'John Doe',
-  email: 'john@example.com',
-  avatar: null,
-  points: 150
-})
+// Type definitions
+interface Job {
+  _id: string;
+  title?: string;
+  employer?: string;
+  location?: string;
+  sector?: string;
+  experience_level?: string;
+  salary?: string;
+  job_description?: string;
+  field?: string;
+  experience_length?: string;
+  posted?: string;
+  created_at?: string;
+}
+
+interface Application {
+  _id: string;
+  jobId: string;
+  status: string;
+}
+
+interface ApplicationFormData {
+  jobId: string;
+  applicantDetails: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    address: string;
+    linkedin: string;
+    portfolio: string;
+  };
+  coverLetter: string;
+  skills: string[];
+  experience: {
+    years: number;
+    description: string;
+  };
+}
+
+// Refs and composables
+const alertRef = ref<InstanceType<typeof MessagePopup> | null>(null)
+const authStore = useAuthStore()
+
+const applicationsComposable = useApplications()
+// User data
+const user = computed(() => authStore.getUser)
 
 // Reactive data
-const loading = ref(true)
-const error = ref(null)
-const jobs = ref([])
-const selectedJob = ref(null)
-const searchQuery = ref('')
-const showFilters = ref(false)
-const currentPage = ref(1)
-const jobsPerPage = ref(12)
-const sortBy = ref('newest')
-const savedJobs = ref([])
+const loading = ref<boolean>(true)
+const error = ref<string | null>(null)
+const jobs = ref<Job[]>([])
+const selectedJob = ref<Job | null>(null)
+const viewingJob = ref<Job | null>(null)
+const searchQuery = ref<string>('')
+const showFilters = ref<boolean>(false)
+const currentPage = ref<number>(1)
+const jobsPerPage = ref<number>(12)
+const sortBy = ref<string>('newest')
+const savedJobs = ref<string[]>([])
+
+// Application form data
+const showApplicationModal = ref<boolean>(false)
+const applicationLoading = ref<boolean>(false)
+const applicationForm = ref<ApplicationFormData>({
+  jobId: '',
+  applicantDetails: {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    linkedin: '',
+    portfolio: ''
+  },
+  coverLetter: '',
+  skills: [],
+  experience: {
+    years: 0,
+    description: ''
+  }
+})
+const resumeFile = ref<File | null>(null)
+const newSkill = ref<string>('')
+const applicationErrors = ref<Record<string, string>>({})
+
+// User applications tracking
+const userApplications = ref<Application[]>([])
+const applicationsLoading = ref<boolean>(false)
 
 // Filters
 const filters = ref({
@@ -519,139 +892,36 @@ const filters = ref({
   experience_level: ''
 })
 
-// Mock data
-const mockJobs = [
-  {
-    _id: '1',
-    title: 'Senior Software Engineer',
-    employer: 'TechFlow Inc',
-    location: 'Accra, Ghana',
-    sector: 'Technology',
-    experience_level: 'Senior',
-    salary: 'GHS 15,000 - 20,000',
-    field: 'Software Development',
-    experience_length: '5+ years',
-    job_description: 'We are seeking a talented Senior Software Engineer to join our growing team. You will be responsible for designing and developing scalable web applications using modern technologies like React, Node.js, and cloud platforms.',
-    qualifications: 'Bachelor\'s degree in Computer Science or related field, 5+ years of experience with React/Node.js, experience with cloud platforms (AWS/GCP)',
-    email: 'careers@techflow.com',
-    posted: '2024-08-25',
-    url: 'https://techflow.com/careers',
-    created_at: '2024-08-25'
-  },
-  {
-    _id: '2',
-    title: 'Marketing Manager',
-    employer: 'Creative Minds Agency',
-    location: 'Kumasi, Ghana',
-    sector: 'Marketing',
-    experience_level: 'Mid-Level',
-    salary: 'GHS 8,000 - 12,000',
-    field: 'Digital Marketing',
-    experience_length: '3-5 years',
-    job_description: 'Lead our marketing initiatives and drive brand growth through innovative digital strategies. Manage campaigns, analyze performance metrics, and collaborate with cross-functional teams.',
-    qualifications: 'Marketing degree, 3+ years experience in digital marketing, proficiency in Google Analytics and social media platforms',
-    email: 'hr@creativeminds.com',
-    posted: '2024-08-24',
-    created_at: '2024-08-24'
-  },
-  {
-    _id: '3',
-    title: 'Data Analyst',
-    employer: 'DataCorp Solutions',
-    location: 'Remote',
-    sector: 'Data Science',
-    experience_level: 'Junior',
-    salary: 'GHS 6,000 - 9,000',
-    field: 'Analytics',
-    experience_length: '1-3 years',
-    job_description: 'Analyze complex datasets to drive business decisions and create insightful reports. Work with SQL, Python, and visualization tools to extract meaningful insights.',
-    qualifications: 'Statistics/Mathematics degree, Python/R experience, SQL proficiency',
-    email: 'jobs@datacorp.com',
-    posted: '2024-08-23',
-    created_at: '2024-08-23'
-  },
-  {
-    _id: '4',
-    title: 'UX Designer',
-    employer: 'Design Studio Pro',
-    location: 'Takoradi, Ghana',
-    sector: 'Design',
-    experience_level: 'Mid-Level',
-    salary: 'GHS 10,000 - 14,000',
-    field: 'User Experience',
-    experience_length: '2-4 years',
-    job_description: 'Create intuitive and beautiful user experiences for web and mobile applications. Collaborate with developers and product managers to deliver exceptional user interfaces.',
-    qualifications: 'Design degree, Figma/Sketch proficiency, portfolio required, understanding of user research methods',
-    email: 'design@studiopro.com',
-    posted: '2024-08-22',
-    created_at: '2024-08-22'
-  },
-  {
-    _id: '5',
-    title: 'Financial Analyst',
-    employer: 'Ghana Banking Corp',
-    location: 'Accra, Ghana',
-    sector: 'Finance',
-    experience_level: 'Junior',
-    salary: 'GHS 7,000 - 10,000',
-    field: 'Financial Analysis',
-    experience_length: '1-2 years',
-    job_description: 'Support financial planning and analysis activities, prepare financial reports, and assist in budgeting and forecasting processes.',
-    qualifications: 'Finance or Accounting degree, Excel proficiency, analytical mindset',
-    email: 'recruitment@ghanabankingcorp.com',
-    posted: '2024-08-21',
-    created_at: '2024-08-21'
-  },
-  {
-    _id: '6',
-    title: 'Project Manager',
-    employer: 'BuildRight Construction',
-    location: 'Tema, Ghana',
-    sector: 'Construction',
-    experience_level: 'Senior',
-    salary: 'GHS 12,000 - 18,000',
-    field: 'Project Management',
-    experience_length: '4+ years',
-    job_description: 'Oversee construction projects from inception to completion, manage teams, ensure quality standards, and maintain project timelines and budgets.',
-    qualifications: 'Engineering degree, PMP certification preferred, construction industry experience',
-    email: 'pm@buildright.gh',
-    posted: '2024-08-20',
-    created_at: '2024-08-20'
-  }
-]
-
 // Computed properties
-const uniqueLocations = computed(() => {
-  const locations = jobs.value.map(job => job.location).filter(Boolean)
+const uniqueLocations = computed((): string[] => {
+  const locations = jobs.value.map(job => job.location).filter(Boolean) as string[]
   return [...new Set(locations)].sort()
 })
 
-const uniqueSectors = computed(() => {
-  const sectors = jobs.value.map(job => job.sector).filter(Boolean)
+const uniqueSectors = computed((): string[] => {
+  const sectors = jobs.value.map(job => job.sector).filter(Boolean) as string[]
   return [...new Set(sectors)].sort()
 })
 
-const uniqueExperienceLevels = computed(() => {
-  const levels = jobs.value.map(job => job.experience_level).filter(Boolean)
+const uniqueExperienceLevels = computed((): string[] => {
+  const levels = jobs.value.map(job => job.experience_level).filter(Boolean) as string[]
   return [...new Set(levels)].sort()
 })
 
-const filteredJobs = computed(() => {
+const filteredJobs = computed((): Job[] => {
   let filtered = jobs.value
 
-  // Search filter
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(job =>
-      job.title?.toLowerCase().includes(query) ||
-      job.employer?.toLowerCase().includes(query) ||
-      job.job_description?.toLowerCase().includes(query) ||
-      job.location?.toLowerCase().includes(query) ||
-      job.sector?.toLowerCase().includes(query)
+      (job.title?.toLowerCase() || '').includes(query) ||
+      (job.employer?.toLowerCase() || '').includes(query) ||
+      (job.job_description?.toLowerCase() || '').includes(query) ||
+      (job.location?.toLowerCase() || '').includes(query) ||
+      (job.sector?.toLowerCase() || '').includes(query)
     )
   }
 
-  // Apply filters
   if (filters.value.location) {
     filtered = filtered.filter(job => job.location === filters.value.location)
   }
@@ -662,13 +932,12 @@ const filteredJobs = computed(() => {
     filtered = filtered.filter(job => job.experience_level === filters.value.experience_level)
   }
 
-  // Sorting
   filtered.sort((a, b) => {
     switch (sortBy.value) {
       case 'newest':
-        return new Date(b.created_at) - new Date(a.created_at)
+        return new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
       case 'oldest':
-        return new Date(a.created_at) - new Date(b.created_at)
+        return new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime()
       case 'title':
         return (a.title || '').localeCompare(b.title || '')
       case 'company':
@@ -681,16 +950,18 @@ const filteredJobs = computed(() => {
   return filtered
 })
 
-const totalPages = computed(() => Math.ceil(filteredJobs.value.length / jobsPerPage.value))
+const totalPages = computed((): number => {
+  return Math.max(1, Math.ceil(filteredJobs.value.length / jobsPerPage.value))
+})
 
-const paginatedJobs = computed(() => {
+const paginatedJobs = computed((): Job[] => {
   const start = (currentPage.value - 1) * jobsPerPage.value
   const end = start + jobsPerPage.value
   return filteredJobs.value.slice(start, end)
 })
 
-const visiblePages = computed(() => {
-  const pages = []
+const visiblePages = computed((): number[] => {
+  const pages: number[] = []
   const maxVisible = 5
   let startPage = Math.max(1, currentPage.value - Math.floor(maxVisible / 2))
   let endPage = Math.min(totalPages.value, startPage + maxVisible - 1)
@@ -706,13 +977,238 @@ const visiblePages = computed(() => {
   return pages
 })
 
-// Methods
-const fetchJobs = async () => {
+// Application Methods
+const applyToJob = (job: Job): void => {
+  // Check if user already applied for this job
+  const existingApplication = userApplications.value.find(
+    (app: Application) => app.jobId === job._id && app.status !== 'withdrawn'
+  )
+  
+  if (existingApplication) {
+    alertRef.value?.error('You have already applied for this position', {
+      title: 'Already Applied',
+      duration: 3000
+    })
+    return
+  }
+
+  selectedJob.value = job
+  viewingJob.value = job
+  applicationForm.value.jobId = job._id
+  
+  // Pre-fill form with user data if available
+  if (user.value) {
+    const nameParts = (user.value.name || '').split(' ')
+    applicationForm.value.applicantDetails.firstName = nameParts[0] || ''
+    applicationForm.value.applicantDetails.lastName = nameParts.slice(1).join(' ') || ''
+    applicationForm.value.applicantDetails.email = user.value.email || ''
+  }
+  
+  showApplicationModal.value = true
+}
+
+const submitApplication = async (): Promise<void> => {
+  // Validate form using composable
+  const validation = applicationsComposable.validateApplicationForm(applicationForm.value, resumeFile.value || undefined)
+  
+  if (!validation.isValid) {
+    applicationErrors.value = validation.errors
+    alertRef.value?.error('Please correct the errors in the form', {
+      title: 'Validation Error',
+      duration: 4000
+    })
+    return
+  }
+
+  applicationLoading.value = true
+  applicationErrors.value = {}
+
+  try {
+    // Format form data using composable
+    const formData = applicationsComposable.formatApplicationData(
+      applicationForm.value, 
+      resumeFile.value || undefined
+    )
+
+    // Submit application using composable
+    const response = await applicationsComposable.submitApplication(formData)
+
+    if (response.success) {
+      alertRef.value?.success('Application submitted successfully! We will review your submission and get back to you within 5-7 business days.', {
+        title: 'Application Submitted!',
+        duration: 5000
+      })
+      
+      showApplicationModal.value = false
+      resetApplicationForm()
+      
+      // Refresh user applications
+      await fetchUserApplications()
+    }
+
+  } catch (error: any) {
+    console.error('Error submitting application:', error)
+    
+    let errorMessage = 'Failed to submit application. Please try again.'
+    let errorTitle = 'Submission Failed'
+    
+    if (error.status === 409) {
+      errorMessage = 'You have already applied for this position this year.'
+      errorTitle = 'Duplicate Application'
+    } else if (error.data?.errors) {
+      // Handle validation errors from backend
+      error.data.errors.forEach((err: any) => {
+        applicationErrors.value[err.field] = err.message
+      })
+      errorMessage = 'Please correct the errors and try again'
+      errorTitle = 'Validation Error'
+    } else if (error.data?.message) {
+      errorMessage = error.data.message
+    }
+    
+    alertRef.value?.error(errorMessage, {
+      title: errorTitle,
+      duration: 6000
+    })
+  } finally {
+    applicationLoading.value = false
+  }
+}
+
+// Fetch user applications using composable
+const fetchUserApplications = async (): Promise<void> => {
+  if (!authStore.isAuthenticated || !user.value?.id) {
+    alertRef.value?.error('Please log in to access this page', {
+      title: 'Authentication Required',
+      duration: 0
+    })
+    await navigateTo('/auth/login')
+    return
+  }
+
+  applicationsLoading.value = true
+  try {
+    const response = await applicationsComposable.getUserApplications(user.value?.id, {
+      page: 1,
+      limit: 100,
+      sortBy: 'submittedAt',
+      sortOrder: 'desc'
+    })
+
+    if (response.success) {
+      userApplications.value = response.data
+    }
+  } catch (error: any) {
+    console.error('Error fetching applications:', error)
+    alertRef.value?.error('Failed to load your applications', {
+      title: 'Loading Error',
+      duration: 4000
+    })
+  } finally {
+    applicationsLoading.value = false
+  }
+}
+
+// Withdraw application method
+const withdrawApplication = async (applicationId: string): Promise<void> => {
+  try {
+    await applicationsComposable.withdrawApplication(applicationId)
+    
+    alertRef.value?.success('Application withdrawn successfully', {
+      title: 'Application Withdrawn',
+      duration: 3000
+    })
+    
+    // Refresh applications
+    await fetchUserApplications()
+  } catch (error: any) {
+    console.error('Error withdrawing application:', error)
+    alertRef.value?.error('Failed to withdraw application', {
+      title: 'Error',
+      duration: 4000
+    })
+  }
+}
+
+// Form validation and utility methods
+const handleFileUpload = (event: Event): void => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (file) {
+    resumeFile.value = file
+    applicationErrors.value.resume = ''
+  }
+}
+
+const addSkill = (): void => {
+  if (newSkill.value.trim() && !applicationForm.value.skills.includes(newSkill.value.trim())) {
+    applicationForm.value.skills.push(newSkill.value.trim())
+    newSkill.value = ''
+  }
+}
+
+const removeSkill = (index: number): void => {
+  applicationForm.value.skills.splice(index, 1)
+}
+
+const resetApplicationForm = (): void => {
+  applicationForm.value = {
+    jobId: '',
+    applicantDetails: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      address: '',
+      linkedin: '',
+      portfolio: ''
+    },
+    coverLetter: '',
+    skills: [],
+    experience: {
+      years: 0,
+      description: ''
+    }
+  }
+  resumeFile.value = null
+  newSkill.value = ''
+  applicationErrors.value = {}
+}
+
+const closeApplicationModal = (): void => {
+  showApplicationModal.value = false
+  resetApplicationForm()
+}
+
+// Check if user has applied for a job
+const hasAppliedToJob = (jobId: string): boolean => {
+  return userApplications.value.some(
+    (app: Application) => app.jobId === jobId && app.status !== 'withdrawn'
+  )
+}
+
+// Get application status text and styling using composable
+const getApplyButtonText = (job: Job): string => {
+  if (hasAppliedToJob(job._id)) {
+    const application = userApplications.value.find((app: Application) => app.jobId === job._id)
+    return `Applied (${applicationsComposable.getStatusText(application?.status || 'submitted')})`
+  }
+  return 'Apply Now'
+}
+
+const getApplyButtonClass = (job: Job): string => {
+  if (hasAppliedToJob(job._id)) {
+    return 'applied-btn'
+  }
+  return 'apply-btn'
+}
+
+// Jobs fetching method
+const fetchJobs = async (): Promise<void> => {
   loading.value = true
   error.value = null
   
   try {
-    // Build query parameters
     const queryParams = new URLSearchParams()
     
     if (searchQuery.value) queryParams.append('search', searchQuery.value)
@@ -720,90 +1216,87 @@ const fetchJobs = async () => {
     if (filters.value.sector) queryParams.append('sector', filters.value.sector)
     if (filters.value.experience_level) queryParams.append('experience_level', filters.value.experience_level)
     if (sortBy.value) queryParams.append('sort', sortBy.value)
-    if (currentPage.value) queryParams.append('page', currentPage.value)
-    queryParams.append('limit', jobsPerPage.value)
+    if (currentPage.value) queryParams.append('page', currentPage.value.toString())
+    queryParams.append('limit', jobsPerPage.value.toString())
 
     const queryString = queryParams.toString()
-    const url = `https://dark-caldron-448714-u5.uc.r.appspot.com/getalljobsHome${queryString ? '?' + queryString : ''}`
+    const url = `${API_ROUTES.BASE_URL}getjobs${queryString ? '?' + queryString : ''}`
     
-    const response = await $fetch(url)
+    // This is a mock API call
+    const response = await $fetch<any>(url)
     
-    // Handle both response formats
     if (response.success) {
       jobs.value = response.data || []
-      
-      // Update filter options if available
-      if (response.filters) {
-        // You can use these to populate filter dropdowns dynamically
-        console.log('Available filters:', response.filters)
-      }
     } else {
-      throw new Error(response.message || 'Failed to fetch jobs')
+      throw new Error('Failed to fetch jobs')
     }
-  } catch (err) {
+  } catch (err: any) {
     error.value = err.message || 'Failed to fetch jobs'
     console.error('Error fetching jobs:', err)
+    
+    alertRef.value?.error('Failed to load job opportunities', {
+      title: 'Loading Error',
+      duration: 4000
+    })
   } finally {
     loading.value = false
   }
 }
 
-const handleSearch = () => {
-  setCurrentPage(1)
-}
-
-const applyFilters = () => {
+const handleSearch = (): void => {
   currentPage.value = 1
+  fetchJobs()
 }
 
-const applySorting = () => {
+const applyFilters = (): void => {
   currentPage.value = 1
+  fetchJobs()
 }
 
-const clearFilters = () => {
+const applySorting = (): void => {
+  currentPage.value = 1
+  fetchJobs()
+}
+
+const clearFilters = (): void => {
   filters.value = {
     location: '',
     sector: '',
     experience_level: ''
   }
   currentPage.value = 1
+  fetchJobs()
 }
 
-const clearAllFilters = () => {
+const clearAllFilters = (): void => {
   searchQuery.value = ''
   clearFilters()
 }
 
-const saveJob = (job) => {
+const saveJob = (job: Job): void => {
   const index = savedJobs.value.indexOf(job._id)
   if (index > -1) {
     savedJobs.value.splice(index, 1)
+    alertRef.value?.success('Job removed from saved', {
+      title: 'Removed',
+      duration: 2000
+    })
   } else {
     savedJobs.value.push(job._id)
+    alertRef.value?.success('Job saved successfully', {
+      title: 'Saved',
+      duration: 2000
+    })
   }
 }
 
-const applyToJob = (job) => {
-  if (job.url) {
-    window.open(job.url, '_blank')
-  } else if (job.email) {
-    const subject = encodeURIComponent(`Application for ${job.title} Position`)
-    const body = encodeURIComponent(`Dear ${job.employer || 'Hiring Manager'},\n\nI am writing to apply for the ${job.title} position.\n\nBest regards,\n[Your Name]`)
-    window.location.href = `mailto:${job.email}?subject=${subject}&body=${body}`
-  }
-}
-
-const openExternalLink = (url) => {
-  window.open(url, '_blank')
-}
-
-const formatDate = (dateString) => {
+const formatDate = (dateString: string): string => {
   if (!dateString) return ''
   
   try {
     const date = new Date(dateString)
     const now = new Date()
-    const diffTime = Math.abs(now - date)
+    const diffTime = Math.abs(now.getTime() - date.getTime())
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     
     if (diffDays === 1) return 'yesterday'
@@ -818,8 +1311,20 @@ const formatDate = (dateString) => {
 }
 
 // Lifecycle
-onMounted(() => {
-  fetchJobs()
+onMounted(async (): Promise<void> => {
+  if (!authStore.isAuthenticated || !user.value?.id) {
+    alertRef.value?.error('Please log in to access this page', {
+      title: 'Authentication Required',
+      duration: 0
+    })
+    await navigateTo('/auth/login')
+    return
+  }
+
+  await Promise.all([
+    fetchJobs(),
+    fetchUserApplications()
+  ])
 })
 
 // Watchers
@@ -837,6 +1342,10 @@ watch(() => filteredJobs.value.length, () => {
     position: relative;
     overflow-x: hidden;
     height: 100vh;
+}
+
+.applied-btn {
+  @apply px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white text-sm font-bold rounded-xl cursor-default shadow-lg shadow-green-500/25;
 }
 
 .main-content {
@@ -938,475 +1447,520 @@ watch(() => filteredJobs.value.length, () => {
 }
 
 .tips-btn {
-    @apply text-slate-700 hover:text-slate-900;
+    @apply text-slate-700 hover:text-slate-900
 }
 
 /* Filter Styles */
 .filter-group {
-    @apply space-y-2;
+@apply space-y-2;
 }
 
 .filter-label {
-    @apply block text-sm font-bold text-slate-700;
+@apply block text-sm font-bold text-slate-700;
 }
 
 .filter-select-wrapper {
-    @apply relative;
+@apply relative;
 }
 
 .filter-select {
-    @apply w-full appearance-none bg-white/60 backdrop-blur-xl border border-white/40 rounded-2xl px-4 py-3 pl-12 text-sm font-medium text-slate-700 focus:ring-4 focus:ring-blue-500/20 focus:outline-none cursor-pointer transition-all duration-300;
+@apply w-full appearance-none bg-white/60 backdrop-blur-xl border border-white/40 rounded-2xl px-4 py-3 pl-12 text-sm font-medium text-slate-700 focus:ring-4 focus:ring-blue-500/20 focus:outline-none cursor-pointer transition-all duration-300;
 }
 
 .filter-icon {
-    @apply absolute left-4 top-3.5 w-4 h-4 text-slate-400 pointer-events-none;
+@apply absolute left-4 top-3.5 w-4 h-4 text-slate-400 pointer-events-none;
 }
 
 /* Main Dashboard Content */
 .dashboard-main {
-    @apply flex-1 p-6 flex flex-col space-y-8;
-    min-height: 0;
-    overflow-y: auto;
-    padding-bottom: 2rem;
+@apply flex-1 p-6 flex flex-col space-y-8;
+min-height: 0;
+overflow-y: auto;
+padding-bottom: 2rem;
 }
 
 /* Job Cards */
 .job-card {
-    @apply relative rounded-3xl transition-all duration-500 cursor-pointer;
-    @apply hover:-translate-y-2 hover:scale-[1.02];
-    backdrop-filter: blur(20px);
+@apply relative rounded-3xl transition-all duration-500 cursor-pointer;
+@apply hover:-translate-y-2 hover:scale-[1.02];
+backdrop-filter: blur(20px);
 }
 
 .card-bg {
-    @apply absolute inset-0 rounded-3xl bg-white/70 border border-white/60;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+@apply absolute inset-0 rounded-3xl bg-white/70 border border-white/60;
+box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
 }
 
 .card-glow {
-    @apply absolute -inset-px rounded-3xl opacity-0 transition-all duration-500;
-    filter: blur(12px);
+@apply absolute -inset-px rounded-3xl opacity-0 transition-all duration-500;
+filter: blur(12px);
 }
 
 .job-card:hover .card-glow {
-    @apply opacity-100;
+@apply opacity-100;
 }
 
 .card-content {
-    @apply relative z-10 p-6 space-y-6;
+@apply relative z-10 p-6 space-y-6;
 }
 
 .job-header {
-    @apply flex items-start justify-between;
+@apply flex items-start justify-between;
 }
 
 .job-main-info {
-    @apply flex-1 min-w-0;
+@apply flex-1 min-w-0;
 }
 
 .job-title {
-    @apply text-lg font-bold text-slate-900 mb-1 line-clamp-2;
+@apply text-lg font-bold text-slate-900 mb-1 line-clamp-2;
 }
 
 .company-name {
-    @apply text-blue-600 font-semibold;
+@apply text-blue-600 font-semibold;
 }
 
 .salary-badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25;
+@apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25;
 }
 
 .job-details {
-    @apply space-y-2;
+@apply space-y-2;
 }
 
 .detail-item {
-    @apply flex items-center text-sm text-slate-600;
+@apply flex items-center text-sm text-slate-600;
 }
 
 .detail-icon {
-    @apply w-4 h-4 mr-3 flex-shrink-0;
+@apply w-4 h-4 mr-3 flex-shrink-0;
 }
 
 .job-description {
-    @apply text-sm text-slate-600 leading-relaxed;
+@apply text-sm text-slate-600 leading-relaxed;
 }
 
 .job-tags {
-    @apply flex flex-wrap gap-2;
+@apply flex flex-wrap gap-2;
 }
 
 .tag {
-    @apply inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium;
+@apply inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium;
 }
 
 .tag-primary {
-    @apply bg-blue-100 text-blue-700;
+@apply bg-blue-100 text-blue-700;
 }
 
 .tag-secondary {
-    @apply bg-slate-100 text-slate-700;
+@apply bg-slate-100 text-slate-700;
 }
 
 .job-footer {
-    @apply flex items-center justify-between;
+@apply flex items-center justify-between;
 }
 
 .view-details-btn {
-    @apply flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700 transition-all duration-200 space-x-2;
+@apply flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700 transition-all duration-200 space-x-2;
 }
 
 .job-actions {
-    @apply flex items-center space-x-3;
+@apply flex items-center space-x-3;
 }
 
 .save-btn {
-    @apply p-2 rounded-full transition-all duration-300 text-slate-400 hover:text-red-500;
+@apply p-2 rounded-full transition-all duration-300 text-slate-400 hover:text-red-500;
 }
 
 .save-btn.saved {
-    @apply text-red-500;
+@apply text-red-500;
 }
 
 .apply-btn {
-    @apply px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-bold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg shadow-blue-500/25 hover:scale-105;
+@apply px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-bold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg shadow-blue-500/25 hover:scale-105;
 }
 
 /* Modal Styles */
 .modal-overlay {
-    @apply fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50;
-    backdrop-filter: blur(8px);
+@apply fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50;
+backdrop-filter: blur(8px);
 }
 
-.job-modal {
-    @apply relative bg-white/95 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden;
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+.application-modal {
+@apply relative bg-white/95 rounded-3xl max-w-5xl w-full max-h-[95vh] overflow-hidden;
+backdrop-filter: blur(20px);
+border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .modal-backdrop {
-    @apply absolute inset-0 bg-white/80 backdrop-blur-xl;
+@apply absolute inset-0 bg-white/80 backdrop-blur-xl;
 }
 
 .modal-header {
-    @apply relative z-10 flex items-center justify-between p-8 border-b border-slate-200/60;
+@apply relative z-10 flex items-center justify-between p-8 border-b border-slate-200/60;
 }
 
 .modal-title-section {
-    @apply space-y-2;
+@apply space-y-2;
 }
 
 .modal-title {
-    @apply text-2xl font-black text-slate-900;
+@apply text-2xl font-black text-slate-900;
 }
 
 .modal-company {
-    @apply text-lg font-semibold text-blue-600;
+@apply text-lg font-semibold text-blue-600;
 }
 
 .title-decoration {
-    @apply w-16 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full;
+@apply w-16 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full;
 }
 
 .modal-close {
-    @apply p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100/70 transition-all duration-200;
+@apply p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100/70 transition-all duration-200;
 }
 
 .modal-content {
-    @apply relative z-10 flex-1 overflow-hidden;
+@apply relative z-10 flex-1 overflow-hidden;
 }
 
 .modal-scroll-area {
-    @apply h-96 overflow-y-auto p-8 space-y-8;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+@apply h-96 overflow-y-auto p-8 space-y-8;
+scrollbar-width: thin;
+scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
 }
 
 .modal-scroll-area::-webkit-scrollbar {
-    width: 6px;
+width: 6px;
 }
 
 .modal-scroll-area::-webkit-scrollbar-track {
-    background: transparent;
+background: transparent;
 }
 
 .modal-scroll-area::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.5));
-    border-radius: 3px;
+background: linear-gradient(to bottom, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.5));
+border-radius: 3px;
 }
 
-.modal-section {
-    @apply space-y-4;
-}
-
-.modal-section.full-width {
-    @apply col-span-full;
+/* Form Styles */
+.form-section {
+@apply p-6 bg-slate-50/50 rounded-2xl border border-slate-200/60 space-y-4;
+backdrop-filter: blur(10px);
 }
 
 .section-title {
-    @apply text-lg font-bold text-slate-900 flex items-center space-x-2;
+@apply flex items-center space-x-3 text-lg font-bold text-slate-900 pb-4 border-b border-slate-200/60;
 }
 
-.details-grid {
-    @apply space-y-4;
+.form-group {
+@apply space-y-2;
 }
 
-.detail-row {
-    @apply flex items-start space-x-3 p-4 bg-slate-50/70 rounded-2xl backdrop-blur-xl;
+.form-label {
+@apply block text-sm font-semibold text-slate-700;
 }
 
-.detail-row-icon {
-    @apply w-5 h-5 text-slate-500 mt-0.5;
+.form-input {
+@apply w-full px-4 py-3 bg-white/70 border border-slate-300/60 rounded-xl text-slate-900 placeholder-slate-500 backdrop-blur-xl transition-all duration-200;
+@apply focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500;
 }
 
-.detail-label {
-    @apply block text-xs font-bold text-slate-500 uppercase tracking-wide;
+.form-input.error {
+@apply border-red-500 focus:ring-red-500/20 focus:border-red-500;
 }
 
-.detail-value {
-    @apply block text-sm font-semibold text-slate-900;
+.error-message {
+@apply text-xs font-medium text-red-600;
 }
 
-.requirements-content {
-    @apply space-y-4;
+/* File Upload Styles */
+.file-upload-area {
+@apply border-2 border-dashed border-slate-300 rounded-xl p-6 text-center transition-colors;
+@apply hover:border-blue-400 hover:bg-blue-50/50;
 }
 
-.requirement-item {
-    @apply p-4 bg-slate-50/70 rounded-2xl backdrop-blur-xl;
+.file-upload-label {
+@apply cursor-pointer flex flex-col items-center justify-center;
 }
 
-.requirement-label {
-    @apply block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2;
+/* Skills Styles */
+.skill-tag {
+@apply inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full;
+@apply border border-blue-200;
 }
 
-.requirement-text {
-    @apply text-sm text-slate-700 leading-relaxed;
+/* Form Actions */
+.form-actions {
+@apply flex items-center justify-end space-x-4 pt-6 border-t border-slate-200/60;
 }
 
-.description-content {
-    @apply p-6 bg-slate-50/70 rounded-2xl backdrop-blur-xl;
+.btn-primary {
+@apply flex items-center justify-center px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-2xl;
+@apply hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-500/20;
+@apply disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105;
 }
 
-.contact-card {
-    @apply p-6 bg-gradient-to-r from-slate-50/70 to-blue-50/70 rounded-2xl backdrop-blur-xl border border-white/40;
+.btn-secondary {
+@apply px-8 py-3 bg-white/70 text-slate-700 font-bold rounded-2xl border border-slate-300/60 backdrop-blur-xl;
+@apply hover:bg-slate-50/70 focus:outline-none focus:ring-4 focus:ring-slate-500/20;
+@apply disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300;
 }
 
-.contact-info {
-    @apply flex items-center space-x-4;
+/* Applications summary styles */
+.applications-summary {
+@apply mb-6;
 }
 
-.contact-icon-wrapper {
-    @apply relative w-12 h-12;
+.summary-card {
+@apply bg-white/70 backdrop-blur-xl rounded-2xl p-6 border border-white/40;
 }
 
-.contact-icon-bg {
-    @apply absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl;
+.summary-header {
+@apply flex items-center space-x-3 mb-4;
 }
 
-.contact-icon {
-    @apply relative z-10 w-6 h-6 text-white;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.summary-title {
+@apply text-lg font-bold text-slate-900;
 }
 
-.contact-email {
-    @apply text-slate-700 font-semibold;
+.summary-stats {
+@apply grid grid-cols-3 gap-4;
 }
 
-.modal-footer {
-    @apply relative z-10 flex items-center justify-end pt-6 px-8 pb-8 border-t border-slate-200/60 space-x-4;
+.stat-item {
+@apply text-center;
 }
 
-.footer-btn {
-    @apply flex items-center space-x-2 px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 hover:scale-105;
+.stat-number {
+@apply block text-2xl font-black text-blue-600;
 }
 
-.footer-btn.primary {
-    @apply bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/25 hover:from-blue-700 hover:to-blue-800;
-}
-
-.footer-btn.secondary {
-    @apply bg-white/60 text-slate-700 border border-white/40 backdrop-blur-xl hover:bg-slate-50/70;
-}
-
-.footer-btn.secondary.saved {
-    @apply text-red-600 hover:text-red-700 border-red-200;
-}
-
-.footer-btn.tertiary {
-    @apply bg-slate-100/70 text-slate-600 hover:bg-slate-200/70;
+.stat-label {
+@apply block text-xs font-medium text-slate-600 mt-1;
 }
 
 /* Pagination */
 .pagination-container {
-    @apply flex items-center justify-between mt-8 p-6 bg-white/60 backdrop-blur-xl rounded-3xl border border-white/40;
+@apply flex items-center justify-between mt-8 p-6 bg-white/60 backdrop-blur-xl rounded-3xl border border-white/40;
 }
 
 .pagination-info {
-    @apply text-sm font-medium text-slate-600;
+@apply text-sm font-medium text-slate-600;
 }
 
 .pagination-controls {
-    @apply flex items-center space-x-2;
+@apply flex items-center space-x-2;
 }
 
 .pagination-btn {
-    @apply flex items-center space-x-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white/60 border border-white/40 rounded-xl hover:bg-slate-50/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 backdrop-blur-xl;
+@apply flex items-center space-x-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white/60 border border-white/40 rounded-xl hover:bg-slate-50/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 backdrop-blur-xl;
 }
 
 .pagination-numbers {
-    @apply flex items-center space-x-1;
+@apply flex items-center space-x-1;
 }
 
 .page-btn {
-    @apply px-3 py-2 text-sm font-bold rounded-xl transition-all duration-300 backdrop-blur-xl;
+@apply px-3 py-2 text-sm font-bold rounded-xl transition-all duration-300 backdrop-blur-xl;
 }
 
 .page-btn:not(.active) {
-    @apply text-slate-600 bg-white/60 border border-white/40 hover:bg-slate-50/70;
+@apply text-slate-600 bg-white/60 border border-white/40 hover:bg-slate-50/70;
 }
 
 .page-btn.active {
-    @apply bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/25;
+@apply bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/25;
 }
 
 /* Loading States */
 .loading-state {
-    @apply flex flex-col items-center justify-center py-16 space-y-4;
+@apply flex flex-col items-center justify-center py-16 space-y-4;
 }
 
 .loading-spinner {
-    @apply w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full;
-    animation: spin 1s linear infinite;
+@apply w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full;
+animation: spin 1s linear infinite;
 }
 
 .loading-text {
-    @apply text-slate-600 font-semibold text-lg;
+@apply text-slate-600 font-semibold text-lg;
 }
 
 .error-state {
-    @apply flex flex-col items-center justify-center py-16 space-y-4 bg-red-50/70 rounded-3xl mx-6 border border-red-200/60 backdrop-blur-xl;
+@apply flex flex-col items-center justify-center py-16 space-y-4 bg-red-50/70 rounded-3xl mx-6 border border-red-200/60 backdrop-blur-xl;
 }
 
 /* Utilities */
 .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+overflow: hidden;
 }
 
 .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+display: -webkit-box;
+-webkit-line-clamp: 3;
+-webkit-box-orient: vertical;
+overflow: hidden;
 }
 
 /* Custom Scrollbar */
 .main-content {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+scrollbar-width: thin;
+scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
 }
 
 .main-content::-webkit-scrollbar {
-    width: 6px;
+width: 6px;
 }
 
 .main-content::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 3px;
+background: transparent;
+border-radius: 3px;
 }
 
 .main-content::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.5));
-    border-radius: 3px;
-    transition: all 0.3s ease;
+background: linear-gradient(to bottom, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.5));
+border-radius: 3px;
+transition: all 0.3s ease;
 }
 
 .main-content::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.5), rgba(148, 163, 184, 0.7));
+background: linear-gradient(to bottom, rgba(148, 163, 184, 0.5), rgba(148, 163, 184, 0.7));
 }
 
 .dashboard-main {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+scrollbar-width: thin;
+scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
 }
 
 .dashboard-main::-webkit-scrollbar {
-    width: 6px;
+width: 6px;
 }
 
 .dashboard-main::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 3px;
+background: transparent;
+border-radius: 3px;
 }
 
 .dashboard-main::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.5));
-    border-radius: 3px;
-    transition: all 0.3s ease;
+background: linear-gradient(to bottom, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.5));
+border-radius: 3px;
+transition: all 0.3s ease;
 }
 
 .dashboard-main::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.5), rgba(148, 163, 184, 0.7));
+background: linear-gradient(to bottom, rgba(148, 163, 184, 0.5), rgba(148, 163, 184, 0.7));
 }
 
 /* Animations */
 @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-6px); }
+0%, 100% { transform: translateY(0px); }
+50% { transform: translateY(-6px); }
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+to { transform: rotate(360deg); }
 }
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-    .main-content-adjusted {
-        margin-left: 0;
-    }
+.main-content-adjusted {
+margin-left: 0;
+}
 }
 
 @media (max-width: 640px) {
-    .dashboard-title {
-        @apply text-2xl;
-    }
-    
-    .header-content {
-        @apply flex-col space-y-4;
-    }
-    
-    .header-actions {
-        @apply flex-col w-full space-y-3 space-x-0;
-    }
-    
-    .header-actions > * {
-        @apply w-full;
-    }
-    
-    .pagination-container {
-        @apply flex-col space-y-4;
-    }
-    
-    .pagination-controls {
-        @apply w-full justify-center;
-    }
+.dashboard-title {
+@apply text-2xl;
+}
+.header-content {
+    @apply flex-col space-y-4;
+}
+
+.header-actions {
+    @apply flex-col w-full space-y-3 space-x-0;
+}
+
+.header-actions > * {
+    @apply w-full;
+}
+
+.pagination-container {
+    @apply flex-col space-y-4;
+}
+
+.pagination-controls {
+    @apply w-full justify-center;
+}
 }
 
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-    .floating-orb,
-    .job-card,
-    .footer-btn,
-    .apply-btn {
-        animation: none;
-    }
-    
-    .job-card:hover {
-        transform: none;
-    }
+.floating-orb,
+.job-card,
+.footer-btn,
+.apply-btn {
+animation: none;
+}
+.job-card:hover {
+    transform: none;
+}
+}
+/* Job Details Modal Styles */
+.job-details-modal {
+  @apply relative bg-white/95 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.job-details-content {
+  @apply space-y-6;
+}
+
+.details-section {
+  @apply p-6 bg-slate-50/50 rounded-2xl border border-slate-200/60;
+  backdrop-filter: blur(10px);
+}
+
+.info-item {
+  @apply flex items-center space-x-3 text-sm;
+}
+
+.info-icon {
+  @apply w-4 h-4 text-slate-500 flex-shrink-0;
+}
+
+.info-label {
+  @apply font-semibold text-slate-700 min-w-0;
+}
+
+.info-value {
+  @apply text-slate-600 flex-1;
+}
+
+.description-content {
+  @apply text-slate-700 leading-relaxed text-sm space-y-3;
+}
+
+.description-content p {
+  @apply mb-3;
+}
+
+.description-content ul, .description-content ol {
+  @apply ml-4 space-y-1;
+}
+
+.description-content ul {
+  @apply list-disc;
+}
+
+.description-content ol {
+  @apply list-decimal;
+}
+.details-actions {
+  @apply flex items-center justify-end space-x-4 pt-6 border-t border-slate-200/60;
 }
 </style>
