@@ -219,7 +219,7 @@
           <div class="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
             <div
               v-for="scholarship in paginatedScholarships"
-              :key="scholarship._id || scholarship.id || `scholarship-${Math.random()}`"
+              :key="scholarship.id || `scholarship-${Math.random()}`"
               class="scholarship-card group"
             >
               <!-- Card Background -->
@@ -306,12 +306,12 @@
                       @click="saveScholarship(scholarship)"
                       :class="[
                         'save-btn',
-                        savedScholarships.includes(scholarship._id || scholarship.id) ? 'saved' : ''
+                        savedScholarships.includes( scholarship.id) ? 'saved' : ''
                       ]"
-                      :title="savedScholarships.includes(scholarship._id || scholarship.id) ? 'Remove from saved' : 'Save scholarship'"
+                      :title="savedScholarships.includes(scholarship.id) ? 'Remove from saved' : 'Save scholarship'"
                       :disabled="loading"
                     >
-                      <Heart :fill="savedScholarships.includes(scholarship._id || scholarship.id) ? 'currentColor' : 'none'" class="w-4 h-4" />
+                      <Heart :fill="savedScholarships.includes(scholarship.id) ? 'currentColor' : 'none'" class="w-4 h-4" />
                     </button>
                     
                     <button
@@ -553,7 +553,6 @@ const API_BASE_URL = 'https://dark-caldron-448714-u5.uc.r.appspot.com'
 
 // Type definitions
 interface Scholarship {
-  _id?: string;
   id?: string;
   title?: string;
   provider?: string;
@@ -859,15 +858,13 @@ const fetchScholarships = async (): Promise<void> => {
         scholarshipData = []
       }
       
-      console.log('Extracted scholarship data:', scholarshipData)
-      
       // Force reactive update
       allScholarships.value = [...scholarshipData]
       await nextTick()
       
       console.log('Scholarships loaded:', allScholarships.value.length)
     } else {
-      throw new Error(response?.message || 'Failed to fetch scholarships')
+      throw new Error(response?.message)
     }
   } catch (err: any) {
     console.error('Error fetching scholarships:', err)
@@ -889,7 +886,7 @@ const getScholarshipDetails = async (scholarshipId: string) => {
     if (response.success) {
       return response.data
     } else {
-      throw new Error(response.message || 'Failed to fetch scholarship details')
+      throw new Error(response.message)
     }
   } catch (err: any) {
     console.error('Error fetching scholarship details:', err)
@@ -978,7 +975,7 @@ const prevPage = () => {
 const openScholarshipModal = async (scholarship: Scholarship): Promise<void> => {
   try {
     // Fetch fresh scholarship details if we have an ID
-    const scholarshipId = scholarship._id || scholarship.id
+    const scholarshipId = scholarship.id
     if (scholarshipId) {
       const freshData = await getScholarshipDetails(scholarshipId)
       viewingScholarship.value = freshData
@@ -997,7 +994,7 @@ const closeScholarshipModal = (): void => {
 }
 
 const saveScholarship = (scholarship: Scholarship): void => {
-  const scholarshipId = scholarship._id || scholarship.id
+  const scholarshipId = scholarship.id
   if (!scholarshipId) return
 
   const index = savedScholarships.value.indexOf(scholarshipId)
