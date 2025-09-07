@@ -57,10 +57,27 @@
       </div>
 
       <!-- Filters Panel -->
+      <!-- Update the Filters Panel section -->
+
       <div v-if="showFilters" class="relative">
         <div class="absolute inset-0 bg-white/70 backdrop-blur-xl border-b border-slate-200/60"></div>
         <div class="relative z-10 px-6 py-6">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-6"> <!-- Changed from 4 to 5 columns -->
+            
+            <!-- Country Filter - New -->
+            <div class="filter-group">
+              <label class="filter-label">Country</label>
+              <div class="filter-select-wrapper">
+                <select v-model="filters.country" @change="applyFilters" class="filter-select">
+                  <option value="">All Countries</option>
+                  <option v-for="country in uniqueCountries" :key="country" :value="country">
+                    {{ country }}
+                  </option>
+                </select>
+                <Globe class="filter-icon" />
+              </div>
+            </div>
+
             <!-- Location Filter -->
             <div class="filter-group">
               <label class="filter-label">Location</label>
@@ -253,7 +270,13 @@
                     <MapPin class="detail-icon" />
                     <span>{{ job.location }}</span>
                   </div>
-                  
+                  <div v-if="job.location" class="detail-item">
+                    <MapPin class="detail-icon" />
+                    <span>{{ job.location }}</span>
+                    <span v-if="extractCountryFromLocation(job.location)" class="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                      {{ extractCountryFromLocation(job.location) }}
+                    </span>
+                  </div>
                   <div v-if="job.sector" class="detail-item">
                     <Building class="detail-icon" />
                     <span>{{ job.sector }}</span>
@@ -787,7 +810,8 @@ import {
   Upload,
   Plus,
   MessageSquare,
-  Send
+  Send,
+  Globe
 } from 'lucide-vue-next'
 
 // Page metadata
@@ -796,11 +820,13 @@ definePageMeta({
 })
 
 // Type definitions
+// Update your Job interface to include country
 interface Job {
   _id: string;
   title?: string;
   employer?: string;
   location?: string;
+  country?: string;  // Add this field
   sector?: string;
   experience_level?: string;
   salary?: string;
@@ -810,6 +836,14 @@ interface Job {
   posted?: string;
   created_at?: string;
 }
+
+// Update your filters object
+const filters = ref({
+  location: '',
+  country: '',     // Add this
+  sector: '',
+  experience_level: ''
+})
 
 interface Application {
   _id: string;
@@ -888,12 +922,6 @@ const applicationErrors = ref<Record<string, string>>({})
 const userApplications = ref<Application[]>([])
 const applicationsLoading = ref<boolean>(false)
 
-// Filters
-const filters = ref({
-  location: '',
-  sector: '',
-  experience_level: ''
-})
 
 // Computed properties
 const uniqueLocations = computed((): string[] => {
@@ -925,6 +953,14 @@ const filteredJobs = computed((): Job[] => {
     )
   }
 
+  // Add country filtering
+  if (filters.value.country) {
+    filtered = filtered.filter(job => {
+      const jobCountry = extractCountryFromLocation(job.location || '')
+      return jobCountry === filters.value.country
+    })
+  }
+
   if (filters.value.location) {
     filtered = filtered.filter(job => job.location === filters.value.location)
   }
@@ -935,6 +971,7 @@ const filteredJobs = computed((): Job[] => {
     filtered = filtered.filter(job => job.experience_level === filters.value.experience_level)
   }
 
+  // Rest of your sorting logic...
   filtered.sort((a, b) => {
     switch (sortBy.value) {
       case 'newest':
@@ -979,6 +1016,74 @@ const visiblePages = computed((): number[] => {
 
   return pages
 })
+
+const uniqueCountries = computed((): string[] => {
+  const countries = jobs.value
+    .map(job => extractCountryFromLocation(job.location || ''))
+    .filter(Boolean) as string[]
+  return [...new Set(countries)].sort()
+})
+
+// Helper function to extract country from location string
+const extractCountryFromLocation = (location: string): string => {
+  if (!location) return ''
+  
+  // Common country patterns in job locations
+  const countryPatterns = [
+    // African Countries
+    'Ghana', 'Nigeria', 'Kenya', 'South Africa', 'Egypt', 'Morocco', 'Tunisia',
+    'Ethiopia', 'Uganda', 'Tanzania', 'Rwanda', 'Botswana', 'Zambia', 'Zimbabwe',
+    'Senegal', 'Mali', 'Burkina Faso', 'Ivory Coast', 'Cameroon', 'Algeria',
+    
+    // European Countries
+    'United Kingdom', 'UK', 'Germany', 'France', 'Spain', 'Italy', 'Netherlands',
+    'Switzerland', 'Sweden', 'Norway', 'Denmark', 'Finland', 'Belgium', 'Austria',
+    'Portugal', 'Ireland', 'Poland', 'Czech Republic', 'Hungary', 'Romania',
+    
+    // North American Countries
+    'United States', 'USA', 'US', 'Canada', 'Mexico',
+    
+    // Asian Countries
+    'India', 'China', 'Japan', 'Singapore', 'Malaysia', 'Thailand', 'Vietnam',
+    'Philippines', 'Indonesia', 'South Korea', 'Hong Kong', 'Taiwan', 'UAE',
+    'Saudi Arabia', 'Qatar', 'Kuwait', 'Israel', 'Turkey',
+    
+    // Oceania
+    'Australia', 'New Zealand',
+    
+    // South American Countries
+    'Brazil', 'Argentina', 'Chile', 'Colombia', 'Peru', 'Venezuela', 'Uruguay',
+    
+    // Other patterns
+    'Remote', 'Worldwide', 'Global'
+  ]
+  
+  // Check for exact country matches (case insensitive)
+  for (const country of countryPatterns) {
+    if (location.toLowerCase().includes(country.toLowerCase())) {
+      // Normalize some common variations
+      if (country.toLowerCase() === 'uk') return 'United Kingdom'
+      if (country.toLowerCase() === 'usa' || country.toLowerCase() === 'us') return 'United States'
+      return country
+    }
+  }
+  
+  // If no country found, try to extract from common location formats
+  // Format: "City, Country" or "City, State, Country"
+  const parts = location.split(',').map(part => part.trim())
+  if (parts.length >= 2) {
+    const lastPart = parts[parts.length - 1]
+    // Check if the last part matches any known country
+    for (const country of countryPatterns) {
+      if (lastPart.toLowerCase() === country.toLowerCase()) {
+        return country
+      }
+    }
+    return lastPart // Return the last part as potential country
+  }
+  
+  return '' // No country identified
+}
 
 // Modal Management Methods
 const openJobDetailsModal = (job: Job): void => {
@@ -1200,6 +1305,7 @@ const fetchJobs = async (): Promise<void> => {
     const queryParams = new URLSearchParams()
     
     if (searchQuery.value) queryParams.append('search', searchQuery.value)
+    if (filters.value.country) queryParams.append('country', filters.value.country)  // Add this
     if (filters.value.location) queryParams.append('location', filters.value.location)
     if (filters.value.sector) queryParams.append('sector', filters.value.sector)
     if (filters.value.experience_level) queryParams.append('experience_level', filters.value.experience_level)
@@ -1248,6 +1354,7 @@ const applySorting = (): void => {
 const clearFilters = (): void => {
   filters.value = {
     location: '',
+    country: '',    // Add this
     sector: '',
     experience_level: ''
   }

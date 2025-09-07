@@ -160,6 +160,14 @@
                                              fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M20 6h-2.18c.11-.31.18-.65.18-1a2.996 2.996 0 0 0-5.5-1.65l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z"/>
                                         </svg>
+
+                                        <!-- Scholarships Icon -->
+                                        <svg v-else-if="item.key === 'scholarships'"
+                                             class="w-5 h-5 flex-shrink-0 transition-all duration-200 relative z-10"
+                                             :class="$route.path === item.path ? 'text-white drop-shadow-sm' : 'text-slate-500 group-hover:text-slate-700'"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
+                                        </svg>
                                         
                                         <span v-if="!isCollapsed || isMobile" 
                                               class="ml-3 truncate transition-all duration-200 relative z-10 font-medium">
@@ -237,21 +245,6 @@
                             </ul>
                         </div>
                     </div>
-
-                    <!-- AI Qwesi Capabilities Section -->
-                    <!-- <div v-if="!isCollapsed || isMobile" class="mt-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100/60">
-                        <div class="flex items-start space-x-3">
-                            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 16.5v-9l7 4.5-7 4.5z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-semibold text-slate-800">AI-Powered Features</h4>
-                                <p class="text-xs text-slate-600 mt-1">Smart matching, screening, and recruitment tools</p>
-                            </div>
-                        </div>
-                    </div> -->
                 </nav>
             </div>
 
@@ -284,6 +277,7 @@
     </div>
 </template>
 
+
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -305,7 +299,8 @@ const mainNavigation = [
 
 const discoverNavigation = [
     { path: '/dashboard/investors', title: 'Find Investors', key: 'investors' },
-    { path: '/dashboard/jobs', title: 'All Jobs', key: 'jobs' }
+    { path: '/dashboard/jobs', title: 'All Jobs', key: 'jobs' },
+    { path: '/dashboard/scholarships', title: 'Scholarships', key: 'scholarships' } // Added this line
 ]
 
 const registrationNavigation = [
