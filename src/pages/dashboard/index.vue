@@ -1488,7 +1488,7 @@ const handleMemberInvited = (member) => {
 const fetchUserPoints = async () => {
     try {
         const token = authStore.getToken
-        const response = await $fetch(`https://dark-caldron-448714-u5.uc.r.appspot.com/user-points/${user.value.email}`, {
+        const response = await $fetch(`https://dark-caldron-448714-u5.uc.r.appspot.com/get-points/${user.value.email}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
