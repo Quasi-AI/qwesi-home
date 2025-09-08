@@ -6,33 +6,33 @@
              @click="closeMobileMenu"></div>
 
         <!-- Sidebar -->
-        <div class="fixed inset-y-0 left-0 z-50 transition-all duration-300 ease-out flex flex-col"
+        <div class="fixed inset-y-0 left-0 z-50 transition-all duration-300 ease-out flex flex-col h-screen"
              :class="[
                  // Mobile styles
                  'md:relative md:translate-x-0',
                  isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
                  // Desktop styles
-                 'bg-gradient-to-b from-slate-50 to-white border-r border-slate-200/60 min-h-screen shadow-xl',
+                 'bg-gradient-to-b from-slate-50 to-white border-r border-slate-200/60 shadow-xl',
                  isCollapsed && !isMobile ? 'w-20' : 'w-80'
              ]">
             
-            <!-- Logo Section -->
-            <div class="flex-shrink-0 p-6 border-b border-slate-200/60 flex items-center justify-between bg-white/50 backdrop-blur-sm">
+            <!-- Logo Section - Fixed Height -->
+            <div class="flex-shrink-0 h-20 p-4 border-b border-slate-200/60 flex items-center justify-between bg-white/50 backdrop-blur-sm">
                 <NuxtLink to="/" class="hover:opacity-80 transition-all duration-200 transform hover:scale-105">
                     <img v-if="!isCollapsed || isMobile" 
                          src="~/assets/images/logo.png" 
                          alt="QWESI AI Logo" 
-                         class="w-36 h-auto drop-shadow-sm" />
+                         class="w-32 h-auto drop-shadow-sm" />
                     <img v-else 
                          src="~/assets/images/logo.png" 
                          alt="QWESI AI Logo" 
-                         class="w-10 h-auto drop-shadow-sm" />
+                         class="w-8 h-auto drop-shadow-sm" />
                 </NuxtLink>
                 
                 <!-- Desktop collapse button -->
                 <button v-if="!isMobile"
                         @click="toggleCollapse" 
-                        class="p-2.5 rounded-xl hover:bg-slate-100/70 transition-all duration-200 flex-shrink-0 group"
+                        class="p-2 rounded-xl hover:bg-slate-100/70 transition-all duration-200 flex-shrink-0 group"
                         :class="isCollapsed ? 'ml-0' : 'ml-2'">
                     <svg class="w-4 h-4 text-slate-600 transition-all duration-300 group-hover:text-slate-800" 
                          fill="currentColor" 
@@ -47,24 +47,27 @@
                 <!-- Mobile close button -->
                 <button v-if="isMobile"
                         @click="closeMobileMenu"
-                        class="p-2.5 rounded-xl hover:bg-slate-100/70 transition-all duration-200 flex-shrink-0">
+                        class="p-2 rounded-xl hover:bg-slate-100/70 transition-all duration-200 flex-shrink-0">
                     <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
 
-            <!-- Navigation - Scrollable Container -->
-            <div class="flex-1 flex flex-col min-h-0">
-                <nav class="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar" 
-                     :class="(isCollapsed && !isMobile) ? 'p-3' : 'p-6'">
+            <!-- Navigation - Scrollable Container with Fixed Height -->
+            <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
+                <nav class="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar py-4" 
+                     :class="(isCollapsed && !isMobile) ? 'px-2' : 'px-4'">
                     
                     <!-- Main Navigation -->
                     <div class="space-y-6">
                         <!-- Dashboard Section -->
                         <div>
-                            <h3 v-if="!isCollapsed || isMobile" class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 pl-4">Main</h3>
-                            <ul class="space-y-2">
+                            <h3 v-if="!isCollapsed || isMobile" 
+                                class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2">
+                                Main
+                            </h3>
+                            <ul class="space-y-1">
                                 <li v-for="item in mainNavigation" :key="item.path">
                                     <NuxtLink :to="item.path" 
                                               class="flex items-center text-sm font-medium rounded-2xl transition-all duration-200 group w-full relative overflow-hidden"
@@ -72,7 +75,7 @@
                                                   $route.path === item.path
                                                       ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25'
                                                       : 'text-slate-700 hover:bg-slate-100/70 hover:shadow-md',
-                                                  (isCollapsed && !isMobile) ? 'justify-center p-4' : 'px-4 py-3'
+                                                  (isCollapsed && !isMobile) ? 'justify-center p-3' : 'px-3 py-2.5'
                                               ]" 
                                               :title="(isCollapsed && !isMobile) ? item.title : ''"
                                               @click="handleNavigation(item.path)">
@@ -127,8 +130,11 @@
 
                         <!-- Discover Section -->
                         <div>
-                            <h3 v-if="!isCollapsed || isMobile" class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 pl-4">Discover</h3>
-                            <ul class="space-y-2">
+                            <h3 v-if="!isCollapsed || isMobile" 
+                                class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2">
+                                Discover
+                            </h3>
+                            <ul class="space-y-1">
                                 <li v-for="item in discoverNavigation" :key="item.path">
                                     <NuxtLink :to="item.path" 
                                               class="flex items-center text-sm font-medium rounded-2xl transition-all duration-200 group w-full relative overflow-hidden"
@@ -136,7 +142,7 @@
                                                   $route.path === item.path
                                                       ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25'
                                                       : 'text-slate-700 hover:bg-slate-100/70 hover:shadow-md',
-                                                  (isCollapsed && !isMobile) ? 'justify-center p-4' : 'px-4 py-3'
+                                                  (isCollapsed && !isMobile) ? 'justify-center p-3' : 'px-3 py-2.5'
                                               ]" 
                                               :title="(isCollapsed && !isMobile) ? item.title : ''"
                                               @click="handleNavigation(item.path)">
@@ -169,6 +175,15 @@
                                             <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
                                         </svg>
                                         
+                                        <!-- Talent Icon -->
+                                        <svg v-else-if="item.key === 'talents'"
+                                            class="w-5 h-5 flex-shrink-0 transition-all duration-200 relative z-10"
+                                            :class="$route.path === item.path ? 'text-white drop-shadow-sm' : 'text-slate-500 group-hover:text-slate-700'"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                        </svg>
+
                                         <span v-if="!isCollapsed || isMobile" 
                                               class="ml-3 truncate transition-all duration-200 relative z-10 font-medium">
                                             {{ item.title }}
@@ -183,8 +198,11 @@
 
                         <!-- Registration Section -->
                         <div>
-                            <h3 v-if="!isCollapsed || isMobile" class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 pl-4">Registration</h3>
-                            <ul class="space-y-2">
+                            <h3 v-if="!isCollapsed || isMobile" 
+                                class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2">
+                                Registration
+                            </h3>
+                            <ul class="space-y-1">
                                 <li v-for="item in registrationNavigation" :key="item.path">
                                     <NuxtLink :to="item.path" 
                                               class="flex items-center text-sm font-medium rounded-2xl transition-all duration-200 group w-full relative overflow-hidden"
@@ -192,7 +210,7 @@
                                                   $route.path === item.path
                                                       ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25'
                                                       : 'text-slate-700 hover:bg-slate-100/70 hover:shadow-md',
-                                                  (isCollapsed && !isMobile) ? 'justify-center p-4' : 'px-4 py-3'
+                                                  (isCollapsed && !isMobile) ? 'justify-center p-3' : 'px-3 py-2.5'
                                               ]" 
                                               :title="(isCollapsed && !isMobile) ? item.title : ''"
                                               @click="handleNavigation(item.path)">
@@ -248,9 +266,9 @@
                 </nav>
             </div>
 
-            <!-- User Section (Mobile) -->
-            <div v-if="isMobile" class="flex-shrink-0 p-6 border-t border-slate-200/60 bg-white/70 backdrop-blur-sm">
-                <div class="flex items-center">
+            <!-- User Section (Mobile) - Fixed Height -->
+            <div v-if="isMobile" class="flex-shrink-0 h-20 p-4 border-t border-slate-200/60 bg-white/70 backdrop-blur-sm">
+                <div class="flex items-center h-full">
                     <div class="flex-shrink-0">
                         <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
                             <span class="text-sm font-bold text-white drop-shadow-sm">
@@ -258,7 +276,7 @@
                             </span>
                         </div>
                     </div>
-                    <div class="ml-4 min-w-0 flex-1">
+                    <div class="ml-3 min-w-0 flex-1">
                         <p class="text-sm font-bold text-slate-900 truncate">{{ user?.name || 'User' }}</p>
                         <p class="text-xs text-slate-500 truncate">{{ user?.email || 'user@example.com' }}</p>
                     </div>
@@ -269,14 +287,13 @@
         <!-- Mobile Menu Button -->
         <button v-if="isMobile"
                 @click="openMobileMenu"
-                class="fixed top-6 left-6 z-30 p-3 rounded-2xl bg-white/90 backdrop-blur-sm shadow-2xl border border-slate-200/60 hover:bg-white transition-all duration-200 md:hidden group">
+                class="fixed top-4 left-4 z-30 p-3 rounded-2xl bg-white/90 backdrop-blur-sm shadow-2xl border border-slate-200/60 hover:bg-white transition-all duration-200 md:hidden group">
             <svg class="w-6 h-6 text-slate-700 group-hover:text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
         </button>
     </div>
 </template>
-
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
@@ -300,7 +317,8 @@ const mainNavigation = [
 const discoverNavigation = [
     { path: '/dashboard/investors', title: 'Find Investors', key: 'investors' },
     { path: '/dashboard/jobs', title: 'All Jobs', key: 'jobs' },
-    { path: '/dashboard/scholarships', title: 'Scholarships', key: 'scholarships' } // Added this line
+    { path: '/dashboard/scholarships', title: 'Scholarships', key: 'scholarships' },
+    { path: '/dashboard/talent-pool', title: 'Talent Pool/ Freelancers', key: 'talents' }
 ]
 
 const registrationNavigation = [
@@ -435,6 +453,22 @@ onMounted(() => {
     background: linear-gradient(to bottom, rgba(148, 163, 184, 0.5), rgba(148, 163, 184, 0.7));
 }
 
+/* Fixed height container */
+.h-screen {
+    height: 100vh;
+    max-height: 100vh;
+}
+
+/* Ensure proper overflow handling */
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.overflow-y-auto {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 /* Smooth transitions */
 .transition-all {
     transition-property: all;
@@ -511,5 +545,18 @@ onMounted(() => {
 /* Ensure consistent height for scrollable container */
 .min-h-0 {
     min-height: 0;
+}
+
+/* Compact spacing for collapsed state */
+.space-y-1 > * + * {
+    margin-top: 0.25rem;
+}
+
+/* Better mobile menu positioning */
+@media (max-width: 767px) {
+    .fixed.top-4.left-4 {
+        top: 1rem;
+        left: 1rem;
+    }
 }
 </style>
