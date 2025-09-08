@@ -936,6 +936,7 @@ useHead({
 /* Profile Dropdown (reuse from registration page) */
 .profile-dropdown {
   position: relative;
+  z-index: 50;
 }
 
 .profile-btn {

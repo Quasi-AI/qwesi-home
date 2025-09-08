@@ -648,4 +648,27 @@ input[type="date"]::-webkit-inner-spin-button,
 input[type="date"]::-webkit-clear-button {
     display: none;
 }
+
+/* Fix for country code selector z-index in signup form */
+.flex.space-x-3 > .w-1\/3 {
+    position: relative;
+    z-index: 50;
+}
+
+/* Ensure the dropdown appears above other form elements */
+:deep(.country-selector) {
+    position: relative;
+    z-index: 50;
+}
+
+:deep(.country-dropdown) {
+    position: absolute;
+    z-index: 60;
+}
+
+/* Alternative approach using CSS variables */
+.country-code-container {
+    position: relative;
+    z-index: 50;
+}
 </style>

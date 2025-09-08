@@ -405,4 +405,26 @@ input:focus {
 .particle {
     animation: ping-custom 4s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
+/* Fix for country code selector z-index */
+.country-code-dropdown {
+    position: relative;
+    z-index: 50;
+}
+
+/* Ensure the dropdown appears above other form elements */
+:deep(.country-selector) {
+    position: relative;
+    z-index: 50;
+}
+
+:deep(.country-dropdown) {
+    position: absolute;
+    z-index: 50;
+}
+
+/* Alternative approach - target the specific container */
+.flex.space-x-3 > .w-1\/3 {
+    position: relative;
+    z-index: 50;
+}
 </style>

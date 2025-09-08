@@ -811,6 +811,7 @@ useHead({
 /* Profile Dropdown */
 .profile-dropdown {
     position: relative;
+    z-index: 50;
 }
 
 .profile-btn {

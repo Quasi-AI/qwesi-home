@@ -478,7 +478,7 @@ useHead({
 
 /* Profile Dropdown */
 .profile-dropdown {
-    @apply relative;
+    @apply relative z-50;
 }
 
 .profile-btn {
