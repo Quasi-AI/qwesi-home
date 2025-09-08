@@ -8,6 +8,7 @@ import type {
   ValidationResult 
 } from '@/shared/types/application.types'
 import { API_ROUTES } from '@/shared/constants/api-routes'
+import { useAuthStore } from '@/features/auth/stores/auth.store'
 
 export interface ApplicationFilters {
   status?: ApplicationStatus
@@ -23,26 +24,19 @@ export interface FetchApplicationsOptions {
   filters?: ApplicationFilters
 }
 
+const authStore = useAuthStore()
+
 export const useApplications = () => {
   const config = useRuntimeConfig()
   
   // Get auth store INSIDE the composable function, not at module level
-  const getAuthToken = () => {
-    try {
-      const { useAuthStore } = require('@/features/auth/stores/auth.store')
-      const authStore = useAuthStore()
-      return authStore.getToken
-    } catch (error) {
-      console.warn('Auth store not available:', error)
-      return null
-    }
-  }
+
 
   const submitApplication = async (formData: FormData): Promise<ApplicationResponse> => {
     try {
-      const token = getAuthToken()
+      const token = authStore.getToken
       const headers: Record<string, string> = {}
-      
+
       if (token) {
         headers['Authorization'] = `Bearer ${token}`
       }
@@ -77,7 +71,7 @@ export const useApplications = () => {
         ...options.filters
       }
 
-      const token = getAuthToken()
+      const token = authStore.getToken
       const headers: Record<string, string> = {}
       
       if (token) {
@@ -106,7 +100,7 @@ export const useApplications = () => {
 
   const getApplicationDetails = async (applicationId: string): Promise<ApplicationResponse> => {
     try {
-      const token = getAuthToken()
+      const token = authStore.getToken
       const headers: Record<string, string> = {}
       
       if (token) {
@@ -130,7 +124,7 @@ export const useApplications = () => {
 
   const withdrawApplication = async (applicationId: string): Promise<{ success: boolean }> => {
     try {
-      const token = getAuthToken()
+      const token = authStore.getToken
       const headers: Record<string, string> = {}
       
       if (token) {
@@ -155,7 +149,7 @@ export const useApplications = () => {
 
   const getApplicationStats = async (userId: string): Promise<{ success: boolean; data: ApplicationStats }> => {
     try {
-      const token = getAuthToken()
+      const token = authStore.getToken
       const headers: Record<string, string> = {}
       
       if (token) {
