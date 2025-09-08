@@ -937,6 +937,169 @@
 
         <!-- Modals -->
         <ProModal v-model="showProModal" mode="upgrade" />
+
+        <!-- Leaderboard Modal -->
+        <div v-if="showLeaderboardModal" class="modal-overlay" @click.self="showLeaderboardModal = false">
+            <div class="modal-backdrop"></div>
+            <div class="referral-modal">
+                <div class="modal-header">
+                    <div class="modal-title-section">
+                        <h3 class="modal-title">Referral Leaderboard</h3>
+                        <div class="title-decoration"></div>
+                    </div>
+                    <button @click="showLeaderboardModal = false" class="modal-close">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="p-6 overflow-y-auto max-h-[60vh]">
+                    <!-- Loading State -->
+                    <div v-if="leaderboardLoading" class="loading-state">
+                        <div class="loading-spinner small"></div>
+                        <span class="loading-text">Loading leaderboard...</span>
+                    </div>
+
+                    <!-- Error State -->
+                    <div v-else-if="leaderboardError" class="error-state">
+                        <div class="error-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <p class="error-message">{{ leaderboardError }}</p>
+                        <button @click="fetchLeaderboard" class="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                            Try Again
+                        </button>
+                    </div>
+
+                    <!-- Leaderboard Content -->
+                    <div v-else>
+                        <!-- Top 3 Podium -->
+                        <div v-if="leaderboard.length >= 3" class="mb-8">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-4 text-center">Top Referrers</h4>
+                            <div class="flex items-end justify-center space-x-4">
+                                <!-- 2nd Place -->
+                                <div class="text-center">
+                                    <div class="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center text-white font-bold text-lg mb-2 mx-auto">
+                                        2
+                                    </div>
+                                    <div class="bg-gray-100 rounded-lg p-3 w-24">
+                                        <div class="font-semibold text-sm text-gray-900 truncate">{{ leaderboard[1]?.name || 'Anonymous' }}</div>
+                                        <div class="text-xs text-gray-600">{{ leaderboard[1]?.totalReferrals || 0 }} referrals</div>
+                                        <div class="text-xs text-blue-600 font-medium">{{ leaderboard[1]?.totalPointsEarned || 0 }} pts</div>
+                                    </div>
+                                </div>
+
+                                <!-- 1st Place -->
+                                <div class="text-center">
+                                    <div class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-xl mb-2 mx-auto relative">
+                                        <svg class="w-6 h-6 absolute -top-2 -right-2 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
+                                        1
+                                    </div>
+                                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 w-28">
+                                        <div class="font-bold text-sm text-gray-900 truncate">{{ leaderboard[0]?.name || 'Anonymous' }}</div>
+                                        <div class="text-xs text-gray-600">{{ leaderboard[0]?.totalReferrals || 0 }} referrals</div>
+                                        <div class="text-xs text-yellow-600 font-bold">{{ leaderboard[0]?.totalPointsEarned || 0 }} pts</div>
+                                    </div>
+                                </div>
+
+                                <!-- 3rd Place -->
+                                <div class="text-center">
+                                    <div class="w-16 h-16 bg-gradient-to-br from-amber-600 to-amber-700 rounded-full flex items-center justify-center text-white font-bold text-lg mb-2 mx-auto">
+                                        3
+                                    </div>
+                                    <div class="bg-amber-50 rounded-lg p-3 w-24">
+                                        <div class="font-semibold text-sm text-gray-900 truncate">{{ leaderboard[2]?.name || 'Anonymous' }}</div>
+                                        <div class="text-xs text-gray-600">{{ leaderboard[2]?.totalReferrals || 0 }} referrals</div>
+                                        <div class="text-xs text-amber-600 font-medium">{{ leaderboard[2]?.totalPointsEarned || 0 }} pts</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Full Leaderboard Table -->
+                        <div class="bg-white rounded-lg border border-gray-200">
+                            <div class="px-4 py-3 border-b border-gray-200">
+                                <h4 class="font-semibold text-gray-900">Full Rankings</h4>
+                            </div>
+                            <div class="divide-y divide-gray-200">
+                                <div v-for="user in leaderboard" :key="user.rank" 
+                                    :class="[
+                                        'px-4 py-3 flex items-center justify-between',
+                                        user.rank <= 3 ? 'bg-gradient-to-r from-blue-50 to-transparent' : 'hover:bg-gray-50'
+                                    ]">
+                                    <div class="flex items-center space-x-3">
+                                        <div :class="[
+                                            'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold',
+                                            user.rank === 1 ? 'bg-yellow-500 text-white' :
+                                            user.rank === 2 ? 'bg-gray-400 text-white' :
+                                            user.rank === 3 ? 'bg-amber-600 text-white' :
+                                            'bg-gray-200 text-gray-700'
+                                        ]">
+                                            {{ user.rank }}
+                                        </div>
+                                        <div>
+                                            <div class="font-medium text-gray-900">{{ user.name || 'Anonymous User' }}</div>
+                                            <div class="text-sm text-gray-500">{{ user.totalReferrals }} successful referrals</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-bold text-blue-600">{{ user.totalPointsEarned }} pts</div>
+                                        <div v-if="user.rank <= 3" class="text-xs text-yellow-600 font-medium">🏆 Top Performer</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div v-if="leaderboard.length === 0" class="text-center py-8">
+                            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No referrals yet</h3>
+                            <p class="text-gray-500">Be the first to start referring friends and climb the leaderboard!</p>
+                        </div>
+
+                        <!-- User's Position (if not in top 10) -->
+                        <div v-if="userPosition && userPosition.rank > 10" class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 class="font-medium text-blue-900 mb-2">Your Position</h4>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                        {{ userPosition.rank }}
+                                    </div>
+                                    <div>
+                                        <div class="font-medium text-blue-900">{{ userPosition.name }}</div>
+                                        <div class="text-sm text-blue-700">{{ userPosition.totalReferrals }} referrals</div>
+                                    </div>
+                                </div>
+                                <div class="text-blue-600 font-bold">{{ userPosition.totalPointsEarned }} pts</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="p-6 border-t border-gray-200">
+                    <div class="flex space-x-3">
+                        <button @click="fetchLeaderboard" :disabled="leaderboardLoading" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50">
+                            <svg v-if="leaderboardLoading" class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            {{ leaderboardLoading ? 'Refreshing...' : 'Refresh' }}
+                        </button>
+                        <button @click="showLeaderboardModal = false" class="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         
         <!-- Enhanced Referral Modal -->
         <div v-if="showReferralModal" class="modal-overlay" @click.self="showReferralModal = false">
@@ -1468,6 +1631,79 @@ const closeInviteTeamModal = () => { modals.inviteTeam = false }
 const closeReportsModal = () => { modals.reports = false }
 const closeHelpModal = () => { modals.help = false }
 
+// Add these new reactive variables to your existing script setup
+// Add these new reactive variables to your existing script setup
+const showLeaderboardModal = ref(false)
+const leaderboard = ref([])
+const leaderboardLoading = ref(false)
+const leaderboardError = ref(null)
+const userPosition = ref(null)
+
+// Replace the existing viewLeaderboard function with this implementation
+const viewLeaderboard = async () => {
+    showReferralModal.value = false
+    showLeaderboardModal.value = true
+    await fetchLeaderboard()
+}
+
+// Add this new function
+const fetchLeaderboard = async () => {
+    leaderboardLoading.value = true
+    leaderboardError.value = null
+    
+    try {
+        const token = authStore.getToken
+        const response = await $fetch('https://dark-caldron-448714-u5.uc.r.appspot.com/referral-leaderboard?limit=10', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        
+        if (response.success) {
+            leaderboard.value = response.leaderboard
+            
+            // Check if current user is in the leaderboard
+            const currentUserName = user.value?.name
+            const currentUserInLeaderboard = leaderboard.value.find(leaderboardUser => 
+                leaderboardUser.name === currentUserName
+            )
+            
+            if (!currentUserInLeaderboard && referralStats.value.totalReferrals > 0) {
+                // Fetch user's position if they're not in top 10
+                await fetchUserPosition()
+            } else {
+                userPosition.value = null
+            }
+        } else {
+            leaderboardError.value = 'Failed to load leaderboard data'
+        }
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error)
+        leaderboardError.value = 'Unable to connect to server. Please try again.'
+    } finally {
+        leaderboardLoading.value = false
+    }
+}
+
+// Add this helper function to get user's position if not in top 10
+const fetchUserPosition = async () => {
+    try {
+        const token = authStore.getToken
+        // This would require a new backend endpoint to get user's specific position
+        // For now, we'll calculate it client-side based on their referral stats
+        if (referralStats.value.totalReferrals > 0) {
+            userPosition.value = {
+                rank: '11+', // Placeholder - you'd get actual rank from backend
+                name: user.value.name,
+                totalReferrals: referralStats.value.totalReferrals,
+                totalPointsEarned: referralStats.value.totalPointsEarned
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching user position:', error)
+    }
+}
+
 const handleTaskCreated = (task) => {
     closeNewTaskModal()
     alertRef.value.success(`Task ${task.title} created successfully!`, {
@@ -1568,20 +1804,6 @@ const shareReferral = async () => {
     }
 }
 
-const viewLeaderboard = async () => {
-    try {
-        const response = await $fetch('https://dark-caldron-448714-u5.uc.r.appspot.com/referral-leaderboard?limit=10')
-        if (response.success) {
-            console.log('Leaderboard:', response.leaderboard)
-            alertRef.value.info('Leaderboard feature coming soon!', {
-                title: 'Info',
-                duration: 3000
-            })
-        }
-    } catch (error) {
-        console.error('Error fetching leaderboard:', error)
-    }
-}
 
 // Onboarding
 const showOnboarding = ref(true)
