@@ -24,13 +24,13 @@ export interface FetchApplicationsOptions {
   filters?: ApplicationFilters
 }
 
-const authStore = useAuthStore()
+
 
 export const useApplications = () => {
   const config = useRuntimeConfig()
   
   // Get auth store INSIDE the composable function, not at module level
-
+  const authStore = useAuthStore()
 
   const submitApplication = async (formData: FormData): Promise<ApplicationResponse> => {
     try {
