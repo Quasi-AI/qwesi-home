@@ -728,7 +728,7 @@ const fetchJobs = async () => {
 
 const fetchApplicationCounts = async () => {
     try {
-        const response = await $fetch(`${BASE_API_URL}/applications/employer/count/${user.value.id}`, {
+        const response = await $fetch(`${BASE_API_URL}/applications/employer/${user.value.email}/counts`, {
             method: 'GET',
             throw: false
         })
@@ -746,7 +746,7 @@ const fetchApplicationCounts = async () => {
 const fetchJobApplications = async (jobId) => {
     loadingApplications.value = true
     try {
-        const response = await $fetch(`${BASE_API_URL}/applications/employer/${user.value.id}`, {
+        const response = await $fetch(`${BASE_API_URL}/applications/employer/${user.value.email}/applications`, {
             method: 'GET',
             query: { jobId },
             throw: false
