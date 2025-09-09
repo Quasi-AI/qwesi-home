@@ -1513,6 +1513,7 @@ import NewTaskModal from '~/pages/modals/NewTaskModal.vue'
 import InviteTeamModal from '~/pages/modals/InviteTeamModal.vue'
 import ReportsModal from '~/pages/modals/ReportsModal.vue'
 import HelpModal from '~/pages/modals/HelpModal.vue'
+import { API_ROUTES } from '~/shared/constants/api-routes'
 
 const alertRef = ref(null)
 const authStore = useAuthStore()
@@ -1653,7 +1654,7 @@ const fetchLeaderboard = async () => {
     
     try {
         const token = authStore.getToken
-        const response = await $fetch('https://dark-caldron-448714-u5.uc.r.appspot.com/referral-leaderboard?limit=10', {
+        const response = await $fetch(`${API_ROUTES.BASE_URL}referral-leaderboard?limit=10`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -1724,7 +1725,7 @@ const handleMemberInvited = (member) => {
 const fetchUserPoints = async () => {
     try {
         const token = authStore.getToken
-        const response = await $fetch(`https://dark-caldron-448714-u5.uc.r.appspot.com/get-points/${user.value.email}`, {
+        const response = await $fetch(`${API_ROUTES.BASE_URL}get-points/${user.value.email}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -1743,7 +1744,7 @@ const fetchUserPoints = async () => {
 const redeemPoints = async (amount, description) => {
     try {
         const token = authStore.getToken
-        const response = await $fetch('https://dark-caldron-448714-u5.uc.r.appspot.com/redeem-points', {
+        const response = await $fetch(`${API_ROUTES.BASE_URL}redeem-points`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,

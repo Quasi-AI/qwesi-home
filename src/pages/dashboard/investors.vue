@@ -320,6 +320,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { API_ROUTES } from '~/shared/constants/api-routes'
 import { useAuthStore } from '~/features/auth/stores/auth.store'
 import Sidebar from '@/features/dashboard/components/dashboard-sidebar.vue'
 import BackButton from '@/shared/components/ui/back-button.vue'
@@ -371,7 +372,7 @@ const fetchInvestors = async () => {
   error.value = null
   
   try {
-    const response = await fetch('https://dark-caldron-448714-u5.uc.r.appspot.com/getallinvestor')
+    const response = await fetch(`${API_ROUTES.BASE_URL}getallinvestor`)
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)

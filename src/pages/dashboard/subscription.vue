@@ -397,10 +397,6 @@ const handleUpdatePayment = async (formData) => {
 
 // Lifecycle
 onMounted(async () => {
-  if (!authStore.isAuthenticated) {
-    navigateTo('/auth/login')
-    return
-  }
   
   await subscriptionStore.fetchSubscription()
   await subscriptionStore.fetchPlans()

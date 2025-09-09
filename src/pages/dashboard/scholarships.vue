@@ -525,6 +525,7 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { useAuthStore } from '@/features/auth/stores/auth.store'
 import MessagePopup from '~/shared/components/message/MessagePopup.vue'
 import Sidebar from '@/features/dashboard/components/dashboard-sidebar.vue'
+import { API_ROUTES } from '~/shared/constants/api-routes'
 
 // Import icons
 import {
@@ -547,9 +548,6 @@ import {
 definePageMeta({
   layout: 'dashboard'
 })
-
-// API Configuration
-const API_BASE_URL = 'https://dark-caldron-448714-u5.uc.r.appspot.com'
 
 // Type definitions
 interface Scholarship {
@@ -707,8 +705,8 @@ const uniqueFields = computed(() => {
 
 // API Helper Functions
 const apiCall = async (endpoint: string, options = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`
-  const token = localStorage.getItem('token') || ''
+  const url = `${API_ROUTES.BASE_URL}${endpoint}`
+  const token = authStore.getToken
   
   const defaultOptions = {
     headers: {
@@ -838,7 +836,7 @@ const fetchScholarships = async (): Promise<void> => {
   try {
     console.log('Fetching scholarships from API...')
     
-    const response = await apiCall('/scholarship/all')
+    const response = await apiCall('scholarship/all')
     console.log('API Response:', response)
     
     if (response && response.success) {
@@ -881,7 +879,7 @@ const fetchScholarships = async (): Promise<void> => {
 
 const getScholarshipDetails = async (scholarshipId: string) => {
   try {
-    const response = await apiCall(`/scholarship/single/${scholarshipId}`)
+    const response = await apiCall(`scholarship/single/${scholarshipId}`)
     
     if (response.success) {
       return response.data

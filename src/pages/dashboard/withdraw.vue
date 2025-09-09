@@ -403,15 +403,14 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '~/features/auth/stores/auth.store'
 import Sidebar from '@/features/dashboard/components/dashboard-sidebar.vue'
 import MessagePopup from '~/shared/components/message/MessagePopup.vue'
+import { API_ROUTES } from '~/shared/constants/api-routes'
 
 const alertRef = ref(null)
 const authStore = useAuthStore()
 
-// API Base URL
-const BASE_API_URL = 'https://dark-caldron-448714-u5.uc.r.appspot.com'
 
 // User state
-const user = computed(() => authStore.getUser || {})
+const user = computed(() => authStore.getUser)
 
 // Reactive data
 const withdrawals = ref([])
@@ -495,7 +494,7 @@ const isFormValid = computed(() => {
 const fetchWithdrawals = async () => {
   loading.value = true
   try {
-    const response = await $fetch(`${BASE_API_URL}/withdrawals/user/${user.value._id}`, {
+    const response = await $fetch(`${API_ROUTES.BASE_URL}withdrawals/user/${user.value._id}`, {
       headers: {
         'Authorization': `Bearer ${authStore.getToken}`
       }
@@ -513,7 +512,7 @@ const fetchWithdrawals = async () => {
 
 const fetchUserBalance = async () => {
   try {
-    const response = await $fetch(`${BASE_API_URL}/users/balance`, {
+    const response = await $fetch(`${API_ROUTES.BASE_URL}users/balance`, {
       headers: {
         'Authorization': `Bearer ${authStore.getToken}`
       }
@@ -532,7 +531,7 @@ const submitWithdrawal = async () => {
 
   submitting.value = true
   try {
-    const response = await $fetch(`${BASE_API_URL}/withdrawals/request`, {
+    const response = await $fetch(`${API_ROUTES.BASE_URL}withdrawals/request`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${authStore.getToken}`,
@@ -560,7 +559,7 @@ const cancelWithdrawal = async (withdrawalId) => {
 
   cancelling.value = true
   try {
-    const response = await $fetch(`${BASE_API_URL}/withdrawals/${withdrawalId}/cancel`, {
+    const response = await $fetch(`${API_ROUTES.BASE_URL}withdrawals/${withdrawalId}/cancel`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${authStore.getToken}`

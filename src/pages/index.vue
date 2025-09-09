@@ -607,6 +607,7 @@ import DemoModal from "@/features/landing/components/landing-demo.vue";
 import Footer from "@/shared/components/ui/footer.vue";
 import { useAuthStore } from '~/features/auth/stores/auth.store'
 import { FEATURE_SWITCH } from '~/shared/constants/feature-switch'
+import { API_ROUTES } from "~/shared/constants/api-routes";
 
 const authStore = useAuthStore();
 const mobileMenuOpen = ref(false);
@@ -639,7 +640,7 @@ const handleDonation = async () => {
     const donationEmail = user.value?.email || 'donor@qwesi.org';
     
     // Make API call to your backend
-    const response = await fetch('https://dark-caldron-448714-u5.uc.r.appspot.com/api/create-checkout-session', {
+    const response = await fetch(`${API_ROUTES.BASE_URL}api/create-checkout-session`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

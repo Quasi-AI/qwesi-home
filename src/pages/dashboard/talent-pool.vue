@@ -496,6 +496,7 @@ import Sidebar from '@/features/dashboard/components/dashboard-sidebar.vue'
 import MessagePopup from '~/shared/components/message/MessagePopup.vue'
 import TalentProfileModal from '@/pages/modals/TalentProfileModal.vue'
 import { debounce } from 'lodash'
+import { API_ROUTES } from '~/shared/constants/api-routes'
 
 const alertRef = ref(null)
 const authStore = useAuthStore()
@@ -543,9 +544,6 @@ const contactForm = ref({
   message: ''
 })
 
-// API Base URL
-const API_BASE = 'https://dark-caldron-448714-u5.uc.r.appspot.com'
-
 // Fetch talents data
 const fetchTalents = async () => {
   try {
@@ -559,7 +557,7 @@ const fetchTalents = async () => {
     params.append('page', currentPage.value.toString())
     params.append('limit', '12')
     
-    const response = await $fetch(`${API_BASE}/api/talent/pool?${params}`)
+    const response = await $fetch(`${API_ROUTES.BASE_URL}api/talent/pool?${params}`)
     
     if (response.success) {
       talents.value = response.data.talents
@@ -678,7 +676,7 @@ const submitContactRequest = async () => {
   try {
     isSubmittingContact.value = true
     
-    const response = await $fetch(`${API_BASE}/api/talent/${selectedTalent.value.id}/contact`, {
+    const response = await $fetch(`${API_ROUTES.BASE_URL}api/talent/${selectedTalent.value.id}/contact`, {
       method: 'POST',
       body: contactForm.value
     })

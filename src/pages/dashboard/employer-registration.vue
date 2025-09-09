@@ -610,9 +610,6 @@ import MessagePopup from '~/shared/components/message/MessagePopup.vue'
 const alertRef = ref(null)
 const authStore = useAuthStore()
 
-// Base API URL
-const BASE_API_URL = 'https://dark-caldron-448714-u5.uc.r.appspot.com'
-
 // User state
 const user = computed(() => authStore.getUser || {})
 
@@ -728,7 +725,7 @@ const fetchJobs = async () => {
 
 const fetchApplicationCounts = async () => {
     try {
-        const response = await $fetch(`${BASE_API_URL}/applications/employer/${user.value.email}/counts`, {
+        const response = await $fetch(`${API_ROUTES.BASE_URL}applications/employer/${user.value.email}/counts`, {
             method: 'GET',
             throw: false
         })
@@ -746,7 +743,7 @@ const fetchApplicationCounts = async () => {
 const fetchJobApplications = async (jobId) => {
     loadingApplications.value = true
     try {
-        const response = await $fetch(`${BASE_API_URL}/applications/employer/${user.value.email}/applications`, {
+        const response = await $fetch(`${API_ROUTES.BASE_URL}applications/employer/${user.value.email}/applications`, {
             method: 'GET',
             query: { jobId },
             throw: false
@@ -817,7 +814,7 @@ const deleteJobById = async (jobId) => {
 
 const updateApplicationStatus = async (applicationId, newStatus) => {
     try {
-        const response = await $fetch(`${BASE_API_URL}/applications/${applicationId}/status`, {
+        const response = await $fetch(`${API_ROUTES.BASE_URL}applications/${applicationId}/status`, {
             method: 'PUT',
             body: { status: newStatus },
             throw: false
@@ -840,7 +837,7 @@ const updateApplicationStatus = async (applicationId, newStatus) => {
 }
 
 const deleteApplicationById = async (applicationId) => {
-    const response = await $fetch(`${BASE_API_URL}/applications/${applicationId}`, {
+    const response = await $fetch(`${API_ROUTES.BASE_URL}applications/${applicationId}`, {
         method: 'DELETE',
         throw: false
     })

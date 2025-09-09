@@ -324,6 +324,8 @@
 </template>
 
 <script setup>
+import { API_ROUTES } from '~/shared/constants/api-routes'
+
 const props = defineProps({
   isOpen: {
     type: Boolean,
@@ -353,8 +355,6 @@ const contactForm = ref({
   message: ''
 })
 
-// API Base URL
-const API_BASE = 'https://dark-caldron-448714-u5.uc.r.appspot.com'
 
 // Watch for modal open/close and talent ID changes
 watch(() => props.isOpen, (newValue) => {
@@ -377,7 +377,7 @@ const fetchTalentProfile = async () => {
     loading.value = true
     error.value = null
     
-    const response = await $fetch(`${API_BASE}/api/talent/profile/${props.talentId}`)
+    const response = await $fetch(`${API_ROUTES.BASE_URL}api/talent/profile/${props.talentId}`)
     
     if (response.success) {
       talent.value = response.data
@@ -470,7 +470,7 @@ const submitContactRequest = async () => {
   try {
     isSubmittingContact.value = true
     
-    const response = await $fetch(`${API_BASE}/api/talent/${talent.value.id}/contact`, {
+    const response = await $fetch(`${API_ROUTES.BASE_URL}api/talent/${talent.value.id}/contact`, {
       method: 'POST',
       body: contactForm.value
     })
