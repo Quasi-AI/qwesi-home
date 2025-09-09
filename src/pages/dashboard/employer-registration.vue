@@ -11,9 +11,11 @@
                 <div class="header-content">
                     <div class="header-info">
                         <div class="welcome-section">
-                            <h1 class="dashboard-title">{{ currentView === 'list' ? 'Job Management' : currentView === 'create' ? 'Create New Job' : 'Edit Job' }}</h1>
+                            <h1 class="dashboard-title">
+                                {{ currentView === 'list' ? 'Job Management' : currentView === 'create' ? 'Create New Job' : 'Edit Job' }}
+                            </h1>
                             <p class="welcome-message">
-                                {{ currentView === 'list' ? 'Manage your job postings and find the best talent' : 
+                                {{ currentView === 'list' ? 'Manage your job postings and review applications' : 
                                    currentView === 'create' ? 'Post a new job opening to attract qualified candidates' : 
                                    'Update your job posting details' }}
                             </p>
@@ -22,48 +24,53 @@
 
                     <!-- Header Actions -->
                     <div class="header-actions">
-                        <!-- View Toggle Buttons -->
-                        <button v-if="currentView !== 'list'" @click="switchToList" class="action-btn tips-btn">
-                            <div class="btn-bg"></div>
-                            <div class="btn-content">
-                                <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                                </svg>
-                                <span>View Jobs</span>
-                            </div>
-                        </button>
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <!-- View Toggle Buttons -->
+                            <div class="job-actions">
+                                <button v-if="currentView !== 'list'" @click="switchToList" class="action-btn tips-btn">
+                                    <div class="btn-bg"></div>
+                                    <div class="btn-content">
+                                        <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                        </svg>
+                                        <span>View Jobs</span>
+                                    </div>
+                                </button>
 
-                        <button v-if="currentView === 'list'" @click="switchToCreate" class="action-btn create-btn">
-                            <div class="btn-bg"></div>
-                            <div class="btn-content">
-                                <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                </svg>
-                                <span>Create Job</span>
+                                <button v-if="currentView === 'list'" @click="switchToCreate" class="action-btn create-btn">
+                                    <div class="btn-bg"></div>
+                                    <div class="btn-content">
+                                        <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        <span>Create Job</span>
+                                    </div>
+                                </button>
                             </div>
-                        </button>
 
-                        <!-- Tips Button -->
-                        <button @click="showTipsModal = true" class="action-btn tips-btn">
-                            <div class="btn-bg"></div>
-                            <div class="btn-content">
-                                <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span>Tips</span>
-                            </div>
-                        </button>
+                            <!-- Tips Button -->
+                            <button @click="showTipsModal = true" class="action-btn tips-btn">
+                                <div class="btn-bg"></div>
+                                <div class="btn-content">
+                                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>Tips</span>
+                                </div>
+                            </button>
 
-                        <!-- Back Button -->
-                        <NuxtLink to="/dashboard/get-started" class="action-btn referral-btn">
-                            <div class="btn-bg"></div>
-                            <div class="btn-content">
-                                <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                </svg>
-                                <span>Dashboard</span>
-                            </div>
-                        </NuxtLink>
+                            <!-- Back Button -->
+                            <NuxtLink to="/dashboard/get-started" class="action-btn referral-btn">
+                                <div class="btn-bg"></div>
+                                <div class="btn-content">
+                                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                    </svg>
+                                    <span>Dashboard</span>
+                                </div>
+                            </NuxtLink>
+                        </div>
                     </div>
                 </div>
                 
@@ -84,53 +91,68 @@
                     <!-- Jobs List View -->
                     <div v-if="currentView === 'list'" class="space-y-6">
                         <!-- Stats Cards -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div class="stats-card">
                                 <div class="stats-backdrop"></div>
                                 <div class="stats-content">
-                                <div class="stats-icon bg-blue-500">
-                                    <svg fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div class="stats-info">
-                                    <h3 class="stats-title">Total Jobs</h3>
-                                    <p class="stats-number">{{ jobs.length }}</p>
-                                </div>
+                                    <div class="stats-icon bg-blue-500">
+                                        <svg fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="stats-info">
+                                        <h3 class="stats-title">Total Jobs</h3>
+                                        <p class="stats-number">{{ jobs.length }}</p>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="stats-card">
                                 <div class="stats-backdrop"></div>
                                 <div class="stats-content">
-                                <div class="stats-icon bg-green-500">
-                                    <svg fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div class="stats-info">
-                                    <h3 class="stats-title">Active Jobs</h3>
-                                    <p class="stats-number">{{ activeJobs }}</p>
-                                </div>
+                                    <div class="stats-icon bg-green-500">
+                                        <svg fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="stats-info">
+                                        <h3 class="stats-title">Active Jobs</h3>
+                                        <p class="stats-number">{{ activeJobs }}</p>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="stats-card">
                                 <div class="stats-backdrop"></div>
                                 <div class="stats-content">
-                                <div class="stats-icon bg-purple-500">
-                                    <svg fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                                    </svg>
+                                    <div class="stats-icon bg-purple-500">
+                                        <svg fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                                        </svg>
+                                    </div>
+                                    <div class="stats-info">
+                                        <h3 class="stats-title">Applications</h3>
+                                        <p class="stats-number">{{ totalApplications }}</p>
+                                    </div>
                                 </div>
-                                <div class="stats-info">
-                                    <h3 class="stats-title">Total Views</h3>
-                                    <p class="stats-number">{{ totalViews }}</p>
-                                </div>
-                                </div>
-                            </div>
                             </div>
 
+                            <div class="stats-card">
+                                <div class="stats-backdrop"></div>
+                                <div class="stats-content">
+                                    <div class="stats-icon bg-amber-500">
+                                        <svg fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="stats-info">
+                                        <h3 class="stats-title">Total Views</h3>
+                                        <p class="stats-number">{{ totalViews }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Search and Filter Bar -->
                         <div class="search-filter-bar">
@@ -177,7 +199,7 @@
                         </div>
 
                         <div v-else class="jobs-grid">
-                            <div v-for="job in filteredJobs" :key="job.id" class="job-card">
+                            <div v-for="job in filteredJobs" :key="job._id" class="job-card" @click="viewJob(job._id)">
                                 <div class="job-backdrop"></div>
                                 <div class="job-content">
                                     <div class="job-header">
@@ -188,6 +210,14 @@
                                         <div class="job-status" :class="`status-${job.status}`">
                                             {{ job.status }}
                                         </div>
+                                    </div>
+
+                                    <!-- Application Count Badge -->
+                                    <div class="application-count-badge">
+                                        <svg class="badge-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 119.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        <span class="badge-count">{{ applicationCounts[job._id] || 0 }} Applications</span>
                                     </div>
 
                                     <div class="job-details">
@@ -215,14 +245,7 @@
                                         <p class="job-description">{{ truncateText(job.job_description, 120) }}</p>
                                     </div>
 
-                                    <div class="job-actions">
-                                        <button @click="viewJob(job._id)" class="job-action-btn view-btn">
-                                            <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                            View
-                                        </button>
+                                    <div class="job-actions" @click.stop>
                                         <button @click="editJob(job)" class="job-action-btn edit-btn">
                                             <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -352,13 +375,13 @@
                         </div>
                     </div>
 
-                    <!-- Job Detail Modal -->
+                    <!-- Job Detail Modal with Applications -->
                     <div v-if="showJobDetail" class="modal-overlay" @click="closeJobDetail">
                         <div class="modal-container" @click.stop>
                             <div class="modal-backdrop"></div>
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h3 class="modal-title">Job Details</h3>
+                                    <h3 class="modal-title">Job Details & Applications</h3>
                                     <button @click="closeJobDetail" class="modal-close">
                                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -367,44 +390,170 @@
                                 </div>
                                 
                                 <div v-if="selectedJob" class="modal-body">
-                                    <div class="job-detail-header">
-                                        <h4 class="detail-title">{{ selectedJob.title }}</h4>
-                                        <span class="detail-company">{{ selectedJob.employer }}</span>
-                                        <div class="detail-status" :class="`status-${selectedJob.status}`">
-                                            {{ selectedJob.status }}
+                                    <!-- Job Details Section -->
+                                    <div class="job-detail-section">
+                                        <div class="job-detail-header">
+                                            <h4 class="detail-title">{{ selectedJob.title }}</h4>
+                                            <span class="detail-company">{{ selectedJob.employer }}</span>
+                                            <div class="detail-status" :class="`status-${selectedJob.status}`">
+                                                {{ selectedJob.status }}
+                                            </div>
+                                        </div>
+
+                                        <div class="job-detail-meta">
+                                            <div class="detail-meta-item">
+                                                <span class="meta-label">Location:</span>
+                                                <span class="meta-value">{{ selectedJob.location }}</span>
+                                            </div>
+                                            <div class="detail-meta-item">
+                                                <span class="meta-label">Salary:</span>
+                                                <span class="meta-value">{{ selectedJob.salary }}</span>
+                                            </div>
+                                            <div class="detail-meta-item">
+                                                <span class="meta-label">Job Type:</span>
+                                                <span class="meta-value">{{ selectedJob.jobType }}</span>
+                                            </div>
+                                            <div class="detail-meta-item">
+                                                <span class="meta-label">Experience:</span>
+                                                <span class="meta-value">{{ selectedJob.experience_level }}</span>
+                                            </div>
+                                            <div v-if="selectedJob.skills" class="detail-meta-item">
+                                                <span class="meta-label">Skills:</span>
+                                                <span class="meta-value">{{ selectedJob.skills }}</span>
+                                            </div>
+                                            <div v-if="selectedJob.deadline" class="detail-meta-item">
+                                                <span class="meta-label">Deadline:</span>
+                                                <span class="meta-value">{{ formatDate(selectedJob.deadline) }}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="job-detail-description">
+                                            <h5 class="description-title">Job Description</h5>
+                                            <p class="description-text">{{ selectedJob.job_description }}</p>
                                         </div>
                                     </div>
 
-                                    <div class="job-detail-meta">
-                                        <div class="detail-meta-item">
-                                            <span class="meta-label">Location:</span>
-                                            <span class="meta-value">{{ selectedJob.location }}</span>
+                                    <!-- Applications Section -->
+                                    <div class="applications-section">
+                                        <div class="section-header">
+                                            <h5 class="section-title">Applications ({{ jobApplications.length }})</h5>
+                                            <div class="application-filters">
+                                                <select v-model="selectedStatusFilter" class="mini-filter">
+                                                    <option value="">All Status</option>
+                                                    <option v-for="status in applicationStatusOptions" :key="status.value" :value="status.value">
+                                                        {{ status.title }}
+                                                    </option>
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div class="detail-meta-item">
-                                            <span class="meta-label">Salary:</span>
-                                            <span class="meta-value">{{ selectedJob.salary }}</span>
-                                        </div>
-                                        <div class="detail-meta-item">
-                                            <span class="meta-label">Job Type:</span>
-                                            <span class="meta-value">{{ selectedJob.jobType }}</span>
-                                        </div>
-                                        <div class="detail-meta-item">
-                                            <span class="meta-label">Experience:</span>
-                                            <span class="meta-value">{{ selectedJob.experience_level }}</span>
-                                        </div>
-                                        <div v-if="selectedJob.skills" class="detail-meta-item">
-                                            <span class="meta-label">Skills:</span>
-                                            <span class="meta-value">{{ selectedJob.skills }}</span>
-                                        </div>
-                                        <div v-if="selectedJob.deadline" class="detail-meta-item">
-                                            <span class="meta-label">Deadline:</span>
-                                            <span class="meta-value">{{ formatDate(selectedJob.deadline) }}</span>
-                                        </div>
-                                    </div>
 
-                                    <div class="job-detail-description">
-                                        <h5 class="description-title">Job Description</h5>
-                                        <p class="description-text">{{ selectedJob.job_description }}</p>
+                                        <div v-if="loadingApplications" class="loading-applications">
+                                            <div class="loading-spinner small"></div>
+                                            <span>Loading applications...</span>
+                                        </div>
+
+                                        <div v-else-if="filteredJobApplications.length === 0" class="no-applications">
+                                            <svg class="no-app-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 119.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                            </svg>
+                                            <p>{{ selectedStatusFilter ? 'No applications with selected status' : 'No applications received yet' }}</p>
+                                        </div>
+
+                                        <div v-else class="applications-list">
+                                            <div 
+                                                v-for="application in filteredJobApplications" 
+                                                :key="application._id"
+                                                class="application-item"
+                                            >
+                                                <div class="application-header">
+                                                    <div class="applicant-info">
+                                                        <div class="applicant-avatar small">
+                                                            {{ getInitials(application.applicantDetails?.firstName, application.applicantDetails?.lastName) }}
+                                                        </div>
+                                                        <div class="applicant-details">
+                                                            <div class="applicant-name">
+                                                                {{ application.applicantDetails?.firstName }} {{ application.applicantDetails?.lastName }}
+                                                            </div>
+                                                            <div class="applicant-email">{{ application.applicantDetails?.email }}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="application-status">
+                                                        <select
+                                                            :model-value="application.status"
+                                                            @update:model-value="updateApplicationStatus(application._id, $event)"
+                                                            @click.stop
+                                                            class="status-select small"
+                                                        >
+                                                            <option v-for="status in applicationStatusOptions" :key="status.value" :value="status.value">
+                                                                {{ status.title }}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="application-meta">
+                                                    <span class="meta-item">
+                                                        <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                        Applied {{ formatDate(application.submittedAt) }}
+                                                    </span>
+                                                    <span v-if="application.experience?.years" class="meta-item">
+                                                        <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h8z" />
+                                                        </svg>
+                                                        {{ application.experience.years }} years exp.
+                                                    </span>
+                                                </div>
+
+                                                <div v-if="application.skills?.length" class="application-skills">
+                                                    <span 
+                                                        v-for="skill in application.skills.slice(0, 4)" 
+                                                        :key="skill"
+                                                        class="skill-tag mini"
+                                                    >
+                                                        {{ skill }}
+                                                    </span>
+                                                    <span v-if="application.skills.length > 4" class="more-skills mini">
+                                                        +{{ application.skills.length - 4 }}
+                                                    </span>
+                                                </div>
+
+                                                <div class="application-actions">
+                                                    <button 
+                                                        v-if="application.resume?.url"
+                                                        class="action-btn mini primary"
+                                                        @click="downloadResume(application.resume.url, application.resume.originalName)"
+                                                        title="Download Resume"
+                                                    >
+                                                        <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                        </svg>
+                                                        Resume
+                                                    </button>
+                                                    <button 
+                                                        class="action-btn mini secondary" 
+                                                        @click="contactApplicant(application)"
+                                                        title="Contact Applicant"
+                                                    >
+                                                        <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                        </svg>
+                                                        Contact
+                                                    </button>
+                                                    <button 
+                                                        class="action-btn mini danger" 
+                                                        @click="deleteApplication(application._id)"
+                                                        title="Delete Application"
+                                                    >
+                                                        <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -426,7 +575,7 @@
                                 </div>
                                 
                                 <div class="modal-body">
-                                    <p class="text-slate-600">Are you sure you want to delete this job? This action cannot be undone.</p>
+                                    <p class="text-slate-600">Are you sure you want to delete this {{ deleteType }}? This action cannot be undone.</p>
                                     <div class="flex justify-end space-x-3 mt-6">
                                         <button @click="cancelDelete" class="cancel-btn">
                                             Cancel
@@ -439,7 +588,7 @@
                                                 </svg>
                                                 Deleting...
                                             </span>
-                                            <span v-else>Delete Job</span>
+                                            <span v-else>Delete {{ deleteType }}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -461,26 +610,29 @@ import MessagePopup from '~/shared/components/message/MessagePopup.vue'
 const alertRef = ref(null)
 const authStore = useAuthStore()
 
+// Base API URL
+const BASE_API_URL = 'https://dark-caldron-448714-u5.uc.r.appspot.com'
+
 // User state
 const user = computed(() => authStore.getUser || {})
-const userInitials = computed(() => {
-    const name = user.value?.name || 'User'
-    return name.charAt(0).toUpperCase()
-})
-const displayName = computed(() => user.value?.name || 'User')
 
 // View state
 const currentView = ref('list') // 'list', 'create', 'edit'
-const profileMenuOpen = ref(false)
 const showTipsModal = ref(false)
 const showJobDetail = ref(false)
 const showDeleteConfirm = ref(false)
 
 // Data state
 const jobs = ref([])
+const jobApplications = ref([])
+const applicationCounts = ref({})
 const selectedJob = ref(null)
 const jobToDelete = ref(null)
+const applicationToDelete = ref(null)
+const deleteType = ref('job') // 'job' or 'application'
+const selectedStatusFilter = ref('')
 const loading = ref(false)
+const loadingApplications = ref(false)
 const isSubmitting = ref(false)
 const isDeleting = ref(false)
 
@@ -503,6 +655,16 @@ const jobForm = ref({
     status: 'active'
 })
 
+const applicationStatusOptions = [
+    { title: 'Submitted', value: 'submitted' },
+    { title: 'Under Review', value: 'under_review' },
+    { title: 'Interview Scheduled', value: 'interview_scheduled' },
+    { title: 'Interviewed', value: 'interviewed' },
+    { title: 'Offered', value: 'offered' },
+    { title: 'Rejected', value: 'rejected' },
+    { title: 'Withdrawn', value: 'withdrawn' }
+]
+
 // Computed properties
 const filteredJobs = computed(() => {
     let filtered = jobs.value
@@ -523,8 +685,17 @@ const filteredJobs = computed(() => {
     return filtered
 })
 
+const filteredJobApplications = computed(() => {
+    if (!selectedStatusFilter.value) return jobApplications.value
+    return jobApplications.value.filter(app => app.status === selectedStatusFilter.value)
+})
+
 const activeJobs = computed(() => {
     return jobs.value.filter(job => job.status === 'active').length
+})
+
+const totalApplications = computed(() => {
+    return Object.values(applicationCounts.value).reduce((sum, count) => sum + count, 0)
 })
 
 const totalViews = computed(() => {
@@ -542,6 +713,8 @@ const fetchJobs = async () => {
 
         if (response.success) {
             jobs.value = response.data || []
+            // Fetch application counts for all jobs
+            await fetchApplicationCounts()
         } else {
             alertRef.value.error(response.message || 'Failed to fetch jobs')
         }
@@ -550,6 +723,46 @@ const fetchJobs = async () => {
         alertRef.value.error('Failed to load jobs')
     } finally {
         loading.value = false
+    }
+}
+
+const fetchApplicationCounts = async () => {
+    try {
+        const response = await $fetch(`${BASE_API_URL}/applications/employer/count/${user.value.id}`, {
+            method: 'GET',
+            throw: false
+        })
+
+        if (response.success) {
+            applicationCounts.value = response.data || {}
+        } else {
+            console.warn('Failed to fetch application counts:', response.message)
+        }
+    } catch (error) {
+        console.error('Fetch application counts error:', error)
+    }
+}
+
+const fetchJobApplications = async (jobId) => {
+    loadingApplications.value = true
+    try {
+        const response = await $fetch(`${BASE_API_URL}/applications/employer/${user.value.id}`, {
+            method: 'GET',
+            query: { jobId },
+            throw: false
+        })
+
+        if (response.success) {
+            jobApplications.value = response.data || []
+        } else {
+            console.warn('Failed to fetch job applications:', response.message)
+            jobApplications.value = []
+        }
+    } catch (error) {
+        console.error('Fetch job applications error:', error)
+        jobApplications.value = []
+    } finally {
+        loadingApplications.value = false
     }
 }
 
@@ -563,6 +776,9 @@ const fetchJobById = async (jobId) => {
         if (response.success) {
             selectedJob.value = response.data
             showJobDetail.value = true
+            selectedStatusFilter.value = ''
+            // Fetch applications for this job
+            await fetchJobApplications(jobId)
         } else {
             alertRef.value.error(response.message || 'Failed to fetch job details')
         }
@@ -582,7 +798,6 @@ const createJob = async (payload) => {
 }
 
 const updateJob = async (payload) => {
-    console.log(payload._id) 
     const response = await $fetch(`${API_ROUTES.JOBS}/update/${payload._id}`, {
         method: 'PUT',
         body: payload,
@@ -595,6 +810,38 @@ const deleteJobById = async (jobId) => {
     const response = await $fetch(`${API_ROUTES.JOBS}/delete/${jobId}`, {
         method: 'DELETE',
         body: { id: jobId },
+        throw: false
+    })
+    return response
+}
+
+const updateApplicationStatus = async (applicationId, newStatus) => {
+    try {
+        const response = await $fetch(`${BASE_API_URL}/applications/${applicationId}/status`, {
+            method: 'PUT',
+            body: { status: newStatus },
+            throw: false
+        })
+
+        if (response.success) {
+            // Update local application data
+            const appIndex = jobApplications.value.findIndex(app => app._id === applicationId)
+            if (appIndex !== -1) {
+                jobApplications.value[appIndex].status = newStatus
+            }
+            alertRef.value.success('Application status updated successfully')
+        } else {
+            alertRef.value.error(response.message || 'Failed to update status')
+        }
+    } catch (error) {
+        console.error('Update status error:', error)
+        alertRef.value.error('Failed to update application status')
+    }
+}
+
+const deleteApplicationById = async (applicationId) => {
+    const response = await $fetch(`${BASE_API_URL}/applications/${applicationId}`, {
+        method: 'DELETE',
         throw: false
     })
     return response
@@ -625,7 +872,7 @@ const submitJobForm = async () => {
             })
             resetJobForm()
             switchToList()
-            await fetchJobs() // Refresh the jobs list
+            await fetchJobs()
         } else {
             alertRef.value.error(response.message || `Failed to ${currentView.value} job`)
         }
@@ -675,26 +922,57 @@ const viewJob = async (jobId) => {
 
 const deleteJob = (jobId) => {
     jobToDelete.value = jobId
+    deleteType.value = 'job'
     showDeleteConfirm.value = true
+}
+
+const deleteApplication = (applicationId) => {
+    applicationToDelete.value = applicationId
+    deleteType.value = 'application'
+    showDeleteConfirm.value = true
+}
+
+const contactApplicant = (application) => {
+    const email = application.applicantDetails?.email
+    if (email) {
+        const subject = `Regarding your application for ${selectedJob.value?.title || 'position'}`
+        const body = `Dear ${application.applicantDetails?.firstName},\n\nThank you for your interest in the ${selectedJob.value?.title || 'position'} position at ${selectedJob.value?.employer || 'our company'}.\n\nBest regards`
+        window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    } else {
+        alertRef.value.error('No email address found for this applicant')
+    }
 }
 
 const confirmDelete = async () => {
     isDeleting.value = true
     try {
-        const response = await deleteJobById(jobToDelete.value)
-        
-        if (response.success) {
-            alertRef.value.success('Job deleted successfully!', {
-                title: 'Deleted',
-                duration: 3000
-            })
-            await fetchJobs() // Refresh the jobs list
+        let response
+        if (deleteType.value === 'job') {
+            response = await deleteJobById(jobToDelete.value)
+            if (response.success) {
+                alertRef.value.success('Job deleted successfully!')
+                await fetchJobs()
+                if (showJobDetail.value && selectedJob.value?._id === jobToDelete.value) {
+                    closeJobDetail()
+                }
+            }
         } else {
-            alertRef.value.error(response.message || 'Failed to delete job')
+            response = await deleteApplicationById(applicationToDelete.value)
+            if (response.success) {
+                alertRef.value.success('Application deleted successfully!')
+                // Remove from local array
+                jobApplications.value = jobApplications.value.filter(app => app._id !== applicationToDelete.value)
+                // Update application counts
+                await fetchApplicationCounts()
+            }
+        }
+        
+        if (!response.success) {
+            alertRef.value.error(response.message || `Failed to delete ${deleteType.value}`)
         }
     } catch (error) {
-        console.error('Delete job error:', error)
-        alertRef.value.error('Failed to delete job')
+        console.error(`Delete ${deleteType.value} error:`, error)
+        alertRef.value.error(`Failed to delete ${deleteType.value}`)
     } finally {
         isDeleting.value = false
         cancelDelete()
@@ -704,6 +982,8 @@ const confirmDelete = async () => {
 const cancelDelete = () => {
     showDeleteConfirm.value = false
     jobToDelete.value = null
+    applicationToDelete.value = null
+    deleteType.value = 'job'
 }
 
 const cancelForm = () => {
@@ -714,6 +994,8 @@ const cancelForm = () => {
 const closeJobDetail = () => {
     showJobDetail.value = false
     selectedJob.value = null
+    jobApplications.value = []
+    selectedStatusFilter.value = ''
 }
 
 // Utility Functions
@@ -726,21 +1008,23 @@ const formatDate = (dateString) => {
     })
 }
 
+const getInitials = (firstName, lastName) => {
+    return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase()
+}
+
+const downloadResume = (url, filename) => {
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename || 'resume.pdf'
+    link.target = '_blank'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+}
+
 const truncateText = (text, length) => {
     if (!text) return ''
     return text.length > length ? text.substring(0, length) + '...' : text
-}
-
-// Profile actions
-const editProfile = () => {
-    profileMenuOpen.value = false
-    navigateTo('/dashboard/profile')
-}
-
-const handleLogout = () => {
-    profileMenuOpen.value = false
-    authStore.logout()
-    navigateTo('/auth/login')
 }
 
 // Lifecycle
@@ -833,7 +1117,15 @@ useHead({
 
 /* Header Actions */
 .header-actions {
+    @apply flex items-center space-x-4;
+}
+
+.action-buttons {
     @apply flex items-center space-x-3;
+}
+
+.job-actions {
+    @apply flex space-x-2;
 }
 
 .action-btn {
@@ -878,81 +1170,6 @@ useHead({
     @apply text-blue-700 hover:text-blue-900;
 }
 
-/* Profile Dropdown */
-.profile-dropdown {
-    @apply relative z-50;
-}
-
-.profile-btn {
-    @apply flex items-center space-x-3 p-2 rounded-2xl hover:bg-slate-100/70 transition-all duration-300;
-}
-
-.profile-avatar {
-    @apply relative w-10 h-10;
-}
-
-.avatar-image {
-    @apply w-10 h-10 rounded-2xl overflow-hidden border-2 border-slate-200;
-}
-
-.avatar-image img {
-    @apply w-full h-full object-cover;
-}
-
-.avatar-initials {
-    @apply w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl;
-    @apply flex items-center justify-center text-white font-bold text-sm;
-    @apply shadow-lg shadow-blue-500/25;
-}
-
-.avatar-ring {
-    @apply absolute -inset-1 rounded-2xl border-2 border-blue-400/30 opacity-0;
-    @apply transition-opacity duration-300;
-}
-
-.profile-btn:hover .avatar-ring {
-    @apply opacity-100;
-}
-
-.dropdown-arrow {
-    @apply w-4 h-4 text-slate-400 transition-transform duration-300;
-}
-
-.profile-btn:hover .dropdown-arrow {
-    @apply rotate-180;
-}
-
-.profile-menu {
-    @apply absolute right-0 mt-2 w-48 rounded-2xl overflow-hidden z-10;
-}
-
-.menu-backdrop {
-    @apply absolute inset-0 bg-white/95 border border-slate-200/60;
-    backdrop-filter: blur(20px);
-    border-radius: inherit;
-}
-
-.menu-content {
-    @apply relative z-10 py-2;
-}
-
-.menu-item {
-    @apply w-full text-left px-4 py-3 text-sm font-medium text-slate-700;
-    @apply hover:bg-slate-100/70 transition-colors duration-200 flex items-center space-x-3;
-}
-
-.menu-icon {
-    @apply w-4 h-4;
-}
-
-.logout-item {
-    @apply text-red-600 hover:text-red-700 hover:bg-red-50/70;
-}
-
-.menu-divider {
-    @apply border-t border-slate-200/60 my-1;
-}
-
 /* Main Dashboard Content */
 .dashboard-main {
     @apply flex-1 p-6 flex flex-col space-y-8;
@@ -963,120 +1180,107 @@ useHead({
 
 /* Stats Cards */
 .stats-card {
-  position: relative;
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-  transition: all 0.3s ease;
-  height: 100%;
+    position: relative;
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    height: 100%;
 }
 
 .stats-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .stats-backdrop {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  opacity: 0.03;
-  z-index: 0;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    opacity: 0.03;
+    z-index: 0;
 }
 
 .stats-content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
 .stats-icon {
-  width: 4rem;
-  height: 4rem;
-  border-radius: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  flex-shrink: 0;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
 }
 
 .stats-icon svg {
-  width: 2rem;
-  height: 2rem;
+    width: 2rem;
+    height: 2rem;
 }
 
 .stats-info {
-  flex: 1;
+    flex: 1;
 }
 
 .stats-title {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #6b7280;
-  margin-bottom: 0.25rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .stats-number {
-  font-size: 2rem;
-  font-weight: 800;
-  color: #1f2937;
-  margin: 0;
-  line-height: 1;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin: 0;
+    line-height: 1;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .stats-card {
-    padding: 1.25rem;
-  }
-  
-  .stats-icon {
-    width: 3.5rem;
-    height: 3.5rem;
-  }
-  
-  .stats-icon svg {
-    width: 1.75rem;
-    height: 1.75rem;
-  }
-  
-  .stats-number {
-    font-size: 1.75rem;
-  }
-}
-
-/* Animation for numbers */
-.stats-number {
-  transition: all 0.5s ease;
-}
-
-.stats-card:hover .stats-number {
-  transform: scale(1.05);
-}
-
-/* Color variations */
 .bg-blue-500 {
-  background-color: #3b82f6;
+    background-color: #3b82f6;
 }
 
 .bg-green-500 {
-  background-color: #10b981;
+    background-color: #10b981;
 }
 
 .bg-purple-500 {
-  background-color: #8b5cf6;
+    background-color: #8b5cf6;
 }
 
+.bg-amber-500 {
+    background-color: #f59e0b;
+}
+
+/* Application Count Badge */
+.application-count-badge {
+    @apply flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-blue-50 to-indigo-100;
+    @apply text-blue-700 rounded-xl text-sm font-medium border border-blue-200/50 mb-3;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+}
+
+.badge-icon {
+    @apply w-4 h-4;
+}
+
+.badge-count {
+    font-weight: 600;
+}
 
 /* Search and Filter */
 .search-filter-bar {
@@ -1122,8 +1326,16 @@ useHead({
     animation: spin 1s linear infinite;
 }
 
+.loading-spinner.small {
+    @apply w-5 h-5 border-2;
+}
+
 .loading-text {
     @apply text-slate-600 font-medium;
+}
+
+.loading-applications {
+    @apply flex items-center justify-center py-8 space-x-3 text-slate-600;
 }
 
 /* Empty State */
@@ -1167,7 +1379,7 @@ useHead({
 }
 
 .job-card {
-    @apply relative rounded-3xl overflow-hidden transition-all duration-300;
+    @apply relative rounded-3xl overflow-hidden transition-all duration-300 cursor-pointer;
     @apply hover:scale-[1.02] hover:shadow-xl;
     backdrop-filter: blur(20px);
 }
@@ -1243,10 +1455,6 @@ useHead({
 
 .action-icon {
     @apply w-4 h-4;
-}
-
-.view-btn {
-    @apply bg-blue-100 text-blue-700 hover:bg-blue-200;
 }
 
 .edit-btn {
@@ -1362,6 +1570,10 @@ useHead({
 }
 
 /* Job Detail Styles */
+.job-detail-section {
+    @apply mb-8 pb-8 border-b border-slate-200;
+}
+
 .job-detail-header {
     @apply space-y-2 mb-6;
 }
@@ -1406,6 +1618,124 @@ useHead({
     @apply text-slate-700 leading-relaxed whitespace-pre-line;
 }
 
+/* Applications Section */
+.applications-section {
+    @apply space-y-4;
+}
+
+.section-header {
+    @apply flex items-center justify-between mb-4;
+}
+
+.section-title {
+    @apply text-lg font-bold text-slate-900;
+}
+
+.application-filters {
+    @apply flex space-x-2;
+}
+
+.mini-filter {
+    @apply px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl;
+    @apply focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.no-applications {
+    @apply flex flex-col items-center justify-center py-8 text-slate-500;
+}
+
+.no-app-icon {
+    @apply w-12 h-12 mb-3;
+}
+
+.applications-list {
+    @apply space-y-4 max-h-96 overflow-y-auto;
+}
+
+.application-item {
+    @apply bg-gradient-to-r from-slate-50/80 to-white/80 rounded-2xl p-4 border border-slate-200/50;
+    @apply hover:shadow-md transition-all duration-300;
+}
+
+.application-header {
+    @apply flex items-start justify-between mb-3;
+}
+
+.applicant-info {
+    @apply flex items-center space-x-3 flex-1;
+}
+
+.applicant-avatar.small {
+    @apply w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.applicant-details {
+    @apply flex-1;
+}
+
+.applicant-name {
+    @apply font-semibold text-slate-900 text-sm;
+}
+
+.applicant-email {
+    @apply text-xs text-slate-500;
+}
+
+.application-status .status-select.small {
+    @apply text-xs px-2 py-1 min-w-[110px];
+}
+
+.application-meta {
+    @apply flex flex-wrap gap-3 text-xs text-slate-600 mb-3;
+}
+
+.meta-item {
+    @apply flex items-center space-x-1;
+}
+
+.meta-item .meta-icon {
+    @apply w-3 h-3;
+}
+
+.application-skills {
+    @apply flex flex-wrap gap-1 mb-3;
+}
+
+.skill-tag.mini {
+    @apply px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium;
+}
+
+.more-skills.mini {
+    @apply text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-lg;
+}
+
+.application-actions {
+    @apply flex space-x-2;
+}
+
+.action-btn.mini {
+    @apply flex items-center space-x-1 px-3 py-2 rounded-xl text-xs font-medium;
+    @apply transition-all duration-300;
+}
+
+.action-btn.mini.primary {
+    @apply bg-blue-100 text-blue-700 hover:bg-blue-200;
+}
+
+.action-btn.mini.secondary {
+    @apply bg-slate-100 text-slate-700 hover:bg-slate-200;
+}
+
+.action-btn.mini.danger {
+    @apply bg-red-100 text-red-700 hover:bg-red-200;
+}
+
+.action-btn.mini .action-icon {
+    @apply w-3 h-3;
+}
+
 /* Delete Confirmation Styles */
 .delete-confirm-btn {
     @apply px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-2xl;
@@ -1422,6 +1752,46 @@ useHead({
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* Custom Scrollbar */
+.main-content,
+.dashboard-main,
+.applications-list,
+.modal-body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+}
+
+.main-content::-webkit-scrollbar,
+.dashboard-main::-webkit-scrollbar,
+.applications-list::-webkit-scrollbar,
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.main-content::-webkit-scrollbar-track,
+.dashboard-main::-webkit-scrollbar-track,
+.applications-list::-webkit-scrollbar-track,
+.modal-body::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+}
+
+.main-content::-webkit-scrollbar-thumb,
+.dashboard-main::-webkit-scrollbar-thumb,
+.applications-list::-webkit-scrollbar-thumb,
+.modal-body::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.5));
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover,
+.dashboard-main::-webkit-scrollbar-thumb:hover,
+.applications-list::-webkit-scrollbar-thumb:hover,
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.5), rgba(148, 163, 184, 0.7));
 }
 
 /* Responsive Design */
@@ -1445,55 +1815,90 @@ useHead({
     .form-actions {
         @apply flex-col space-y-3 space-x-0;
     }
+    
+    .header-content {
+        @apply px-4 py-3;
+    }
+    
+    .dashboard-main {
+        @apply px-4;
+    }
+    
+    .stats-card {
+        padding: 1rem;
+    }
+    
+    .search-content {
+        @apply p-4;
+    }
+    
+    .job-content,
+    .form-content {
+        @apply p-4;
+    }
+    
+    .modal-body {
+        @apply p-4;
+    }
+    
+    .applications-list {
+        @apply max-h-80;
+    }
 }
 
-/* Custom Scrollbar */
-.main-content {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+@media (max-width: 480px) {
+    .application-actions {
+        @apply flex-col space-y-2 space-x-0;
+    }
+    
+    .action-btn.mini {
+        @apply justify-center;
+    }
 }
 
-.main-content::-webkit-scrollbar {
-    width: 6px;
+/* Focus styles for accessibility */
+.action-btn:focus,
+.job-action-btn:focus,
+.status-select:focus,
+.mini-filter:focus {
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2;
 }
 
-.main-content::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 3px;
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .stats-backdrop,
+    .search-backdrop,
+    .empty-backdrop,
+    .job-backdrop,
+    .form-backdrop,
+    .modal-backdrop {
+        @apply bg-white border-2 border-slate-900;
+    }
+    
+    .floating-orb {
+        @apply opacity-60;
+    }
 }
 
-.main-content::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.5));
-    border-radius: 3px;
-    transition: all 0.3s ease;
-}
-
-.main-content::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.5), rgba(148, 163, 184, 0.7));
-}
-
-.dashboard-main {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
-}
-
-.dashboard-main::-webkit-scrollbar {
-    width: 6px;
-}
-
-.dashboard-main::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 3px;
-}
-
-.dashboard-main::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.5));
-    border-radius: 3px;
-    transition: all 0.3s ease;
-}
-
-.dashboard-main::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.5), rgba(148, 163, 184, 0.7));
+/* Print styles */
+@media print {
+    .header-decorations,
+    .floating-orb,
+    .action-btn,
+    .job-actions,
+    .application-actions {
+        display: none !important;
+    }
+    
+    .dashboard-container {
+        @apply bg-white;
+    }
+    
+    .job-card,
+    .stats-card {
+        @apply border border-slate-300 shadow-none;
+        break-inside: avoid;
+    }
 }
 
 /* Reduced Motion */
@@ -1503,10 +1908,7 @@ useHead({
         animation: none;
     }
     
-    .job-card:hover {
-        transform: none;
-    }
-    
+    .job-card:hover,
     .action-btn:hover,
     .submit-btn:hover {
         transform: none;

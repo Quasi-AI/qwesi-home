@@ -196,6 +196,50 @@
                             </ul>
                         </div>
 
+                                                <!-- Discover Section -->
+                        <div>
+                            <h3 v-if="!isCollapsed || isMobile" 
+                                class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2">
+                                Payment
+                            </h3>
+                            <ul class="space-y-1">
+                                <li v-for="item in PaymentNavigation" :key="item.path">
+                                    <NuxtLink :to="item.path" 
+                                              class="flex items-center text-sm font-medium rounded-2xl transition-all duration-200 group w-full relative overflow-hidden"
+                                              :class="[
+                                                  $route.path === item.path
+                                                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25'
+                                                      : 'text-slate-700 hover:bg-slate-100/70 hover:shadow-md',
+                                                  (isCollapsed && !isMobile) ? 'justify-center p-3' : 'px-3 py-2.5'
+                                              ]" 
+                                              :title="(isCollapsed && !isMobile) ? item.title : ''"
+                                              @click="handleNavigation(item.path)">
+                                        
+                                        <!-- Active indicator -->
+                                        <div v-if="$route.path === item.path" 
+                                             class="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-600/20 animate-pulse"></div>
+                                        
+                                        <!-- Investors Icon -->
+                                        <svg v-if="item.key === 'withdraw'"
+                                             class="w-5 h-5 flex-shrink-0 transition-all duration-200 relative z-10"
+                                             :class="$route.path === item.path ? 'text-white drop-shadow-sm' : 'text-slate-500 group-hover:text-slate-700'"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                                        </svg>
+                                        
+
+                                        <span v-if="!isCollapsed || isMobile" 
+                                              class="ml-3 truncate transition-all duration-200 relative z-10 font-medium">
+                                            {{ item.title }}
+                                        </span>
+
+                                        <!-- Hover effect -->
+                                        <div class="absolute inset-0 bg-gradient-to-r from-slate-100/50 to-slate-200/50 opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-2xl"></div>
+                                    </NuxtLink>
+                                </li>
+                            </ul>
+                        </div>
+
                         <!-- Registration Section -->
                         <div>
                             <h3 v-if="!isCollapsed || isMobile" 
@@ -327,6 +371,12 @@ const registrationNavigation = [
     { path: '/dashboard/employer-registration', title: 'Employer', key: 'employer-reg' },
     { path: '/dashboard/pitch', title: 'Pitch Competition', key: 'pitch-reg' }
 ]
+
+const PaymentNavigation = [
+    { path: '/dashboard/withdraw', title: 'Withdraw', key: 'withdraw' },
+]
+
+
 
 // Reactive state
 const isCollapsed = ref(true)
