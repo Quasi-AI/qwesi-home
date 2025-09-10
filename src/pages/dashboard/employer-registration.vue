@@ -282,6 +282,12 @@
                                             <input v-model="jobForm.employer" type="text" placeholder="Your company name"
                                                 class="form-input" required />
                                         </div>
+
+                                        <div>
+                                            <label class="form-label">Email *</label>
+                                            <input v-model="jobForm.email" type="text" placeholder="Email for recieving applications"
+                                                class="form-input" required />
+                                        </div>
                                     </div>
 
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -527,27 +533,41 @@
                                                         title="Download Resume"
                                                     >
                                                         <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                         </svg>
                                                         Resume
                                                     </button>
+                                                    
+                                                    <!-- NEW: Schedule Interview Button -->
+                                                    <button 
+                                                        class="action-btn mini interview-btn" 
+                                                        @click="scheduleInterview(application)"
+                                                        title="Schedule Interview"
+                                                    >
+                                                        <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                        Schedule Interview
+                                                    </button>
+                                                    
                                                     <button 
                                                         class="action-btn mini secondary" 
                                                         @click="contactApplicant(application)"
                                                         title="Contact Applicant"
                                                     >
                                                         <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                                         </svg>
                                                         Contact
                                                     </button>
+                                                    
                                                     <button 
                                                         class="action-btn mini danger" 
                                                         @click="deleteApplication(application._id)"
                                                         title="Delete Application"
                                                     >
                                                         <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                         </svg>
                                                         Delete
                                                     </button>
@@ -559,6 +579,7 @@
                             </div>
                         </div>
                     </div>
+                                            
 
                     <!-- Delete Confirmation Modal -->
                     <div v-if="showDeleteConfirm" class="modal-overlay" @click="cancelDelete">
@@ -598,6 +619,11 @@
                 </div>
             </main>
         </div>
+         <InterviewScheduling 
+                        ref="interviewSchedulingRef"
+                        :selectedJob="selectedJob"
+                        :jobApplications="jobApplications"
+                    />
     </div>
 </template>
 
@@ -606,6 +632,8 @@ import { API_ROUTES } from '~/shared/constants/api-routes'
 import { useAuthStore } from '~/features/auth/stores/auth.store'
 import Sidebar from '@/features/dashboard/components/dashboard-sidebar.vue'
 import MessagePopup from '~/shared/components/message/MessagePopup.vue'
+import InterviewScheduling  from '@/pages/modals/InterviewScheduling.vue'
+
 
 const alertRef = ref(null)
 const authStore = useAuthStore()
@@ -641,6 +669,7 @@ const statusFilter = ref('')
 const jobForm = ref({
     id: null,
     title: '',
+    email: '',
     employer: '',
     location: '',
     salary: '',
@@ -651,6 +680,18 @@ const jobForm = ref({
     deadline: '',
     status: 'active'
 })
+
+
+// Add ref for interview scheduling component
+const interviewSchedulingRef = ref(null)
+
+const scheduleInterview = (application) => {
+  if (interviewSchedulingRef.value) {
+    closeJobDetail()
+    interviewSchedulingRef.value.openScheduleModal(application)
+  }
+}
+
 
 const applicationStatusOptions = [
     { title: 'Submitted', value: 'submitted' },
@@ -703,7 +744,7 @@ const totalViews = computed(() => {
 const fetchJobs = async () => {
     loading.value = true
     try {
-        const response = await $fetch(`${API_ROUTES.JOBS}/${user.value.email}`, {
+        const response = await $fetch(`${API_ROUTES.JOBS}/${user.value.id}`, {
             method: 'GET',
             throw: false
         })
@@ -725,7 +766,7 @@ const fetchJobs = async () => {
 
 const fetchApplicationCounts = async () => {
     try {
-        const response = await $fetch(`${API_ROUTES.BASE_URL}applications/employer/${user.value.email}/counts`, {
+        const response = await $fetch(`${API_ROUTES.BASE_URL}applications/employer/${user.value.id}/counts`, {
             method: 'GET',
             throw: false
         })
@@ -743,7 +784,7 @@ const fetchApplicationCounts = async () => {
 const fetchJobApplications = async (jobId) => {
     loadingApplications.value = true
     try {
-        const response = await $fetch(`${API_ROUTES.BASE_URL}applications/employer/${user.value.email}/applications`, {
+        const response = await $fetch(`${API_ROUTES.BASE_URL}applications/employer/${user.value.id}/applications`, {
             method: 'GET',
             query: { jobId },
             throw: false
@@ -851,7 +892,7 @@ const submitJobForm = async () => {
     try {
         const payload = {
             ...jobForm.value,
-            email: user.value.email,
+            user_id: user.value.id
         }
 
         let response
@@ -1910,5 +1951,25 @@ useHead({
     .submit-btn:hover {
         transform: none;
     }
+}
+
+/* Add this new style for the interview button */
+.action-btn.mini.interview-btn {
+  @apply bg-purple-100 text-purple-700 hover:bg-purple-200;
+}
+
+/* Update existing styles to accommodate new button */
+.application-actions {
+  @apply flex space-x-2 flex-wrap;
+}
+
+@media (max-width: 480px) {
+  .application-actions {
+    @apply grid grid-cols-2 gap-2;
+  }
+  
+  .action-btn.mini {
+    @apply justify-center text-xs px-2 py-1;
+  }
 }
 </style>
