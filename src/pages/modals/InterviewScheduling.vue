@@ -312,6 +312,8 @@
   </div>
 </template>
 
+// FIXED SCRIPT SECTION FOR InterviewScheduling.vue
+
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 
@@ -328,6 +330,9 @@ const selectedApplicant = ref(null)
 const isScheduling = ref(false)
 const interviewStatusFilter = ref('')
 
+// API method reference - FIX: Properly declare this variable
+let scheduleInterviewAPI = null
+
 // Form data
 const scheduleForm = ref({
   interviewType: 'video',
@@ -343,34 +348,6 @@ const scheduleForm = ref({
   reminderTime: 24
 })
 
-// Mock interviews data
-const scheduledInterviews = ref([
-  {
-    id: '1',
-    candidateName: 'John Smith',
-    candidateEmail: 'john@example.com',
-    date: '2024-09-15',
-    startTime: '10:00',
-    duration: 60,
-    type: 'video',
-    stage: 'screening',
-    status: 'scheduled',
-    notes: 'Initial screening interview',
-    meetingLink: 'https://meet.google.com/abc-defg-hij'
-  },
-  {
-    id: '2',
-    candidateName: 'Sarah Johnson',
-    candidateEmail: 'sarah@example.com',
-    date: '2024-09-16',
-    startTime: '14:30',
-    duration: 45,
-    type: 'phone',
-    stage: 'technical',
-    status: 'completed',
-    notes: 'Technical assessment completed'
-  }
-])
 
 // Interview types - using simple objects instead of dynamic imports
 const interviewTypes = [
@@ -418,46 +395,48 @@ const closeScheduleModal = () => {
   selectedApplicant.value = null
 }
 
+// FIX: Properly declare setScheduleMethod to accept the API function
+const setScheduleMethod = (apiMethod) => {
+  scheduleInterviewAPI = apiMethod
+}
+
+// FIX: Updated scheduleInterview method with proper error handling
 const scheduleInterview = async () => {
-  if (!selectedApplicant.value) return
+  if (!selectedApplicant.value) {
+    console.error('No applicant selected')
+    return
+  }
   
   isScheduling.value = true
   
   try {
-    // Create interview object
     const interviewData = {
-      ...scheduleForm.value,
+      applicationId: selectedApplicant.value._id,
+      jobId: props.selectedJob?._id,
       candidateName: `${selectedApplicant.value.applicantDetails?.firstName} ${selectedApplicant.value.applicantDetails?.lastName}`,
       candidateEmail: selectedApplicant.value.applicantDetails?.email,
-      jobId: props.selectedJob?.id,
-      jobTitle: props.selectedJob?.title,
-      applicationId: selectedApplicant.value._id
+      interviewType: scheduleForm.value.interviewType,
+      date: scheduleForm.value.date,
+      startTime: scheduleForm.value.startTime,
+      duration: scheduleForm.value.duration,
+      platform: scheduleForm.value.platform,
+      location: scheduleForm.value.location,
+      phoneNumber: scheduleForm.value.phoneNumber,
+      stage: scheduleForm.value.stage,
+      notes: scheduleForm.value.notes,
+      sendReminder: scheduleForm.value.sendReminder,
+      reminderTime: scheduleForm.value.reminderTime
     }
     
-    // Simulate API call
-    setTimeout(() => {
-      const newInterview = {
-        id: Date.now().toString(),
-        ...interviewData,
-        status: 'scheduled',
-        meetingLink: scheduleForm.value.interviewType === 'video' ? generateMeetingLink() : null
-      }
-      
-      scheduledInterviews.value.push(newInterview)
-      
-      // Update application status
-      const appIndex = props.jobApplications?.findIndex(app => app._id === selectedApplicant.value._id)
-      if (appIndex !== -1 && props.jobApplications) {
-        props.jobApplications[appIndex].status = 'interview_scheduled'
-      }
-      
+    // Use the API method passed from parent
+    if (scheduleInterviewAPI && typeof scheduleInterviewAPI === 'function') {
+      await scheduleInterviewAPI(interviewData)
       closeScheduleModal()
-      showInterviewsList.value = true
-      isScheduling.value = false
-    }, 1000)
+    } 
     
   } catch (error) {
     console.error('Schedule interview error:', error)
+  } finally {
     isScheduling.value = false
   }
 }
@@ -560,9 +539,35 @@ const getInterviewTypeLabel = (type) => {
   return typeMap[type] || type
 }
 
+const generateCalendarEvent = (interview) => {
+  const startDate = new Date(`${interview.date}T${interview.startTime}`)
+  const endDate = new Date(startDate.getTime() + interview.duration * 60000)
+  
+  const formatDate = (date) => {
+    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+  }
+  
+  const calendarUrl = new URL('https://calendar.google.com/calendar/render')
+  calendarUrl.searchParams.set('action', 'TEMPLATE')
+  calendarUrl.searchParams.set('text', `Interview: ${interview.stage} - ${props.selectedJob?.title}`)
+  calendarUrl.searchParams.set('dates', `${formatDate(startDate)}/${formatDate(endDate)}`)
+  calendarUrl.searchParams.set('details', `
+    Interview Details:
+    Position: ${props.selectedJob?.title}
+    Company: ${props.selectedJob?.employer}
+    Type: ${interview.interviewType}
+    ${interview.meetingLink ? `Meeting Link: ${interview.meetingLink}` : ''}
+    ${interview.location ? `Location: ${interview.location}` : ''}
+    ${interview.notes ? `Notes: ${interview.notes}` : ''}
+  `.trim())
+  
+  return calendarUrl.toString()
+}
+
 // Expose methods to parent component
 defineExpose({
   openScheduleModal,
+  setScheduleMethod,
   showInterviewsList
 })
 </script>

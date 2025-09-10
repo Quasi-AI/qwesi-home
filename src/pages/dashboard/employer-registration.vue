@@ -38,6 +38,16 @@
                                     </div>
                                 </button>
 
+                                <button @click="showInterviews" class="action-btn interview-btn">
+                                    <div class="btn-bg"></div>
+                                    <div class="btn-content">
+                                        <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <span>Interviews</span>
+                                    </div>
+                                </button>
+
                                 <button v-if="currentView === 'list'" @click="switchToCreate" class="action-btn create-btn">
                                     <div class="btn-bg"></div>
                                     <div class="btn-content">
@@ -48,28 +58,6 @@
                                     </div>
                                 </button>
                             </div>
-
-                            <!-- Tips Button -->
-                            <button @click="showTipsModal = true" class="action-btn tips-btn">
-                                <div class="btn-bg"></div>
-                                <div class="btn-content">
-                                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span>Tips</span>
-                                </div>
-                            </button>
-
-                            <!-- Back Button -->
-                            <NuxtLink to="/dashboard/get-started" class="action-btn referral-btn">
-                                <div class="btn-bg"></div>
-                                <div class="btn-content">
-                                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                    </svg>
-                                    <span>Dashboard</span>
-                                </div>
-                            </NuxtLink>
                         </div>
                     </div>
                 </div>
@@ -579,6 +567,247 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Interview Management Section -->
+                    <div v-if="showInterviewsList" class="modal-overlay" @click="showInterviewsList = false">
+                    <div class="modal-container" @click.stop>
+                        <div class="modal-backdrop"></div>
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Scheduled Interviews</h3>
+                            <button @click="showInterviewsList = false" class="modal-close">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            </button>
+                        </div>
+                        
+                        <div class="modal-body">
+                            <div v-if="scheduledInterviews.length === 0" class="no-interviews">
+                            <svg class="no-interviews-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <p>No interviews scheduled yet</p>
+                            </div>
+
+                            <div v-else class="interviews-list">
+                            <div 
+                                v-for="interview in scheduledInterviews" 
+                                :key="interview._id"
+                                class="interview-card"
+                            >
+                                <div class="interview-header">
+                                <div class="interview-candidate">
+                                    <div class="candidate-avatar small">
+                                    {{ getInitials(interview.candidateName?.split(' ')[0], interview.candidateName?.split(' ')[1]) }}
+                                    </div>
+                                    <div class="candidate-info">
+                                    <h5 class="candidate-name">{{ interview.candidateName }}</h5>
+                                    <p class="candidate-email">{{ interview.candidateEmail }}</p>
+                                    </div>
+                                </div>
+                                <div class="interview-status">
+                                    <span :class="`status-badge ${interview.status}`">
+                                    {{ formatInterviewStatus(interview.status) }}
+                                    </span>
+                                </div>
+                                </div>
+
+                                <div class="interview-details">
+                                <div class="interview-time">
+                                    <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span>{{ formatInterviewDateTime(interview.date, interview.startTime) }}</span>
+                                </div>
+                                
+                                <div class="interview-duration">
+                                    <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>{{ interview.duration }} minutes</span>
+                                </div>
+                                
+                                <div class="interview-type">
+                                    <svg v-if="interview.interviewType === 'video'" class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                    <svg v-else-if="interview.interviewType === 'phone'" class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                    <svg v-else class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 119.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                    <span>{{ getInterviewTypeLabel(interview.interviewType) }}</span>
+                                </div>
+
+                                <div class="interview-stage">
+                                    <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>{{ formatInterviewStage(interview.stage) }}</span>
+                                </div>
+                                </div>
+
+                                <div v-if="interview.notes" class="interview-notes">
+                                <p class="notes-label">Notes:</p>
+                                <p class="notes-text">{{ interview.notes }}</p>
+                                </div>
+
+                                <div class="interview-actions">
+                                <button 
+                                    v-if="interview.interviewType === 'video' && interview.meetingLink"
+                                    @click="joinMeeting(interview.meetingLink)"
+                                    class="action-btn primary"
+                                >
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                    Join Meeting
+                                </button>
+                                
+                                <button 
+                                    @click="updateInterviewStatus(interview._id, 'completed')"
+                                    v-if="interview.status === 'scheduled'"
+                                    class="action-btn secondary"
+                                >
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Mark Complete
+                                </button>
+                                
+                                <button 
+                                    @click="updateInterviewStatus(interview._id, 'cancelled')"
+                                    v-if="interview.status === 'scheduled'"
+                                    class="action-btn danger"
+                                >
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Cancel
+                                </button>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+
+                    <!-- Add this modal to your Vue template, after the existing modals -->
+
+                    <!-- Google Authorization Required Modal -->
+                    <div v-if="showGoogleAuthModal" class="modal-overlay" @click="showGoogleAuthModal = false">
+                    <div class="modal-container small" @click.stop>
+                        <div class="modal-backdrop"></div>
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title text-blue-600">Google Authorization Required</h3>
+                            <button @click="showGoogleAuthModal = false" class="modal-close">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            </button>
+                        </div>
+                        
+                        <div class="modal-body">
+                            <div class="text-center space-y-4">
+                            <!-- Google Meet Icon -->
+                            <div class="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                                <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M15 12h4l-7-7v14l7-7z"/>
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                                </svg>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-lg font-semibold text-slate-900 mb-2">
+                                Authorization Needed for Google Meet
+                                </h4>
+                                <p class="text-slate-600 text-sm leading-relaxed">
+                                To create Google Meet links for video interviews, you need to authorize access to your Google Calendar. 
+                                This is a one-time setup that will allow you to automatically generate meeting links.
+                                </p>
+                            </div>
+                            
+                            <!-- Benefits List -->
+                            <div class="bg-slate-50 rounded-lg p-4 text-left">
+                                <h5 class="font-medium text-slate-900 mb-2">What you'll get:</h5>
+                                <ul class="text-sm text-slate-600 space-y-1">
+                                <li class="flex items-center space-x-2">
+                                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Automatic Google Meet link generation</span>
+                                </li>
+                                <li class="flex items-center space-x-2">
+                                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Calendar events created automatically</span>
+                                </li>
+                                <li class="flex items-center space-x-2">
+                                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Seamless video interview scheduling</span>
+                                </li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="flex flex-col space-y-3 pt-4">
+                                <!-- Primary Action: Authorize -->
+                                <button 
+                                @click="proceedWithGoogleAuth" 
+                                class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-blue-800 transition-all duration-200 flex items-center justify-center space-x-2"
+                                >
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                </svg>
+                                <span>Authorize Google Access</span>
+                                </button>
+                                
+                                <!-- Secondary Action: Skip Video -->
+                                <button 
+                                @click="skipVideoMeeting" 
+                                class="w-full bg-slate-100 text-slate-700 py-3 px-4 rounded-xl font-medium hover:bg-slate-200 transition-all duration-200"
+                                >
+                                Schedule as Phone Interview Instead
+                                </button>
+                                
+                                <!-- Tertiary Action: Cancel -->
+                                <button 
+                                @click="showGoogleAuthModal = false" 
+                                class="text-slate-500 hover:text-slate-700 text-sm py-2 transition-colors duration-200"
+                                >
+                                Cancel Interview Scheduling
+                                </button>
+                            </div>
+                            
+                            <!-- Security Note -->
+                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                <div class="flex items-start space-x-2">
+                                <svg class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                                <div>
+                                    <p class="text-xs text-amber-800 font-medium">Secure Authorization</p>
+                                    <p class="text-xs text-amber-700 mt-1">
+                                    You'll be redirected to Google's secure authorization page. We only request calendar access permissions.
+                                    </p>
+                                </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
                                             
 
                     <!-- Delete Confirmation Modal -->
@@ -619,11 +848,11 @@
                 </div>
             </main>
         </div>
-         <InterviewScheduling 
-                        ref="interviewSchedulingRef"
-                        :selectedJob="selectedJob"
-                        :jobApplications="jobApplications"
-                    />
+        <InterviewScheduling 
+            ref="interviewSchedulingRef"
+            :selectedJob="selectedJob"
+            :jobApplications="jobApplications"
+        />
     </div>
 </template>
 
@@ -643,10 +872,9 @@ const user = computed(() => authStore.getUser || {})
 
 // View state
 const currentView = ref('list') // 'list', 'create', 'edit'
-const showTipsModal = ref(false)
 const showJobDetail = ref(false)
 const showDeleteConfirm = ref(false)
-
+const getJobId = ref('')
 // Data state
 const jobs = ref([])
 const jobApplications = ref([])
@@ -664,6 +892,12 @@ const isDeleting = ref(false)
 // Search and filter
 const searchQuery = ref('')
 const statusFilter = ref('')
+
+const scheduledInterviews = ref([])
+const showInterviewsList = ref(false)
+
+const showGoogleAuthModal = ref(false)
+const googleAuthUrl = ref('')
 
 // Job form data
 const jobForm = ref({
@@ -685,13 +919,279 @@ const jobForm = ref({
 // Add ref for interview scheduling component
 const interviewSchedulingRef = ref(null)
 
-const scheduleInterview = (application) => {
-  if (interviewSchedulingRef.value) {
-    closeJobDetail()
-    interviewSchedulingRef.value.openScheduleModal(application)
+
+// Fetch scheduled interviews for the employer
+const fetchScheduledInterviews = async () => {
+  try {
+    const response = await $fetch(`${API_ROUTES.BASE_URL}interviews/employer/${user.value.id}`, {
+      method: 'GET',
+      headers: {
+                'Authorization': `Bearer ${authStore.getToken}`
+      },
+      throw: false
+    })
+
+    if (response.success) {
+      scheduledInterviews.value = response.data || []
+    } else {
+      console.warn('Failed to fetch scheduled interviews:', response.message)
+    }
+  } catch (error) {
+    console.error('Fetch scheduled interviews error:', error)
   }
 }
 
+const scheduleInterviewAPI = async (interviewData) => {
+  try {
+    const response = await $fetch(`${API_ROUTES.BASE_URL}interviews/schedule`, {
+      method: 'POST',
+      headers: {
+                'Authorization': `Bearer ${authStore.getToken}`
+      },
+      body: {
+        ...interviewData,
+        employerId: user.value.id,
+        jobId: getJobId.value
+      },
+      throw: false
+    })
+
+    if (response.success) {
+      // Success case
+      scheduledInterviews.value.push(response.data)
+      
+      // Update application status in local data
+      const appIndex = jobApplications.value.findIndex(app => app._id === interviewData.applicationId)
+      if (appIndex !== -1) {
+        jobApplications.value[appIndex].status = 'interview_scheduled'
+      }
+      
+      await fetchApplicationCounts()
+      alertRef.value?.success('Interview scheduled successfully!')
+      return response.data
+      
+    } else if (response.authRequired && response.platform === 'google_meet') {
+      // Handle Google authorization required
+      handleGoogleAuthRequired(response.authUrl, interviewData)
+      throw new Error('Google authorization required')
+      
+    } else {
+      alertRef.value?.error(response.message || 'Failed to schedule interview')
+      throw new Error(response.message)
+    }
+  } catch (error) {
+    console.error('Schedule interview API error:', error)
+    if (!error.message.includes('Google authorization required')) {
+      alertRef.value?.error('Failed to schedule interview')
+    }
+    throw error
+  }
+}
+
+// Add these new methods to your Vue component
+
+const handleGoogleAuthRequired = (authUrl, interviewData) => {
+  // Store the interview data temporarily
+  sessionStorage.setItem('pendingInterviewData', JSON.stringify(interviewData))
+  
+  // Show modal with authorization options
+  showGoogleAuthModal.value = true
+  googleAuthUrl.value = authUrl
+}
+
+const proceedWithGoogleAuth = () => {
+  if (googleAuthUrl.value) {
+    // Open Google auth in new window
+    const authWindow = window.open(
+      googleAuthUrl.value, 
+      'google-auth', 
+      'width=500,height=600,scrollbars=yes,resizable=yes'
+    )
+    
+    // Listen for auth completion
+    const checkAuthComplete = setInterval(() => {
+      try {
+        if (authWindow.closed) {
+          clearInterval(checkAuthComplete)
+          // Check if auth was successful and retry interview scheduling
+          retryInterviewScheduling()
+        }
+      } catch (error) {
+        // Handle cross-origin issues
+        console.log('Checking auth window status...')
+      }
+    }, 1000)
+    
+    // Close modal
+    showGoogleAuthModal.value = false
+  }
+}
+
+const retryInterviewScheduling = async () => {
+  try {
+    const pendingData = sessionStorage.getItem('pendingInterviewData')
+    if (pendingData) {
+      const interviewData = JSON.parse(pendingData)
+      sessionStorage.removeItem('pendingInterviewData')
+      
+      // Wait a moment for tokens to be stored
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Retry scheduling
+      await scheduleInterviewAPI(interviewData)
+    }
+  } catch (error) {
+    console.error('Retry scheduling failed:', error)
+    alertRef.value?.error('Please try scheduling the interview again')
+  }
+}
+
+const skipVideoMeeting = () => {
+  try {
+    const pendingData = sessionStorage.getItem('pendingInterviewData')
+    if (pendingData) {
+      const interviewData = JSON.parse(pendingData)
+      sessionStorage.removeItem('pendingInterviewData')
+      
+      // Change to phone or in-person interview
+      interviewData.interviewType = 'phone' // or 'in_person'
+      delete interviewData.platform
+      
+      // Schedule without video meeting
+      scheduleInterviewAPI(interviewData)
+    }
+  } catch (error) {
+    console.error('Error scheduling alternative interview:', error)
+  }
+  
+  showGoogleAuthModal.value = false
+}
+
+// Updated scheduleInterview method that properly passes the API method
+const scheduleInterview = (application) => {
+  console.log('Schedule interview called with application:', application)
+  
+  if (interviewSchedulingRef.value) {
+    // IMPORTANT: Set the API method BEFORE opening the modal
+    interviewSchedulingRef.value.setScheduleMethod(scheduleInterviewAPI)
+    
+    // Close job detail modal
+    closeJobDetail()
+    
+    // Open interview scheduling modal
+    interviewSchedulingRef.value.openScheduleModal(application)
+  } else {
+    console.error('Interview scheduling component ref not found')
+    alertRef.value?.error('Interview scheduling component not available')
+  }
+}
+
+const formatInterviewDateTime = (date, time) => {
+  if (!date || !time) return 'TBD'
+  const interviewDate = new Date(date)
+  const [hours, minutes] = time.split(':')
+  interviewDate.setHours(parseInt(hours), parseInt(minutes))
+  
+  return interviewDate.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    month: 'short', 
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  })
+}
+
+const formatInterviewStatus = (status) => {
+  const statusMap = {
+    scheduled: 'Scheduled',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+    rescheduled: 'Rescheduled',
+    no_show: 'No Show'
+  }
+  return statusMap[status] || status
+}
+
+const formatInterviewStage = (stage) => {
+  const stageMap = {
+    screening: 'Initial Screening',
+    technical: 'Technical Interview',
+    behavioral: 'Behavioral Interview',
+    final: 'Final Interview',
+    panel: 'Panel Interview'
+  }
+  return stageMap[stage] || stage
+}
+
+const getInterviewTypeLabel = (type) => {
+  const typeMap = {
+    video: 'Video Call',
+    phone: 'Phone Call',
+    in_person: 'In Person'
+  }
+  return typeMap[type] || type
+}
+
+const joinMeeting = (meetingLink) => {
+  window.open(meetingLink, '_blank')
+}
+
+// Update interview status
+const updateInterviewStatus = async (interviewId, newStatus) => {
+  try {
+    const response = await $fetch(`${API_ROUTES.BASE_URL}interviews/${interviewId}/status`, {
+      method: 'PUT',
+      body: { status: newStatus },
+      headers: {
+                'Authorization': `Bearer ${authStore.getToken}`
+      },
+      throw: false
+    })
+
+    if (response.success) {
+      const index = scheduledInterviews.value.findIndex(i => i._id === interviewId)
+      if (index !== -1) {
+        scheduledInterviews.value[index].status = newStatus
+      }
+      
+      alertRef.value.success('Interview status updated successfully!')
+    } else {
+      alertRef.value.error(response.message || 'Failed to update interview status')
+    }
+  } catch (error) {
+    console.error('Update interview status error:', error)
+    alertRef.value.error('Failed to update interview status')
+  }
+}
+
+// Delete/Cancel interview
+const deleteInterview = async (interviewId) => {
+  try {
+    const response = await $fetch(`${API_ROUTES.BASE_URL}interviews/${interviewId}`, {
+      method: 'DELETE',
+      throw: false
+    })
+
+    if (response.success) {
+      // Remove from local array
+      scheduledInterviews.value = scheduledInterviews.value.filter(i => i._id !== interviewId)
+      
+      alertRef.value.success('Interview cancelled successfully!')
+    } else {
+      alertRef.value.error(response.message || 'Failed to cancel interview')
+    }
+  } catch (error) {
+    console.error('Delete interview error:', error)
+    alertRef.value.error('Failed to cancel interview')
+  }
+}
+
+// Show interviews list
+const showInterviews = () => {
+  showInterviewsList.value = true
+  fetchScheduledInterviews()
+}
 
 const applicationStatusOptions = [
     { title: 'Submitted', value: 'submitted' },
@@ -746,6 +1246,9 @@ const fetchJobs = async () => {
     try {
         const response = await $fetch(`${API_ROUTES.JOBS}/${user.value.id}`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authStore.getToken}`
+            },
             throw: false
         })
 
@@ -768,6 +1271,9 @@ const fetchApplicationCounts = async () => {
     try {
         const response = await $fetch(`${API_ROUTES.BASE_URL}applications/employer/${user.value.id}/counts`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authStore.getToken}`
+            },
             throw: false
         })
 
@@ -787,6 +1293,9 @@ const fetchJobApplications = async (jobId) => {
         const response = await $fetch(`${API_ROUTES.BASE_URL}applications/employer/${user.value.id}/applications`, {
             method: 'GET',
             query: { jobId },
+            headers: {
+                'Authorization': `Bearer ${authStore.getToken}`
+            },
             throw: false
         })
 
@@ -808,6 +1317,9 @@ const fetchJobById = async (jobId) => {
     try {
         const response = await $fetch(`${API_ROUTES.JOBS}/single/${jobId}`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authStore.getToken}`
+            },
             throw: false
         })
 
@@ -858,6 +1370,9 @@ const updateApplicationStatus = async (applicationId, newStatus) => {
         const response = await $fetch(`${API_ROUTES.BASE_URL}applications/${applicationId}/status`, {
             method: 'PUT',
             body: { status: newStatus },
+            headers: {
+                'Authorization': `Bearer ${authStore.getToken}`
+            },
             throw: false
         })
 
@@ -884,6 +1399,7 @@ const deleteApplicationById = async (applicationId) => {
     })
     return response
 }
+
 
 // Form Functions
 const submitJobForm = async () => {
@@ -955,6 +1471,7 @@ const editJob = (job) => {
 }
 
 const viewJob = async (jobId) => {
+    getJobId.value = jobId
     await fetchJobById(jobId)
 }
 
@@ -1072,6 +1589,7 @@ onMounted(async () => {
         return
     }
     await fetchJobs()
+    await fetchScheduledInterviews() 
 })
 
 // Set page title
@@ -1972,4 +2490,635 @@ useHead({
     @apply justify-center text-xs px-2 py-1;
   }
 }
+
+.interview-btn .btn-bg {
+    @apply bg-gradient-to-r from-purple-100/80 to-indigo-100/60;
+}
+
+.interview-btn {
+    @apply text-purple-700 hover:text-purple-900;
+}
+
+/* Interview status badges */
+.status-badge.scheduled {
+    @apply bg-blue-100 text-blue-700;
+}
+
+.status-badge.completed {
+    @apply bg-green-100 text-green-700;
+}
+
+.status-badge.cancelled {
+    @apply bg-red-100 text-red-700;
+}
+
+.status-badge.rescheduled {
+    @apply bg-yellow-100 text-yellow-700;
+}
+
+.status-badge.no_show {
+    @apply bg-gray-100 text-gray-700;
+}
+
+/* Interview Management Modal Styles */
+
+/* Interview List Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Modal Container */
+.modal-container {
+  position: relative;
+  width: 100%;
+  max-width: 5xl;
+  max-height: 90vh;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* Modal Content */
+.modal-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+/* Modal Header */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.modal-close {
+  padding: 0.75rem;
+  color: #64748b;
+  background: rgba(248, 250, 252, 0.8);
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.modal-close:hover {
+  color: #1e293b;
+  background: rgba(248, 250, 252, 1);
+  transform: scale(1.05);
+}
+
+.modal-close svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Modal Body */
+.modal-body {
+  padding: 2rem;
+  overflow-y: auto;
+  flex: 1;
+  max-height: calc(90vh - 120px);
+}
+
+/* No Interviews State */
+.no-interviews {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #64748b;
+}
+
+.no-interviews-icon {
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.6;
+  color: #94a3b8;
+}
+
+.no-interviews p {
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Interviews List */
+.interviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Interview Card */
+.interview-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.interview-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.interview-card:hover::before {
+  opacity: 1;
+}
+
+.interview-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Interview Header */
+.interview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.interview-candidate {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.candidate-avatar.small {
+  width: 3rem;
+  height: 3rem;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  flex-shrink: 0;
+}
+
+.candidate-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.candidate-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.4;
+}
+
+.candidate-email {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Interview Status */
+.interview-status {
+  flex-shrink: 0;
+}
+
+.status-badge {
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.status-badge.scheduled {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.status-badge.completed {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #166534;
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.status-badge.cancelled {
+  background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.status-badge.rescheduled {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.status-badge.no_show {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #475569;
+  border-color: rgba(100, 116, 139, 0.2);
+}
+
+/* Interview Details Grid */
+.interview-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.interview-time,
+.interview-duration,
+.interview-type,
+.interview-stage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #475569;
+  background: rgba(248, 250, 252, 0.8);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.detail-icon {
+  width: 1rem;
+  height: 1rem;
+  color: #6366f1;
+  flex-shrink: 0;
+}
+
+/* Interview Notes */
+.interview-notes {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+  border-left: 3px solid #6366f1;
+  border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.notes-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6366f1;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.notes-text {
+  font-size: 0.875rem;
+  color: #334155;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Interview Actions */
+.interview-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.action-btn:hover::before {
+  left: 100%;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.action-btn.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+.action-btn.secondary {
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.8) 100%);
+  color: #475569;
+  border-color: rgba(226, 232, 240, 0.8);
+}
+
+.action-btn.secondary:hover {
+  background: linear-gradient(135deg, rgba(241, 245, 249, 1) 0%, rgba(226, 232, 240, 0.9) 100%);
+  border-color: rgba(148, 163, 184, 0.6);
+  transform: translateY(-1px);
+}
+
+.action-btn.danger {
+  background: linear-gradient(135deg, rgba(254, 242, 242, 0.9) 0%, rgba(254, 202, 202, 0.8) 100%);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.action-btn.danger:hover {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.action-btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .modal-container {
+    max-width: calc(100vw - 1rem);
+    margin: 0.5rem;
+  }
+  
+  .modal-header,
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .modal-title {
+    font-size: 1.25rem;
+  }
+  
+  .interview-details {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .interview-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .interview-candidate {
+    width: 100%;
+  }
+  
+  .interview-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+  
+  .action-btn {
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .interview-actions {
+    flex-direction: column;
+  }
+  
+  .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .candidate-email {
+    font-size: 0.75rem;
+  }
+  
+  .interview-time,
+  .interview-duration,
+  .interview-type,
+  .interview-stage {
+    font-size: 0.75rem;
+    padding: 0.5rem;
+  }
+}
+
+/* Custom Scrollbar for Interview List */
+.interviews-list {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
+}
+
+.interviews-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.interviews-list::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.interviews-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.5));
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.interviews-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, rgba(99, 102, 241, 0.5), rgba(139, 92, 246, 0.7));
+}
+
+/* Loading States */
+.loading-interviews {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: #64748b;
+  gap: 1rem;
+}
+
+.loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid rgba(99, 102, 241, 0.2);
+  border-top: 3px solid #6366f1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Focus States for Accessibility */
+.action-btn:focus,
+.modal-close:focus {
+  outline: none;
+  ring: 2px solid #6366f1;
+  ring-offset: 2px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .modal-backdrop {
+    background: rgba(255, 255, 255, 0.98);
+    border: 2px solid #1e293b;
+  }
+  
+  .interview-card {
+    border: 2px solid #475569;
+  }
+  
+  .status-badge {
+    border-width: 2px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .modal-overlay {
+    position: static;
+    background: none;
+    backdrop-filter: none;
+  }
+  
+  .modal-container {
+    box-shadow: none;
+    max-height: none;
+    border: 1px solid #000;
+  }
+  
+  .interview-actions,
+  .modal-close {
+    display: none;
+  }
+  
+  .interview-card {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+    border: 1px solid #000;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-container,
+  .interview-card,
+  .action-btn {
+    animation: none;
+    transition: none;
+  }
+  
+  .loading-spinner {
+    animation: none;
+  }
+}
+
 </style>
