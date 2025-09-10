@@ -697,7 +697,7 @@
 
                     <!-- Add this modal to your Vue template, after the existing modals -->
 
-                    <!-- Google Authorization Required Modal -->
+                    <!-- Updated Google Authorization Modal -->
                     <div v-if="showGoogleAuthModal" class="modal-overlay" @click="showGoogleAuthModal = false">
                     <div class="modal-container small" @click.stop>
                         <div class="modal-backdrop"></div>
@@ -723,17 +723,31 @@
                             
                             <div>
                                 <h4 class="text-lg font-semibold text-slate-900 mb-2">
-                                Authorization Needed for Google Meet
+                                Setting Up Google Meet Integration
                                 </h4>
-                                <p class="text-slate-600 text-sm leading-relaxed">
-                                To create Google Meet links for video interviews, you need to authorize access to your Google Calendar. 
-                                This is a one-time setup that will allow you to automatically generate meeting links.
+                                <p class="text-slate-600 text-sm leading-relaxed mb-3">
+                                To create Google Meet links for video interviews, you need to authorize access to your Google Calendar.
                                 </p>
+                                
+                                <!-- Setup Status Notice -->
+                                <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                                <div class="flex items-start space-x-2">
+                                    <svg class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                    <div>
+                                    <p class="text-xs text-amber-800 font-medium">Setup in Progress</p>
+                                    <p class="text-xs text-amber-700 mt-1">
+                                        OAuth settings are being updated. This can take 5 minutes to 1 hour. If authorization fails, try scheduling as a phone interview instead.
+                                    </p>
+                                    </div>
+                                </div>
+                                </div>
                             </div>
                             
                             <!-- Benefits List -->
                             <div class="bg-slate-50 rounded-lg p-4 text-left">
-                                <h5 class="font-medium text-slate-900 mb-2">What you'll get:</h5>
+                                <h5 class="font-medium text-slate-900 mb-2">What you'll get after setup:</h5>
                                 <ul class="text-sm text-slate-600 space-y-1">
                                 <li class="flex items-center space-x-2">
                                     <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
@@ -758,7 +772,7 @@
                             
                             <!-- Action Buttons -->
                             <div class="flex flex-col space-y-3 pt-4">
-                                <!-- Primary Action: Authorize -->
+                                <!-- Primary Action: Try Authorization -->
                                 <button 
                                 @click="proceedWithGoogleAuth" 
                                 class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-blue-800 transition-all duration-200 flex items-center justify-center space-x-2"
@@ -769,10 +783,10 @@
                                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                                 </svg>
-                                <span>Authorize Google Access</span>
+                                <span>Try Google Authorization</span>
                                 </button>
                                 
-                                <!-- Secondary Action: Skip Video -->
+                                <!-- Secondary Action: Phone Alternative -->
                                 <button 
                                 @click="skipVideoMeeting" 
                                 class="w-full bg-slate-100 text-slate-700 py-3 px-4 rounded-xl font-medium hover:bg-slate-200 transition-all duration-200"
@@ -780,27 +794,17 @@
                                 Schedule as Phone Interview Instead
                                 </button>
                                 
-                                <!-- Tertiary Action: Cancel -->
+                                <!-- Info about waiting -->
+                                <div class="text-center">
+                                <p class="text-xs text-slate-500 mb-2">
+                                    If authorization fails, please wait 10-15 minutes and try again
+                                </p>
                                 <button 
-                                @click="showGoogleAuthModal = false" 
-                                class="text-slate-500 hover:text-slate-700 text-sm py-2 transition-colors duration-200"
+                                    @click="showGoogleAuthModal = false" 
+                                    class="text-slate-500 hover:text-slate-700 text-sm py-2 transition-colors duration-200"
                                 >
-                                Cancel Interview Scheduling
+                                    Cancel for Now
                                 </button>
-                            </div>
-                            
-                            <!-- Security Note -->
-                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                                <div class="flex items-start space-x-2">
-                                <svg class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                </svg>
-                                <div>
-                                    <p class="text-xs text-amber-800 font-medium">Secure Authorization</p>
-                                    <p class="text-xs text-amber-700 mt-1">
-                                    You'll be redirected to Google's secure authorization page. We only request calendar access permissions.
-                                    </p>
-                                </div>
                                 </div>
                             </div>
                             </div>
@@ -808,8 +812,6 @@
                         </div>
                     </div>
                     </div>
-                                            
-
                     <!-- Delete Confirmation Modal -->
                     <div v-if="showDeleteConfirm" class="modal-overlay" @click="cancelDelete">
                         <div class="modal-container small" @click.stop>
@@ -943,24 +945,28 @@ const fetchScheduledInterviews = async () => {
 
 const scheduleInterviewAPI = async (interviewData) => {
   try {
-    const response = await $fetch(`${API_ROUTES.BASE_URL}interviews/schedule`, {
+    // Use fetch instead of $fetch to have more control over error handling
+    const response = await fetch(`${API_ROUTES.BASE_URL}interviews/schedule`, {
       method: 'POST',
       headers: {
-                'Authorization': `Bearer ${authStore.getToken}`
+        'Authorization': `Bearer ${authStore.getToken}`,
+        'Content-Type': 'application/json'
       },
-      body: {
+      body: JSON.stringify({
         ...interviewData,
         employerId: user.value.id,
         jobId: getJobId.value
-      },
-      throw: false
+      })
     })
 
-    if (response.success) {
-      // Success case
-      scheduledInterviews.value.push(response.data)
+    // Parse the response JSON regardless of status
+    const responseData = await response.json()
+    console.log('API Response:', responseData)
+
+    // Handle successful response
+    if (response.ok && responseData.success) {
+      scheduledInterviews.value.push(responseData.data)
       
-      // Update application status in local data
       const appIndex = jobApplications.value.findIndex(app => app._id === interviewData.applicationId)
       if (appIndex !== -1) {
         jobApplications.value[appIndex].status = 'interview_scheduled'
@@ -968,37 +974,44 @@ const scheduleInterviewAPI = async (interviewData) => {
       
       await fetchApplicationCounts()
       alertRef.value?.success('Interview scheduled successfully!')
-      return response.data
-      
-    } else if (response.authRequired && response.platform === 'google_meet') {
-      // Handle Google authorization required
-      handleGoogleAuthRequired(response.authUrl, interviewData)
-      throw new Error('Google authorization required')
-      
-    } else {
-      alertRef.value?.error(response.message || 'Failed to schedule interview')
-      throw new Error(response.message)
+      return responseData.data
     }
+
+    // Handle Google authorization required (403 with specific response)
+    if (response.status === 403 && responseData.authRequired && responseData.platform === 'google_meet') {
+      console.log('Google authorization required, showing auth modal')
+      handleGoogleAuthRequired(responseData.authUrl, interviewData)
+      return // Don't throw error, let auth flow handle it
+    }
+
+    // Handle other API errors
+    const errorMessage = responseData.message || 'Failed to schedule interview'
+    alertRef.value?.error(errorMessage)
+    throw new Error(errorMessage)
+    
   } catch (error) {
     console.error('Schedule interview API error:', error)
-    if (!error.message.includes('Google authorization required')) {
+    
+    // If it's not a Google auth flow, show error
+    if (!error.message?.includes('Google authorization required')) {
       alertRef.value?.error('Failed to schedule interview')
     }
     throw error
   }
 }
 
-// Add these new methods to your Vue component
 
+// Enhanced Google Auth handling with fallback options
 const handleGoogleAuthRequired = (authUrl, interviewData) => {
   // Store the interview data temporarily
   sessionStorage.setItem('pendingInterviewData', JSON.stringify(interviewData))
   
-  // Show modal with authorization options
+  // Show modal with enhanced messaging about OAuth propagation
   showGoogleAuthModal.value = true
   googleAuthUrl.value = authUrl
 }
 
+// Enhanced Google auth modal methods
 const proceedWithGoogleAuth = () => {
   if (googleAuthUrl.value) {
     // Open Google auth in new window
@@ -1008,25 +1021,36 @@ const proceedWithGoogleAuth = () => {
       'width=500,height=600,scrollbars=yes,resizable=yes'
     )
     
-    // Listen for auth completion
+    // Enhanced auth completion checking
     const checkAuthComplete = setInterval(() => {
       try {
         if (authWindow.closed) {
           clearInterval(checkAuthComplete)
-          // Check if auth was successful and retry interview scheduling
-          retryInterviewScheduling()
+          
+          // Wait a bit longer before retrying due to OAuth propagation
+          setTimeout(() => {
+            retryInterviewScheduling()
+          }, 2000)
         }
       } catch (error) {
-        // Handle cross-origin issues
         console.log('Checking auth window status...')
       }
     }, 1000)
     
-    // Close modal
+    // Auto-close the interval after 10 minutes
+    setTimeout(() => {
+      clearInterval(checkAuthComplete)
+      if (!authWindow.closed) {
+        authWindow.close()
+        alertRef.value?.warning('Authorization window timed out. Please try again.')
+      }
+    }, 600000) // 10 minutes
+    
     showGoogleAuthModal.value = false
   }
 }
 
+// Enhanced retry with better error handling
 const retryInterviewScheduling = async () => {
   try {
     const pendingData = sessionStorage.getItem('pendingInterviewData')
@@ -1034,38 +1058,76 @@ const retryInterviewScheduling = async () => {
       const interviewData = JSON.parse(pendingData)
       sessionStorage.removeItem('pendingInterviewData')
       
-      // Wait a moment for tokens to be stored
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Wait longer for OAuth settings to propagate
+      await new Promise(resolve => setTimeout(resolve, 3000))
       
       // Retry scheduling
       await scheduleInterviewAPI(interviewData)
     }
   } catch (error) {
     console.error('Retry scheduling failed:', error)
-    alertRef.value?.error('Please try scheduling the interview again')
+    
+    // If still getting OAuth errors, offer alternatives
+    if (error.message.includes('redirect_uri_mismatch') || error.message.includes('invalid request')) {
+      alertRef.value?.warning(
+        'Google authorization is still being set up. You can schedule as phone interview instead, or try video interview again in a few minutes.',
+        { duration: 8000 }
+      )
+      
+      // Automatically show fallback options
+      setTimeout(() => {
+        showAlternativeSchedulingOptions()
+      }, 1000)
+    } else {
+      alertRef.value?.error('Please try scheduling the interview again')
+    }
   }
 }
 
-const skipVideoMeeting = () => {
+// New method to show alternative scheduling options
+const showAlternativeSchedulingOptions = () => {
+  const pendingData = sessionStorage.getItem('pendingInterviewData')
+  if (pendingData) {
+    const interviewData = JSON.parse(pendingData)
+    
+    // Show confirmation dialog for switching to phone interview
+    if (confirm('Would you like to schedule this as a phone interview instead of video call?')) {
+      skipVideoMeeting()
+    }
+  }
+}
+
+// Enhanced skip video meeting with better UX
+const skipVideoMeeting = async () => {
   try {
     const pendingData = sessionStorage.getItem('pendingInterviewData')
     if (pendingData) {
       const interviewData = JSON.parse(pendingData)
       sessionStorage.removeItem('pendingInterviewData')
       
-      // Change to phone or in-person interview
-      interviewData.interviewType = 'phone' // or 'in_person'
+      // Change to phone interview
+      interviewData.interviewType = 'phone'
       delete interviewData.platform
       
+      // Add a note about the change
+      const originalNotes = interviewData.notes || ''
+      interviewData.notes = originalNotes + 
+        (originalNotes ? '\n\n' : '') + 
+        'Note: Changed from video to phone interview due to setup requirements.'
+      
       // Schedule without video meeting
-      scheduleInterviewAPI(interviewData)
+      await scheduleInterviewAPI(interviewData)
+      
+      alertRef.value?.success('Interview scheduled as phone call successfully!')
     }
   } catch (error) {
-    console.error('Error scheduling alternative interview:', error)
+    console.error('Error scheduling phone interview:', error)
+    alertRef.value?.error('Failed to schedule phone interview. Please try again.')
   }
   
   showGoogleAuthModal.value = false
 }
+
 
 // Updated scheduleInterview method that properly passes the API method
 const scheduleInterview = (application) => {
@@ -1083,6 +1145,21 @@ const scheduleInterview = (application) => {
   } else {
     console.error('Interview scheduling component ref not found')
     alertRef.value?.error('Interview scheduling component not available')
+  }
+}
+
+// Enhanced auth modal text for your Vue template
+const getAuthModalMessage = () => {
+  return {
+    title: 'Google Authorization Setup',
+    description: `To create Google Meet links, we need access to your Google Calendar. 
+                  Our OAuth settings are currently being updated (this can take up to an hour).`,
+    waitingMessage: 'If authorization fails, you can schedule as a phone interview instead.',
+    benefits: [
+      'Automatic Google Meet link generation',
+      'Calendar events created automatically', 
+      'Seamless video interview scheduling'
+    ]
   }
 }
 
