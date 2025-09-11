@@ -1,3 +1,6 @@
+
+
+
 <template>
     <div class="dashboard-container">
         <!-- Sidebar -->
@@ -33,15 +36,6 @@
                                 <span class="btn-text">Tips</span>
                             </div>
                         </button>
-
-                        <!-- NEW: Notification Component -->
-                        <NotificationComponent 
-                            ref="notificationRef"
-                            :auto-refresh="true"
-                            :refresh-interval="30000"
-                            @notification-click="handleNotificationClick"
-                            @notification-action="handleNotificationAction"
-                            />
 
                         <!-- Referral Button -->
                         <button @click="showReferralModal = true" class="action-btn referral-btn">
@@ -142,67 +136,6 @@
                     </div>
                 </div>
 
-                <!-- Quick Actions -->
-                <div class="quick-actions-container" data-onboard="quick-actions">
-                    <div class="section-header">
-                        <h3 class="section-title">Quick Actions</h3>
-                        <div class="section-decorator"></div>
-                    </div>
-                    <div class="quick-actions-grid">
-                        <button @click="openNewTaskModal" class="quick-action-card task-card">
-                            <div class="card-bg bg-gradient-to-br from-blue-500/10 to-blue-600/5"></div>
-                            <div class="card-glow bg-blue-500/20"></div>
-                            <div class="card-content">
-                                <div class="card-icon bg-gradient-to-br from-blue-500 to-blue-600">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                    </svg>
-                                </div>
-                                <span class="card-label">New Task</span>
-                            </div>
-                        </button>
-
-                        <button @click="openInviteTeamModal" class="quick-action-card team-card">
-                            <div class="card-bg bg-gradient-to-br from-emerald-500/10 to-emerald-600/5"></div>
-                            <div class="card-glow bg-emerald-500/20"></div>
-                            <div class="card-content">
-                                <div class="card-icon bg-gradient-to-br from-emerald-500 to-emerald-600">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                                    </svg>
-                                </div>
-                                <span class="card-label">Invite Team</span>
-                            </div>
-                        </button>
-
-                        <button @click="openReportsModal" class="quick-action-card reports-card">
-                            <div class="card-bg bg-gradient-to-br from-purple-500/10 to-purple-600/5"></div>
-                            <div class="card-glow bg-purple-500/20"></div>
-                            <div class="card-content">
-                                <div class="card-icon bg-gradient-to-br from-purple-500 to-purple-600">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2-2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                    </svg>
-                                </div>
-                                <span class="card-label">Reports</span>
-                            </div>
-                        </button>
-
-                        <button @click="openHelpModal" class="quick-action-card help-card">
-                            <div class="card-bg bg-gradient-to-br from-amber-500/10 to-amber-600/5"></div>
-                            <div class="card-glow bg-amber-500/20"></div>
-                            <div class="card-content">
-                                <div class="card-icon bg-gradient-to-br from-amber-500 to-amber-600">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <span class="card-label">Help</span>
-                            </div>
-                        </button>
-                    </div>
-                </div>
-
                 <!-- Stats Section -->
                 <div class="stats-section" data-onboard="stats-grid">
                     <div class="section-header">
@@ -233,40 +166,6 @@
                         <p class="error-message">{{ dashboardError }}</p>
                     </div>
                     <Stats v-else :stats="stats" />
-                </div>
-
-                <!-- Activity Tables Section -->
-                <div class="tables-section" data-onboard="activity-tables">
-                <div class="section-header">
-                    <h2 class="section-title">Recent Activity</h2>
-                    <div class="section-decorator"></div>
-                </div>
-
-                <div class="tables-grid">
-                    <!-- Tasks Table -->
-                    <div class="table-container">
-                    <TasksTable 
-                        @create-task="openNewTaskModal"
-                        @edit-task="editTask"
-                        @view-task="viewTask"
-                        @task-updated="handleTaskUpdated"
-                        @task-deleted="handleTaskDeleted"
-                        ref="tasksTableRef"
-                    />
-                    </div>
-
-                    <!-- Team Members Table -->
-                    <div class="table-container">
-                    <TeamTable 
-                        @invite-member="openInviteTeamModal"
-                        @edit-member="editMember"
-                        @view-member="viewMember"
-                        @member-updated="handleMemberUpdated"
-                        @member-removed="handleMemberRemoved"
-                        ref="teamTableRef"
-                    />
-                    </div>
-                </div>
                 </div>
 
                 <!-- Component Instances -->
@@ -463,124 +362,124 @@
         </div>
         
         <!-- Enhanced Referral Modal -->
-        <div v-if="showReferralModal" class="modal-overlay responsive-modal" @click.self="showReferralModal = false">
-        <div class="modal-backdrop"></div>
-        <div class="referral-modal responsive-referral-modal">
-            <div class="modal-header">
-            <div class="modal-title-section">
-                <h3 class="modal-title">Refer Friends & Earn Points</h3>
-                <div class="title-decoration"></div>
-            </div>
-            <button @click="showReferralModal = false" class="modal-close">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-            </div>
-
-            <div class="modal-body-container">
-            <!-- Points Summary -->
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-6">
-                <div class="grid grid-cols-3 gap-4 text-center">
-                <div>
-                    <div class="text-2xl font-bold text-blue-600">{{ userPoints.total || 0 }}</div>
-                    <div class="text-xs text-gray-600">Total Earned</div>
-                </div>
-                <div>
-                    <div class="text-2xl font-bold text-green-600">{{ userPoints.available || 0 }}</div>
-                    <div class="text-xs text-gray-600">Available</div>
-                </div>
-                <div>
-                    <div class="text-2xl font-bold text-orange-600">{{ referralStats.totalReferrals || 0 }}</div>
-                    <div class="text-xs text-gray-600">Referrals</div>
-                </div>
-                </div>
-            </div>
-
-            <!-- Referral Code Section -->
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                </svg>
-                </div>
-                <p class="text-gray-600 mb-4">Share QWESI AI with friends and earn points when they sign up!</p>
-                <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                <p class="text-sm text-gray-600 mb-2">Your referral code:</p>
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                    <code class="bg-white px-3 py-2 rounded border text-sm font-mono flex-1 text-center sm:text-left">{{ referralCode }}</code>
-                    <button @click="copyReferralCode" class="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm whitespace-nowrap">
-                    {{ copied ? 'Copied!' : 'Copy' }}
+        <div v-if="showReferralModal" class="modal-overlay" @click.self="showReferralModal = false">
+            <div class="modal-backdrop"></div>
+            <div class="referral-modal">
+                <div class="modal-header">
+                    <div class="modal-title-section">
+                        <h3 class="modal-title">Refer Friends & Earn Points</h3>
+                        <div class="title-decoration"></div>
+                    </div>
+                    <button @click="showReferralModal = false" class="modal-close">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                     </button>
                 </div>
-                </div>
-            </div>
 
-            <!-- Rewards Info -->
-            <div class="bg-gray-50 rounded-lg p-4 mb-6">
-                <h4 class="font-semibold text-gray-900 mb-3">Referral Rewards</h4>
-                <div class="space-y-2 text-sm text-gray-600">
-                <div class="flex items-center">
-                    <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                    <span>You get <strong>100 points</strong> for each successful referral</span>
-                </div>
-                <div class="flex items-center">
-                    <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                    <span>Your friend gets <strong>50 points</strong> welcome bonus</span>
-                </div>
-                <div class="flex items-center">
-                    <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                    <span>No limit on referrals - earn unlimited points!</span>
-                </div>
-                </div>
-            </div>
-
-            <!-- Recent Points Activity -->
-            <div v-if="pointsHistory.length > 0" class="mb-6">
-                <h4 class="font-semibold text-gray-900 mb-3">Recent Activity</h4>
-                <div class="space-y-2 max-h-32 overflow-y-auto">
-                <div v-for="activity in pointsHistory.slice(0, 5)" :key="activity._id" 
-                    class="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
-                    <div class="flex items-center min-w-0 flex-1">
-                    <div :class="activity.type === 'earned' || activity.type === 'referral' ? 'text-green-600' : 'text-orange-600'" 
-                        class="w-2 h-2 rounded-full mr-2 flex-shrink-0"></div>
-                    <span class="text-gray-700 truncate">{{ activity.description }}</span>
+                <div class="p-6 overflow-y-auto">
+                    <!-- Points Summary -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-6">
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <div class="text-2xl font-bold text-blue-600">{{ userPoints.total || 0 }}</div>
+                                <div class="text-xs text-gray-600">Total Earned</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-green-600">{{ userPoints.available || 0 }}</div>
+                                <div class="text-xs text-gray-600">Available</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-orange-600">{{ referralStats.totalReferrals || 0 }}</div>
+                                <div class="text-xs text-gray-600">Referrals</div>
+                            </div>
+                        </div>
                     </div>
-                    <span :class="activity.amount > 0 ? 'text-green-600' : 'text-red-600'" class="font-medium ml-2 flex-shrink-0">
-                    {{ activity.amount > 0 ? '+' : '' }}{{ activity.amount }}
-                    </span>
-                </div>
-                </div>
-            </div>
 
-            <!-- Action Buttons -->
-            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
-                <button @click="shareReferral" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
-                Share Link
-                </button>
-                <button @click="viewLeaderboard" class="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
-                Leaderboard
-                </button>
-                <button @click="showReferralModal = false" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium">
-                Close
-                </button>
+                    <!-- Referral Code Section -->
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                            </svg>
+                        </div>
+                        <p class="text-gray-600 mb-4">Share QWESI AI with friends and earn points when they sign up!</p>
+                        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                            <p class="text-sm text-gray-600 mb-2">Your referral code:</p>
+                            <div class="flex items-center space-x-2">
+                                <code class="bg-white px-3 py-2 rounded border text-sm font-mono flex-1">{{ referralCode }}</code>
+                                <button @click="copyReferralCode" class="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm">
+                                    {{ copied ? 'Copied!' : 'Copy' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rewards Info -->
+                    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                        <h4 class="font-semibold text-gray-900 mb-3">Referral Rewards</h4>
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <div class="flex items-center">
+                                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                                You get <strong>100 points</strong> for each successful referral
+                            </div>
+                            <div class="flex items-center">
+                                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                                Your friend gets <strong>50 points</strong> welcome bonus
+                            </div>
+                            <div class="flex items-center">
+                                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                                No limit on referrals - earn unlimited points!
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Points Activity -->
+                    <div v-if="pointsHistory.length > 0" class="mb-6">
+                        <h4 class="font-semibold text-gray-900 mb-3">Recent Activity</h4>
+                        <div class="space-y-2 max-h-32 overflow-y-auto">
+                            <div v-for="activity in pointsHistory.slice(0, 5)" :key="activity._id" 
+                                class="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                                <div class="flex items-center">
+                                    <div :class="activity.type === 'earned' || activity.type === 'referral' ? 'text-green-600' : 'text-orange-600'" 
+                                        class="w-2 h-2 rounded-full mr-2"></div>
+                                    <span class="text-gray-700">{{ activity.description }}</span>
+                                </div>
+                                <span :class="activity.amount > 0 ? 'text-green-600' : 'text-red-600'" class="font-medium">
+                                    {{ activity.amount > 0 ? '+' : '' }}{{ activity.amount }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-3">
+                        <button @click="shareReferral" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                            Share Link
+                        </button>
+                        <button @click="viewLeaderboard" class="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+                            Leaderboard
+                        </button>
+                        <button @click="showReferralModal = false" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium">
+                            Cancel
+                        </button>
+                    </div>
+                    
+                    <!-- Points Redemption -->
+                    <div v-if="userPoints.available >= 100" class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p class="text-sm text-yellow-800 mb-2">You have enough points to redeem rewards!</p>
+                        <button @click="showRedemptionModal = true" class="w-full bg-yellow-500 text-white py-2 px-4 rounded-lg hover:bg-yellow-600 transition-colors text-sm font-medium">
+                            Redeem Points
+                        </button>
+                    </div>
+                </div>
             </div>
-            
-            <!-- Points Redemption -->
-            <div v-if="userPoints.available >= 100" class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p class="text-sm text-yellow-800 mb-2">You have enough points to redeem rewards!</p>
-                <button @click="showRedemptionModal = true" class="w-full bg-yellow-500 text-white py-2 px-4 rounded-lg hover:bg-yellow-600 transition-colors text-sm font-medium">
-                Redeem Points
-                </button>
-            </div>
-            </div>
-        </div>
         </div>
 
         <!-- Points Redemption Modal -->
@@ -866,27 +765,15 @@ import { useSubscriptionStore } from '~/features/subscription/stores/subscriptio
 import { useDashboard } from '~/features/dashboard/composables/use-dashboard'
 import Sidebar from '@/features/dashboard/components/dashboard-sidebar.vue'
 import Stats from '@/features/dashboard/components/dashboard-stats.vue'
-import Table from '@/features/dashboard/components/dashboard-table.vue'
 import ProModal from '@/features/subscription/components/pro-modal.vue'
 import { FEATURE_SWITCH } from '~/shared/constants/feature-switch'
 import MessagePopup from '~/shared/components/message/MessagePopup.vue'
-import NewTaskModal from '~/pages/modals/NewTaskModal.vue'
-import InviteTeamModal from '~/pages/modals/InviteTeamModal.vue'
-import ReportsModal from '~/pages/modals/ReportsModal.vue'
-import TasksTable from '~/features/auth/components/taskTable.vue'
-import TeamTable from '~/features/auth/components/teamTable.vue'
-import HelpModal from '~/pages/modals/HelpModal.vue'
 import { API_ROUTES } from '~/shared/constants/api-routes'
-import NotificationComponent from '~/features/dashboard/components/notification.vue' 
 
 const alertRef = ref(null)
 const authStore = useAuthStore()
 const subscriptionStore = useSubscriptionStore()
 const { loading: dashboardLoading, error: dashboardError, summary, fetchDashboardSummary } = useDashboard()
-
-const notificationRef = ref(null)
-const tasksTableRef = ref(null)
-const teamTableRef = ref(null)
 
 // User state
 const user = computed(() => authStore.getUser || {})
@@ -957,81 +844,6 @@ const stats = computed(() => {
     }
 })
 
-// Add notification handlers
-const handleNotificationClick = (notification) => {
-  console.log('Notification clicked:', notification)
-  
-  // Handle different notification types
-  switch (notification.type) {
-    case 'task':
-      // Navigate to task details
-      if (notification.actionUrl) {
-        navigateTo(notification.actionUrl)
-      }
-      break
-    case 'team':
-      // Handle team notifications
-      alertRef.value?.info(`Team notification: ${notification.title}`)
-      break
-    case 'warning':
-      // Handle warnings
-      alertRef.value?.warning(notification.message)
-      break
-    default:
-      // Default handling
-      break
-  }
-}
-
-const handleNotificationAction = ({ action, notification }) => {
-  console.log('Notification action:', action, notification)
-  
-  // Handle specific actions
-  switch (action.action) {
-    case 'view':
-      if (action.url) {
-        navigateTo(action.url)
-      }
-      break
-    case 'view-profile':
-      navigateTo('/dashboard/team')
-      break
-    case 'approve':
-      // Handle approval actions
-      approveAction(notification)
-      break
-    case 'reject':
-      // Handle rejection actions
-      rejectAction(notification)
-      break
-    default:
-      break
-  }
-}
-
-
-
-// Table data
-const taskColumns = [
-    { key: 'taskName', label: 'Task Name', type: 'title' },
-    { key: 'assignee', label: 'Assignee', type: 'avatar' },
-    { key: 'status', label: 'Status', type: 'status' },
-]
-
-const tasks = computed(() => {
-    return summary.value?.recentTasks || []
-})
-
-const peopleColumns = [
-    { key: 'name', label: 'Name', type: 'avatar' },
-    { key: 'role', label: 'Role', type: 'role' },
-    { key: 'status', label: 'Status', type: 'status' },
-    { key: 'lastActive', label: 'Last Active' }
-]
-
-const people = computed(() => {
-    return summary.value?.teamMembers || []
-})
 
 // Methods
 const editProfile = () => {
@@ -1344,93 +1156,23 @@ const closePitchBanner = () => {
     }
 }
 
-watch([showReferralModal, showLeaderboardModal, showRedemptionModal, showTipsModal], 
-  ([referral, leaderboard, redemption, tips]) => {
-    // Only run on client-side
-    if (!process.client) return
-    
-    const anyModalOpen = referral || leaderboard || redemption || tips
-    
-    if (anyModalOpen) {
-      // Lock body scroll
-      if (document.body) {
-        document.body.classList.add('modal-open')
-        // Store current scroll position
-        const scrollY = window.scrollY
-        document.body.style.position = 'fixed'
-        document.body.style.top = `-${scrollY}px`
-        document.body.style.width = '100%'
-      }
-    } else {
-      // Restore body scroll
-      if (document.body) {
-        document.body.classList.remove('modal-open')
-        const scrollY = document.body.style.top
-        document.body.style.position = ''
-        document.body.style.top = ''
-        document.body.style.width = ''
-        if (scrollY) {
-          window.scrollTo(0, parseInt(scrollY || '0') * -1)
-        }
-      }
+// Lifecycle
+onMounted(async () => {
+    if (!authStore.isAuthenticated) {
+        navigateTo('/auth/login')
+        return
     }
-  }, 
-  { immediate: true }
-)
 
-// Also update the resize handler
-const handleResize = () => {
-  // Only run on client-side
-  if (!process.client) return
-  
-  // Force re-render of modals on resize to ensure proper positioning
-  if (showReferralModal.value || showLeaderboardModal.value || showRedemptionModal.value || showTipsModal.value) {
-    nextTick(() => {
-      // Trigger any modal positioning updates if needed
-    })
-  }
-}
+    await fetchDashboardSummary()
+    await fetchUserPoints()
+    await subscriptionStore.fetchSubscription()
 
-// Update the lifecycle hooks
-onMounted(() => {
-  if (!authStore.isAuthenticated) {
-    navigateTo('/auth/login')
-    return
-  }
-
-  // Add event listeners only on client-side
-  if (process.client) {
-    window.addEventListener('resize', handleResize)
-    window.addEventListener('orientationchange', handleResize)
-  }
-
-  // Your existing onMounted code...
-  fetchDashboardSummary()
-  fetchUserPoints()
-  subscriptionStore.fetchSubscription()
-
-  if (process.client) {
-    const onboardingCompleted = localStorage.getItem('onboarding_completed')
-    const onboardingDismissed = localStorage.getItem('onboarding_dismissed')
-    showOnboarding.value = !onboardingCompleted && !onboardingDismissed && !user.value.hasCompletedOnboarding
-    showPitchBanner.value = localStorage.getItem('hide_pitch_banner_dashboard') !== 'true'
-  }
-})
-
-onUnmounted(() => {
-  // Only run cleanup on client-side
-  if (process.client) {
-    window.removeEventListener('resize', handleResize)
-    window.removeEventListener('orientationchange', handleResize)
-    
-    // Clean up body classes if component unmounts with modal open
-    if (document.body) {
-      document.body.classList.remove('modal-open')
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.width = ''
+    if (process.client) {
+        const onboardingCompleted = localStorage.getItem('onboarding_completed')
+        const onboardingDismissed = localStorage.getItem('onboarding_dismissed')
+        showOnboarding.value = !onboardingCompleted && !onboardingDismissed && !user.value.hasCompletedOnboarding
+        showPitchBanner.value = localStorage.getItem('hide_pitch_banner_dashboard') !== 'true'
     }
-  }
 })
 
 useHead({
@@ -1438,7 +1180,6 @@ useHead({
 })
 
 </script>
-
 
 <style scoped>
 /* Base Layout */
@@ -1955,7 +1696,7 @@ useHead({
 }
 
 .z-60 {
-    z-index: 10;
+    z-index: 60;
 }
 
 /* Animations */
@@ -2118,299 +1859,5 @@ useHead({
         height: 100vh;
         overflow-y: auto;
     }
-}
-
-/* Enhanced Responsive Modal Styles */
-
-/* Base modal overlay with proper positioning */
-.modal-overlay.responsive-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 60;
-  padding: 1rem;
-  backdrop-filter: blur(8px);
-  
-  /* Ensure it covers the full viewport on all devices */
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* Responsive referral modal container */
-.responsive-referral-modal {
-  position: relative;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 1.5rem;
-  width: 100%;
-  max-width: 42rem; /* 672px */
-  max-height: calc(100vh - 2rem);
-  overflow: hidden;
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  
-  /* Smooth transitions for resize */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  /* Flex layout for proper content distribution */
-  display: flex;
-  flex-direction: column;
-}
-
-/* Modal header - fixed height */
-.responsive-referral-modal .modal-header {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
-}
-
-/* Modal body container - scrollable */
-.modal-body-container {
-  flex: 1;
-  padding: 2rem;
-  overflow-y: auto;
-  overflow-x: hidden;
-  
-  /* Custom scrollbar for better UX */
-  scrollbar-width: thin;
-  scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
-}
-
-.modal-body-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-.modal-body-container::-webkit-scrollbar-track {
-  background: transparent;
-  border-radius: 3px;
-}
-
-.modal-body-container::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.5));
-  border-radius: 3px;
-  transition: all 0.3s ease;
-}
-
-.modal-body-container::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, rgba(99, 102, 241, 0.5), rgba(139, 92, 246, 0.7));
-}
-
-/* Responsive breakpoints */
-
-/* Large screens and up (1024px+) */
-@media (min-width: 1024px) {
-  .responsive-referral-modal {
-    max-width: 42rem;
-    max-height: 80vh;
-  }
-  
-  .modal-body-container {
-    padding: 2rem;
-  }
-}
-
-/* Medium screens (768px - 1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .responsive-referral-modal {
-    max-width: 90vw;
-    max-height: 85vh;
-  }
-  
-  .modal-body-container {
-    padding: 1.5rem;
-  }
-  
-  .responsive-referral-modal .modal-header {
-    padding: 1.25rem 1.5rem;
-  }
-}
-
-/* Small screens (640px - 767px) */
-@media (min-width: 640px) and (max-width: 767px) {
-  .modal-overlay.responsive-modal {
-    padding: 0.75rem;
-  }
-  
-  .responsive-referral-modal {
-    max-width: 95vw;
-    max-height: 90vh;
-    border-radius: 1rem;
-  }
-  
-  .modal-body-container {
-    padding: 1.25rem;
-  }
-  
-  .responsive-referral-modal .modal-header {
-    padding: 1rem 1.25rem;
-  }
-}
-
-/* Extra small screens (480px - 639px) */
-@media (min-width: 480px) and (max-width: 639px) {
-  .modal-overlay.responsive-modal {
-    padding: 0.5rem;
-  }
-  
-  .responsive-referral-modal {
-    max-width: 96vw;
-    max-height: 92vh;
-    border-radius: 0.75rem;
-  }
-  
-  .modal-body-container {
-    padding: 1rem;
-  }
-  
-  .responsive-referral-modal .modal-header {
-    padding: 0.875rem 1rem;
-  }
-  
-  /* Adjust title size on smaller screens */
-  .responsive-referral-modal .modal-title {
-    font-size: 1.125rem;
-  }
-}
-
-/* Very small screens (below 480px) */
-@media (max-width: 479px) {
-  .modal-overlay.responsive-modal {
-    padding: 0.25rem;
-    align-items: flex-start;
-    padding-top: 1rem;
-  }
-  
-  .responsive-referral-modal {
-    width: 98vw;
-    max-width: 98vw;
-    max-height: 95vh;
-    border-radius: 0.5rem;
-    margin-top: auto;
-    margin-bottom: auto;
-  }
-  
-  .modal-body-container {
-    padding: 0.875rem;
-  }
-  
-  .responsive-referral-modal .modal-header {
-    padding: 0.75rem 0.875rem;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-  
-  .responsive-referral-modal .modal-title {
-    font-size: 1rem;
-  }
-  
-  .responsive-referral-modal .modal-close {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.875rem;
-  }
-  
-  /* Stack buttons vertically on very small screens */
-  .modal-body-container .flex.flex-col.sm\\:flex-row {
-    flex-direction: column;
-  }
-  
-  .modal-body-container .flex.flex-col.sm\\:flex-row > * {
-    width: 100%;
-  }
-}
-
-/* Landscape orientation on mobile devices */
-@media (max-height: 600px) and (orientation: landscape) {
-  .modal-overlay.responsive-modal {
-    align-items: flex-start;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-  }
-  
-  .responsive-referral-modal {
-    max-height: 95vh;
-  }
-  
-  .modal-body-container {
-    max-height: calc(95vh - 100px); /* Subtract header height */
-  }
-}
-
-/* Fix for iOS Safari viewport height issues */
-@supports (-webkit-touch-callout: none) {
-  .modal-overlay.responsive-modal {
-    height: -webkit-fill-available;
-  }
-  
-  .responsive-referral-modal {
-    max-height: calc(-webkit-fill-available - 2rem);
-  }
-}
-
-/* Ensure content doesn't overflow horizontally */
-.modal-body-container * {
-  max-width: 100%;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-/* Responsive grid adjustments */
-@media (max-width: 480px) {
-  .modal-body-container .grid-cols-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.75rem;
-  }
-  
-  .modal-body-container .text-2xl {
-    font-size: 1.25rem;
-  }
-  
-  .modal-body-container .text-xs {
-    font-size: 0.625rem;
-  }
-}
-
-/* Animation improvements for smooth resizing */
-.responsive-referral-modal,
-.modal-body-container {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Prevent body scroll when modal is open */
-body.modal-open {
-  overflow: hidden;
-  height: 100vh;
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .responsive-referral-modal {
-    background: white;
-    border: 2px solid #000;
-  }
-  
-  .modal-body-container {
-    border-top: 1px solid #000;
-  }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .responsive-referral-modal,
-  .modal-body-container {
-    transition: none;
-  }
 }
 </style>
