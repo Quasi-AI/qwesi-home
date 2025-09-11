@@ -108,7 +108,9 @@ export interface ReportRequest {
  * Handles all HTTP requests for chat functionality with full TypeScript support
  */
 export class ChatAPI {
-  private static readonly baseUrl = "https://dark-caldron-448714-u5.appspot.com"
+  private static readonly baseUrl = process.env.NODE_ENV === 'production' 
+    ? 'https://dark-caldron-448714-u5.uc.r.appspot.com' 
+    : 'http://localhost:5000'
 
   /**
    * Get authentication headers
