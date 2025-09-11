@@ -42,6 +42,7 @@ export default defineNuxtConfig({
       firebaseStorageBucket: "park4me-b2127.appspot.com",
       firebaseMessagingSenderId: "372838267059",
       firebaseAppId: "1:372838267059:web:20430ac4e8fe7f2f4cd8c6",
+      socketUrl: "https://dark-caldron-448714-u5.uc.r.appspot.com"
     },
   },
 });

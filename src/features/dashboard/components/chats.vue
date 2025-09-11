@@ -1,415 +1,635 @@
 <template>
-  <div v-if="isOpen" class="chat-overlay" @click="closeChatIfClickedOutside">
+  <div v-if="isOpen" class="chat-overlay" @click="handleOverlayClick">
     <div class="chat-container" @click.stop>
       <!-- Chat Header -->
       <div class="chat-header">
-        <div class="chat-header-backdrop"></div>
-        <div class="chat-header-content">
-          <button @click="$emit('close')" class="back-btn">
+        <div class="talent-info">
+          <div class="talent-avatar">
+            <img 
+              v-if="talent?.profileImage" 
+              :src="talent.profileImage" 
+              :alt="talent.name"
+              class="avatar-image"
+            />
+            <div v-else class="avatar-placeholder">
+              {{ getInitials(talent?.name) }}
+            </div>
+            <div class="status-indicator" :class="{ online: isUserOnline }"></div>
+          </div>
+          <div class="talent-details">
+            <h3 class="talent-name">{{ talent?.name || 'Unknown User' }}</h3>
+            <p class="talent-status">
+              {{ isUserOnline ? 'Online' : `Last seen ${formatLastSeen(lastSeen)}` }}
+            </p>
+            <p v-if="userTyping" class="typing-indicator">
+              {{ userTyping }} is typing...
+            </p>
+          </div>
+        </div>
+        
+        <div class="chat-actions">
+          <button 
+            @click="showMeetingModal = true" 
+            class="action-btn meeting-btn"
+            title="Schedule Meeting"
+          >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </button>
           
-          <div class="chat-user-info">
-            <div class="chat-avatar">
-              <div v-if="talent.profileImage" class="avatar-img">
-                <img :src="talent.profileImage" :alt="talent.name" />
-              </div>
-              <div v-else class="avatar-initials">
-                {{ getInitials(talent.name) }}
-              </div>
-              <div class="online-indicator" :class="{ 'online': isOnline }"></div>
-            </div>
-            <div class="user-details">
-              <h3 class="user-name">{{ talent.name }}</h3>
-              <p class="user-status">{{ isOnline ? 'Online' : `Last seen ${lastSeen}` }}</p>
-            </div>
-          </div>
-
-          <div class="chat-actions">
-            <button @click="openScheduler" class="action-btn schedule-btn" title="Schedule Meeting">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </button>
-            <button @click="startVideoCall" class="action-btn video-btn" title="Start Video Call">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Chat Messages -->
-      <div class="chat-messages" ref="messagesContainer">
-        <div v-if="messages.length === 0" class="empty-messages">
-          <div class="empty-icon">
-            <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
-                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-          </div>
-          <h4 class="empty-title">Start your conversation</h4>
-          <p class="empty-subtitle">Send a message to {{ talent.name }} to get started</p>
-        </div>
-
-        <div v-else class="messages-list">
-          <div v-for="message in messages" :key="message.id" 
-               class="message-wrapper" 
-               :class="{ 'own-message': message.senderId === currentUserId }">
-            <div class="message-bubble" :class="{ 'sent': message.senderId === currentUserId, 'received': message.senderId !== currentUserId }">
-              <div class="message-content">
-                <p class="message-text">{{ message.content }}</p>
-                <div v-if="message.attachment" class="message-attachment">
-                  <div class="attachment-preview">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                    </svg>
-                    <span>{{ message.attachment.name }}</span>
-                  </div>
-                </div>
-              </div>
-              <div class="message-meta">
-                <span class="message-time">{{ formatTime(message.timestamp) }}</span>
-                <div v-if="message.senderId === currentUserId" class="message-status">
-                  <svg v-if="message.status === 'sent'" class="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                  </svg>
-                  <svg v-else-if="message.status === 'delivered'" class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                  </svg>
-                  <div v-else-if="message.status === 'read'" class="read-indicator">
-                    <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                    <svg class="w-4 h-4 text-blue-500 -ml-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Typing Indicator -->
-        <div v-if="isTyping" class="typing-indicator">
-          <div class="typing-bubble">
-            <div class="typing-dots">
-              <div class="dot"></div>
-              <div class="dot"></div>
-              <div class="dot"></div>
-            </div>
-          </div>
-          <span class="typing-text">{{ talent.name }} is typing...</span>
-        </div>
-      </div>
-
-      <!-- Chat Input -->
-      <div class="chat-input-container">
-        <div class="chat-input-backdrop"></div>
-        <div class="chat-input-wrapper">
-          <div class="input-actions">
-            <input 
-              ref="fileInput"
-              type="file" 
-              @change="handleFileSelect"
-              accept="image/*,.pdf,.doc,.docx"
-              class="hidden"
-            />
-            <button @click="$refs.fileInput.click()" class="input-action-btn" title="Attach file">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-              </svg>
-            </button>
-          </div>
-
-          <div class="message-input-wrapper">
-            <textarea
-              v-model="newMessage"
-              @keydown="handleKeyDown"
-              @input="handleTyping"
-              placeholder="Type a message..."
-              class="message-input"
-              rows="1"
-              ref="messageInput"
-            ></textarea>
-            <button @click="toggleEmojiPicker" class="emoji-btn" title="Add emoji">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </button>
-          </div>
-
-          <button 
-            @click="sendMessage" 
-            :disabled="!newMessage.trim() && !selectedFile"
-            class="send-btn"
-            :class="{ 'has-content': newMessage.trim() || selectedFile }"
-          >
+          <button @click="$emit('close')" class="action-btn close-btn" title="Close Chat">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
+      </div>
 
-        <!-- File Preview -->
-        <div v-if="selectedFile" class="file-preview">
-          <div class="file-info">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-            </svg>
-            <span>{{ selectedFile.name }}</span>
+      <!-- Connection Status -->
+      <div v-if="!isSocketConnected" class="connection-warning">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+        </svg>
+        <span>Connection issues - messages may be delayed</span>
+      </div>
+
+      <!-- Messages Area -->
+      <div ref="messagesContainer" class="messages-container">
+        <div v-if="loading" class="loading-indicator">
+          <div class="loading-spinner"></div>
+          <span>Loading messages...</span>
+        </div>
+
+        <div v-else-if="messages.length === 0" class="empty-chat">
+          <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+          <h3>Start the conversation</h3>
+          <p>Send a message to {{ talent?.name }} to begin chatting</p>
+        </div>
+
+        <div v-else class="messages-list">
+          <div 
+            v-for="message in messages" 
+            :key="message.messageId || message._id"
+            class="message-item"
+            :class="{ 
+              'own-message': message.sender._id === currentUserId,
+              'other-message': message.sender._id !== currentUserId
+            }"
+          >
+            <!-- Regular Message -->
+            <div v-if="message.messageType === 'text'" class="message-bubble">
+              <div class="message-content">
+                <p class="message-text">{{ message.message }}</p>
+                <div class="message-meta">
+                  <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+                  <svg 
+                    v-if="message.sender._id === currentUserId && message.isRead" 
+                    class="read-indicator" 
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                  >
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Meeting Message -->
+            <div v-else-if="message.messageType === 'meeting'" class="meeting-message">
+              <div class="meeting-header">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="meeting-title">{{ message.meetingDetails?.title || 'Meeting Scheduled' }}</span>
+              </div>
+              
+              <div class="meeting-details">
+                <div class="meeting-time">
+                  <strong>Date:</strong> {{ formatMeetingDate(message.meetingDetails?.startTime) }}
+                </div>
+                <div class="meeting-time">
+                  <strong>Time:</strong> {{ formatMeetingTime(message.meetingDetails?.startTime, message.meetingDetails?.endTime) }}
+                </div>
+                <div v-if="message.meetingDetails?.description" class="meeting-description">
+                  <strong>Description:</strong> {{ message.meetingDetails.description }}
+                </div>
+                
+                <div v-if="message.meetingDetails?.meetingLink" class="meeting-actions">
+                  <a 
+                    :href="message.meetingDetails.meetingLink" 
+                    target="_blank" 
+                    class="meeting-link-btn"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Join Meeting
+                  </a>
+                </div>
+              </div>
+              
+              <div class="message-meta">
+                <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+              </div>
+            </div>
           </div>
-          <button @click="removeFile" class="remove-file-btn">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </div>
+      </div>
+
+      <!-- Message Input -->
+      <div class="message-input-container">
+        <div class="input-wrapper">
+          <textarea
+            ref="messageInput"
+            v-model="newMessage"
+            @keydown="handleKeyDown"
+            @input="handleTyping"
+            @blur="stopTyping"
+            placeholder="Type your message..."
+            class="message-input"
+            rows="1"
+            :disabled="!isSocketConnected"
+          ></textarea>
+          
+          <button 
+            @click="sendMessage"
+            :disabled="!newMessage.trim() || !isSocketConnected || sending"
+            class="send-button"
+          >
+            <div v-if="sending" class="loading-spinner small"></div>
+            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Meeting Scheduler Modal -->
-    <MeetingScheduler 
-      v-if="showScheduler"
-      :talent="talent"
-      @close="closeScheduler"
-      @meeting-scheduled="handleMeetingScheduled"
-    />
+    <!-- Meeting Scheduling Modal -->
+    <div v-if="showMeetingModal" class="meeting-modal-overlay" @click="closeMeetingModal">
+      <div class="meeting-modal" @click.stop>
+        <div class="modal-header">
+          <h3 class="modal-title">Schedule Meeting with {{ talent?.name }}</h3>
+          <button @click="closeMeetingModal" class="modal-close-btn">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <form @submit.prevent="scheduleMeeting" class="meeting-form">
+          <div class="form-group">
+            <label class="form-label">Meeting Title *</label>
+            <input 
+              v-model="meetingForm.title" 
+              type="text" 
+              class="form-input"
+              placeholder="e.g., Technical Interview, Project Discussion"
+              required 
+            />
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Date *</label>
+              <input 
+                v-model="meetingForm.date" 
+                type="date" 
+                class="form-input"
+                :min="getTodayDate()"
+                required 
+              />
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Start Time *</label>
+              <input 
+                v-model="meetingForm.startTime" 
+                type="time" 
+                class="form-input"
+                required 
+              />
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Duration *</label>
+              <select v-model="meetingForm.duration" class="form-input" required>
+                <option value="30">30 minutes</option>
+                <option value="60">1 hour</option>
+                <option value="90">1.5 hours</option>
+                <option value="120">2 hours</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Description (Optional)</label>
+            <textarea 
+              v-model="meetingForm.description" 
+              class="form-input"
+              rows="3"
+              placeholder="Add meeting agenda, topics to discuss, or any other details..."
+            ></textarea>
+          </div>
+          
+          <div class="modal-actions">
+            <button type="button" @click="closeMeetingModal" class="cancel-btn">
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              class="schedule-btn"
+              :disabled="schedulingMeeting"
+            >
+              <div v-if="schedulingMeeting" class="loading-spinner small"></div>
+              <span v-else>Schedule Meeting</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
-import MeetingScheduler from './meetings.vue'
+import { useChatSocket } from '~/shared/composables/useChatSocket'
+import { ChatAPI } from '~/services/chatApi'
+import { useAuthStore } from '~/features/auth/stores/auth.store'
 
-// Props
+// Props and Emits
 const props = defineProps({
-  isOpen: {
-    type: Boolean,
-    default: false
-  },
-  talent: {
-    type: Object,
-    required: true
-  },
-  currentUserId: {
-    type: String,
-    required: true
-  }
+  isOpen: Boolean,
+  talent: Object,
+  currentUserId: String
 })
 
-// Emits
 const emit = defineEmits(['close', 'meeting-scheduled'])
 
-// Refs
+// Reactive data
+const messages = ref([])
+const newMessage = ref('')
+const loading = ref(false)
+const sending = ref(false)
+const showMeetingModal = ref(false)
+const schedulingMeeting = ref(false)
 const messagesContainer = ref(null)
 const messageInput = ref(null)
-const fileInput = ref(null)
-
-// Reactive data
-const messages = ref([
-  {
-    id: 1,
-    content: "Hi! I saw your profile and I'm interested in discussing a potential project opportunity.",
-    senderId: props.currentUserId,
-    timestamp: new Date(Date.now() - 300000),
-    status: 'read'
-  },
-  {
-    id: 2,
-    content: "Hello! Thank you for reaching out. I'd be happy to discuss the opportunity. What kind of project are you working on?",
-    senderId: props.talent.id,
-    timestamp: new Date(Date.now() - 240000),
-    status: 'delivered'
-  }
-])
-
-const newMessage = ref('')
-const selectedFile = ref(null)
-const isTyping = ref(false)
-const isOnline = ref(true)
-const lastSeen = ref('2 minutes ago')
-const showScheduler = ref(false)
-const showEmojiPicker = ref(false)
+const currentChatId = ref(null)
+const userTyping = ref('')
+const isUserOnline = ref(false)
+const lastSeen = ref(null)
 const typingTimeout = ref(null)
 
+// Socket connection
+const { 
+  isConnected: isSocketConnected, 
+  connect, 
+  disconnect, 
+  joinChat, 
+  leaveChat,
+  sendMessage: socketSendMessage,
+  scheduleMeeting: socketScheduleMeeting,
+  markMessagesAsRead,
+  startTyping,
+  stopTyping,
+  onNewMessage,
+  onMeetingScheduled,
+  onChatJoined,
+  onUserTyping,
+  onUserStoppedTyping,
+  onError,
+  removeAllListeners
+} = useChatSocket()
+
+// Meeting form
+const meetingForm = ref({
+  title: '',
+  date: '',
+  startTime: '',
+  duration: '60',
+  description: ''
+})
+
 // Computed
+const authStore = useAuthStore()
+
+// Methods
 const getInitials = (name) => {
   if (!name) return 'U'
   return name.split(' ').map(n => n.charAt(0)).join('').slice(0, 2).toUpperCase()
 }
 
-// Methods
-const closeChatIfClickedOutside = (e) => {
-  if (e.target.classList.contains('chat-overlay')) {
-    emit('close')
+const formatTime = (timestamp) => {
+  if (!timestamp) return ''
+  return new Date(timestamp).toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const formatLastSeen = (timestamp) => {
+  if (!timestamp) return 'recently'
+  const now = new Date()
+  const lastSeenDate = new Date(timestamp)
+  const diffInMinutes = Math.floor((now - lastSeenDate) / (1000 * 60))
+  
+  if (diffInMinutes < 5) return 'just now'
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`
+  if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`
+  return lastSeenDate.toLocaleDateString()
+}
+
+const formatMeetingDate = (dateString) => {
+  if (!dateString) return ''
+  return new Date(dateString).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+const formatMeetingTime = (startTime, endTime) => {
+  if (!startTime) return ''
+  const start = new Date(startTime).toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+  const end = endTime ? new Date(endTime).toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit'
+  }) : ''
+  
+  return end ? `${start} - ${end}` : start
+}
+
+const getTodayDate = () => {
+  return new Date().toISOString().split('T')[0]
+}
+
+const loadChatHistory = async () => {
+  if (!props.talent?.id) return
+  
+  try {
+    loading.value = true
+    const response = await ChatAPI.getChatHistory(props.talent.id)
+    
+    if (response.success) {
+      messages.value = response.data.messages || []
+      currentChatId.value = response.data.chatId
+      
+      // Join the chat room via socket
+      if (currentChatId.value) {
+        joinChat(currentChatId.value)
+      }
+      
+      await nextTick()
+      scrollToBottom()
+    }
+  } catch (error) {
+    console.error('Failed to load chat history:', error)
+  } finally {
+    loading.value = false
   }
 }
 
 const sendMessage = async () => {
-  if (!newMessage.value.trim() && !selectedFile.value) return
-
-  const message = {
-    id: Date.now(),
-    content: newMessage.value.trim(),
-    senderId: props.currentUserId,
-    timestamp: new Date(),
-    status: 'sent',
-    attachment: selectedFile.value ? {
-      name: selectedFile.value.name,
-      type: selectedFile.value.type,
-      size: selectedFile.value.size
-    } : null
-  }
-
-  messages.value.push(message)
-  newMessage.value = ''
-  selectedFile.value = null
-
-  await nextTick()
-  scrollToBottom()
-
-  // Simulate message delivery
-  setTimeout(() => {
-    message.status = 'delivered'
-  }, 1000)
-
-  // Simulate response (for demo)
-  setTimeout(() => {
-    simulateResponse()
-  }, 2000)
-}
-
-const simulateResponse = () => {
-  const responses = [
-    "That sounds interesting! Could you tell me more about the timeline?",
-    "I'd be happy to help with that. When would be a good time to discuss this further?",
-    "Great! I have experience with similar projects. Would you like to schedule a call?",
-    "Thank you for sharing those details. I think I can definitely help with this project."
-  ]
-
-  isTyping.value = true
+  if (!newMessage.value.trim() || sending.value || !props.talent?.id) return
   
-  setTimeout(() => {
-    isTyping.value = false
-    messages.value.push({
-      id: Date.now(),
-      content: responses[Math.floor(Math.random() * responses.length)],
-      senderId: props.talent?.id || 'talent-default',
-      timestamp: new Date(),
-      status: 'delivered'
-    })
-    scrollToBottom()
-  }, 2000)
+  try {
+    sending.value = true
+    
+    // Send via socket for real-time delivery
+    const socketSent = socketSendMessage(
+      currentChatId.value, 
+      newMessage.value.trim(), 
+      props.talent.id
+    )
+    
+    if (socketSent) {
+      newMessage.value = ''
+      await nextTick()
+      scrollToBottom()
+    } else {
+      // Fallback to API if socket fails
+      await ChatAPI.sendMessage(props.talent.id, newMessage.value.trim())
+      newMessage.value = ''
+    }
+  } catch (error) {
+    console.error('Failed to send message:', error)
+  } finally {
+    sending.value = false
+  }
 }
 
-const handleKeyDown = (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault()
+const scheduleMeeting = async () => {
+  if (!meetingForm.value.title || !meetingForm.value.date || !meetingForm.value.startTime) {
+    return
+  }
+  
+  try {
+    schedulingMeeting.value = true
+    
+    // Calculate end time
+    const startDateTime = new Date(`${meetingForm.value.date}T${meetingForm.value.startTime}`)
+    const endDateTime = new Date(startDateTime.getTime() + (parseInt(meetingForm.value.duration) * 60000))
+    
+    const meetingDetails = {
+      title: meetingForm.value.title,
+      startTime: startDateTime.toISOString(),
+      endTime: endDateTime.toISOString(),
+      description: meetingForm.value.description,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    }
+    
+    // Send via socket for real-time delivery
+    const socketSent = socketScheduleMeeting(
+      currentChatId.value,
+      props.talent.id,
+      meetingDetails
+    )
+    
+    if (!socketSent) {
+      // Fallback to API
+      await ChatAPI.scheduleMeeting(props.talent.id, meetingDetails)
+    }
+    
+    emit('meeting-scheduled', {
+      talent: props.talent,
+      date: meetingForm.value.date,
+      time: meetingForm.value.startTime,
+      details: meetingDetails
+    })
+    
+    closeMeetingModal()
+  } catch (error) {
+    console.error('Failed to schedule meeting:', error)
+  } finally {
+    schedulingMeeting.value = false
+  }
+}
+
+const handleKeyDown = (event) => {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault()
     sendMessage()
   }
 }
 
 const handleTyping = () => {
-  // Clear existing timeout
-  if (typingTimeout.value) {
-    clearTimeout(typingTimeout.value)
-  }
-
-  // Set new timeout
-  typingTimeout.value = setTimeout(() => {
-    // Send typing stopped event
-  }, 1000)
-}
-
-const handleFileSelect = (e) => {
-  const file = e.target.files[0]
-  if (file) {
-    selectedFile.value = file
+  if (currentChatId.value) {
+    startTyping(currentChatId.value)
+    
+    // Clear existing timeout
+    if (typingTimeout.value) {
+      clearTimeout(typingTimeout.value)
+    }
+    
+    // Stop typing after 3 seconds of inactivity
+    typingTimeout.value = setTimeout(() => {
+      stopTyping(currentChatId.value)
+    }, 3000)
   }
 }
 
-const removeFile = () => {
-  selectedFile.value = null
-  fileInput.value.value = ''
+const handleOverlayClick = () => {
+  emit('close')
+}
+
+const closeMeetingModal = () => {
+  showMeetingModal.value = false
+  meetingForm.value = {
+    title: '',
+    date: '',
+    startTime: '',
+    duration: '60',
+    description: ''
+  }
 }
 
 const scrollToBottom = () => {
-  nextTick(() => {
-    if (messagesContainer.value) {
-      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+  if (messagesContainer.value) {
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+  }
+}
+
+// Socket event handlers
+const setupSocketListeners = () => {
+  onNewMessage((data) => {
+    messages.value.push({
+      messageId: data.messageId,
+      sender: data.sender,
+      receiver: data.receiver,
+      message: data.message,
+      messageType: data.messageType,
+      timestamp: data.timestamp,
+      isRead: data.isRead
+    })
+    
+    nextTick(() => {
+      scrollToBottom()
+    })
+  })
+
+  onMeetingScheduled((data) => {
+    messages.value.push({
+      messageId: data.messageId,
+      sender: data.sender,
+      message: `Meeting scheduled: ${data.meetingDetails.title}`,
+      messageType: 'meeting',
+      meetingDetails: data.meetingDetails,
+      timestamp: data.timestamp,
+      isRead: false
+    })
+    
+    nextTick(() => {
+      scrollToBottom()
+    })
+  })
+
+  onChatJoined((data) => {
+    console.log('Chat joined:', data.chatId)
+    currentChatId.value = data.chatId
+  })
+
+  onUserTyping((data) => {
+    if (data.userId !== props.currentUserId) {
+      userTyping.value = data.userName
+      
+      // Clear typing indicator after 5 seconds
+      setTimeout(() => {
+        userTyping.value = ''
+      }, 5000)
     }
   })
-}
 
-const formatTime = (timestamp) => {
-  return new Date(timestamp).toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
+  onUserStoppedTyping((data) => {
+    if (data.userId !== props.currentUserId) {
+      userTyping.value = ''
+    }
   })
-}
 
-const openScheduler = () => {
-  showScheduler.value = true
-}
-
-const closeScheduler = () => {
-  showScheduler.value = false
-}
-
-const handleMeetingScheduled = (meeting) => {
-  showScheduler.value = false
-  
-  // Add system message about scheduled meeting
-  messages.value.push({
-    id: Date.now(),
-    content: `Meeting scheduled for ${meeting.date} at ${meeting.time}`,
-    senderId: 'system',
-    timestamp: new Date(),
-    status: 'delivered',
-    type: 'meeting'
+  onError((error) => {
+    console.error('Socket error:', error)
   })
-  
-  emit('meeting-scheduled', meeting)
-  scrollToBottom()
-}
-
-const startVideoCall = () => {
-  // Implement video call functionality
-  alert('Starting video call with ' + props.talent.name)
-}
-
-const toggleEmojiPicker = () => {
-  showEmojiPicker.value = !showEmojiPicker.value
 }
 
 // Lifecycle
-onMounted(() => {
-  scrollToBottom()
-  if (messageInput.value) {
-    messageInput.value.focus()
+onMounted(async () => {
+  if (props.isOpen && props.talent?.id) {
+    connect()
+    setupSocketListeners()
+    await loadChatHistory()
   }
 })
 
-watch(() => props.isOpen, (newVal) => {
-  if (newVal) {
-    nextTick(() => {
-      scrollToBottom()
-      if (messageInput.value) {
-        messageInput.value.focus()
-      }
-    })
+onUnmounted(() => {
+  if (currentChatId.value) {
+    leaveChat(currentChatId.value)
+  }
+  removeAllListeners()
+  disconnect()
+  
+  if (typingTimeout.value) {
+    clearTimeout(typingTimeout.value)
+  }
+})
+
+// Watch for prop changes
+watch(() => props.isOpen, (newValue) => {
+  if (newValue && props.talent?.id) {
+    connect()
+    setupSocketListeners()
+    loadChatHistory()
+  } else {
+    if (currentChatId.value) {
+      leaveChat(currentChatId.value)
+    }
+    removeAllListeners()
+    disconnect()
+  }
+})
+
+watch(() => props.talent?.id, (newTalentId) => {
+  if (newTalentId && props.isOpen) {
+    messages.value = []
+    loadChatHistory()
+  }
+})
+
+// Mark messages as read when chat is opened
+watch(() => [props.isOpen, currentChatId.value], ([isOpen, chatId]) => {
+  if (isOpen && chatId) {
+    markMessagesAsRead(chatId)
   }
 })
 </script>
@@ -419,90 +639,63 @@ watch(() => props.isOpen, (newVal) => {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px);
-  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 50;
+  backdrop-filter: blur(8px);
   padding: 1rem;
 }
 
 .chat-container {
-  width: 100%;
-  max-width: 28rem;
-  height: 85vh;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.98);
   border-radius: 1.5rem;
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 100%;
+  max-width: 42rem;
+  height: 90vh;
+  max-height: 48rem;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 /* Chat Header */
 .chat-header {
-  position: relative;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-}
-
-.chat-header-backdrop {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.95) 0%, rgba(219, 234, 254, 0.8) 100%);
-}
-
-.chat-header-content {
-  position: relative;
-  z-index: 10;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
 }
 
-.back-btn {
-  padding: 0.5rem;
-  color: #64748b;
-  border-radius: 0.75rem;
-  transition: all 0.2s ease;
-}
-
-.back-btn:hover {
-  background: rgba(148, 163, 184, 0.1);
-  color: #475569;
-}
-
-.chat-user-info {
-  flex: 1;
+.talent-info {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
-.chat-avatar {
+.talent-avatar {
   position: relative;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
 }
 
-.avatar-img {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 1rem;
-  overflow: hidden;
-  border: 2px solid #e2e8f0;
-}
-
-.avatar-img img {
+.avatar-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 1rem;
+  border: 2px solid rgba(59, 130, 246, 0.2);
 }
 
-.avatar-initials {
-  width: 2.5rem;
-  height: 2.5rem;
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
   background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   border-radius: 1rem;
   display: flex;
@@ -513,38 +706,39 @@ watch(() => props.isOpen, (newVal) => {
   font-size: 0.875rem;
 }
 
-.online-indicator {
+.status-indicator {
   position: absolute;
   bottom: 0;
   right: 0;
   width: 0.75rem;
   height: 0.75rem;
-  background: #6b7280;
+  background: #9ca3af;
   border: 2px solid white;
   border-radius: 50%;
-  transition: all 0.3s ease;
 }
 
-.online-indicator.online {
+.status-indicator.online {
   background: #10b981;
 }
 
-.user-details {
-  flex: 1;
-  min-width: 0;
-}
-
-.user-name {
-  font-size: 1rem;
-  font-weight: 600;
+.talent-name {
+  font-size: 1.125rem;
+  font-weight: 700;
   color: #1e293b;
-  line-height: 1.2;
+  margin: 0;
 }
 
-.user-status {
-  font-size: 0.75rem;
+.talent-status {
+  font-size: 0.875rem;
   color: #64748b;
-  margin-top: 0.125rem;
+  margin: 0;
+}
+
+.typing-indicator {
+  font-size: 0.75rem;
+  color: #3b82f6;
+  font-style: italic;
+  margin: 0;
 }
 
 .chat-actions {
@@ -555,234 +749,233 @@ watch(() => props.isOpen, (newVal) => {
 .action-btn {
   padding: 0.5rem;
   border-radius: 0.75rem;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meeting-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  color: white;
+}
+
+.meeting-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.close-btn {
+  background: rgba(148, 163, 184, 0.1);
   color: #64748b;
 }
 
-.action-btn:hover {
-  background: rgba(148, 163, 184, 0.1);
+.close-btn:hover {
+  background: rgba(148, 163, 184, 0.2);
   color: #475569;
 }
 
-.schedule-btn:hover {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+/* Connection Warning */
+.connection-warning {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #92400e;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
 }
 
-.video-btn:hover {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
-}
-
-/* Chat Messages */
-.chat-messages {
+/* Messages Area */
+.messages-container {
   flex: 1;
   overflow-y: auto;
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
 
-.empty-messages {
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  color: #64748b;
+}
+
+.loading-spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-spinner.small {
+  width: 1rem;
+  height: 1rem;
+  border-width: 1.5px;
+}
+
+.empty-chat {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
   text-align: center;
-  padding: 2rem;
+  padding: 3rem 2rem;
+  color: #64748b;
 }
 
-.empty-icon {
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}
-
-.empty-title {
+.empty-chat h3 {
   font-size: 1.125rem;
   font-weight: 600;
   color: #374151;
-  margin-bottom: 0.5rem;
-}
-
-.empty-subtitle {
-  color: #6b7280;
-  font-size: 0.875rem;
+  margin: 1rem 0 0.5rem;
 }
 
 .messages-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
-.message-wrapper {
+.message-item {
   display: flex;
-  align-items: flex-end;
-  gap: 0.5rem;
+  flex-direction: column;
 }
 
-.message-wrapper.own-message {
-  justify-content: flex-end;
+.message-item.own-message {
+  align-items: flex-end;
+}
+
+.message-item.other-message {
+  align-items: flex-start;
 }
 
 .message-bubble {
   max-width: 75%;
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 1.25rem;
   padding: 0.75rem 1rem;
-  position: relative;
-}
-
-.message-bubble.sent {
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-  color: white;
-  border-bottom-right-radius: 0.5rem;
-}
-
-.message-bubble.received {
-  background: rgba(241, 245, 249, 0.8);
-  color: #1e293b;
-  border-bottom-left-radius: 0.5rem;
+  backdrop-filter: blur(10px);
   border: 1px solid rgba(148, 163, 184, 0.2);
 }
 
-.message-content {
-  margin-bottom: 0.25rem;
+.own-message .message-bubble {
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  color: white;
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 .message-text {
-  line-height: 1.4;
-  font-size: 0.875rem;
-}
-
-.message-attachment {
-  margin-top: 0.5rem;
-}
-
-.attachment-preview {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
+  margin: 0;
+  line-height: 1.5;
+  word-wrap: break-word;
 }
 
 .message-meta {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   justify-content: flex-end;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
 }
 
 .message-time {
-  font-size: 0.625rem;
-  opacity: 0.8;
-}
-
-.message-status {
-  display: flex;
-  align-items: center;
+  font-size: 0.75rem;
+  opacity: 0.7;
 }
 
 .read-indicator {
-  display: flex;
-  align-items: center;
+  width: 0.875rem;
+  height: 0.875rem;
+  opacity: 0.7;
 }
 
-/* Typing Indicator */
-.typing-indicator {
+/* Meeting Messages */
+.meeting-message {
+  max-width: 85%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 1.25rem;
+  padding: 1rem;
+  backdrop-filter: blur(10px);
+}
+
+.meeting-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-left: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
-.typing-bubble {
-  background: rgba(241, 245, 249, 0.8);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 1.25rem;
-  border-bottom-left-radius: 0.5rem;
-  padding: 0.75rem 1rem;
+.meeting-title {
+  font-weight: 600;
+  color: #1e293b;
 }
 
-.typing-dots {
-  display: flex;
-  gap: 0.25rem;
+.meeting-details {
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
 }
 
-.dot {
-  width: 0.375rem;
-  height: 0.375rem;
-  background: #94a3b8;
-  border-radius: 50%;
-  animation: typing 1.4s infinite ease-in-out;
+.meeting-time, .meeting-description {
+  margin-bottom: 0.5rem;
+  color: #374151;
 }
 
-.dot:nth-child(2) {
-  animation-delay: 0.2s;
+.meeting-actions {
+  margin-top: 0.75rem;
 }
 
-.dot:nth-child(3) {
-  animation-delay: 0.4s;
+.meeting-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
-.typing-text {
-  font-size: 0.75rem;
-  color: #64748b;
-  font-style: italic;
+.meeting-link-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
-/* Chat Input */
-.chat-input-container {
-  position: relative;
-  border-top: 1px solid rgba(148, 163, 184, 0.2);
+/* Message Input */
+.message-input-container {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(248, 250, 252, 0.8);
 }
 
-.chat-input-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-}
-
-.chat-input-wrapper {
-  position: relative;
-  z-index: 10;
+.input-wrapper {
   display: flex;
   align-items: flex-end;
   gap: 0.75rem;
-  padding: 1rem;
-}
-
-.input-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.input-action-btn {
-  padding: 0.5rem;
-  color: #64748b;
-  border-radius: 0.75rem;
-  transition: all 0.2s ease;
-}
-
-.input-action-btn:hover {
-  background: rgba(148, 163, 184, 0.1);
-  color: #475569;
-}
-
-.message-input-wrapper {
-  flex: 1;
-  display: flex;
-  align-items: flex-end;
-  gap: 0.5rem;
-  background: rgba(241, 245, 249, 0.8);
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #e2e8f0;
   border-radius: 1.25rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.75rem;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.input-wrapper:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .message-input {
@@ -791,109 +984,199 @@ watch(() => props.isOpen, (newVal) => {
   outline: none;
   background: transparent;
   resize: none;
-  font-size: 0.875rem;
-  line-height: 1.4;
+  min-height: 1.25rem;
   max-height: 6rem;
-  min-height: 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
-.emoji-btn {
-  padding: 0.25rem;
-  color: #64748b;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
-}
-
-.emoji-btn:hover {
-  background: rgba(148, 163, 184, 0.1);
-  color: #475569;
-}
-
-.send-btn {
-  padding: 0.5rem;
-  background: #e2e8f0;
-  color: #94a3b8;
-  border-radius: 0.75rem;
-  transition: all 0.3s ease;
-}
-
-.send-btn.has-content {
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-  color: white;
-  transform: scale(1.05);
-}
-
-.send-btn:disabled {
+.message-input:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
-.file-preview {
-  position: absolute;
-  bottom: 100%;
-  left: 1rem;
-  right: 1rem;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(148, 163, 184, 0.3);
+.send-button {
+  padding: 0.5rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  color: white;
   border-radius: 0.75rem;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  height: 2.5rem;
+}
+
+.send-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #9ca3af;
+}
+
+/* Meeting Modal */
+.meeting-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+  backdrop-filter: blur(8px);
+  padding: 1rem;
+}
+
+.meeting-modal {
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 1.5rem;
+  width: 100%;
+  max-width: 32rem;
+  max-height: 90vh;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
 }
 
-.file-info {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex: 1;
-  min-width: 0;
+.modal-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
 }
 
-.file-info span {
-  font-size: 0.875rem;
-  color: #374151;
-  truncate: true;
-}
-
-.remove-file-btn {
-  padding: 0.25rem;
-  color: #ef4444;
-  border-radius: 0.5rem;
+.modal-close-btn {
+  padding: 0.5rem;
+  color: #9ca3af;
+  border-radius: 0.75rem;
   transition: all 0.2s ease;
 }
 
-.remove-file-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
+.modal-close-btn:hover {
+  color: #6b7280;
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.meeting-form {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-input {
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  background: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cancel-btn {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #e2e8f0;
+  color: #64748b;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.schedule-btn {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  color: white;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.schedule-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.schedule-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Animations */
-@keyframes typing {
-  0%, 60%, 100% {
-    transform: translateY(0);
-  }
-  30% {
-    transform: translateY(-0.5rem);
-  }
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Custom Scrollbar */
-.chat-messages::-webkit-scrollbar {
-  width: 4px;
+.messages-container::-webkit-scrollbar {
+  width: 6px;
 }
 
-.chat-messages::-webkit-scrollbar-track {
+.messages-container::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.chat-messages::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
-  border-radius: 2px;
+.messages-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.5));
+  border-radius: 3px;
 }
 
-.chat-messages::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
+.messages-container::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, rgba(148, 163, 184, 0.5), rgba(148, 163, 184, 0.7));
 }
 
 /* Responsive Design */
@@ -901,15 +1184,24 @@ watch(() => props.isOpen, (newVal) => {
   .chat-container {
     height: 100vh;
     border-radius: 0;
-    max-width: 100%;
+    max-height: none;
   }
   
   .chat-overlay {
     padding: 0;
   }
   
-  .message-bubble {
-    max-width: 85%;
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+  }
+  
+  .meeting-modal {
+    max-height: 100vh;
+    border-radius: 0;
   }
 }
 </style>
