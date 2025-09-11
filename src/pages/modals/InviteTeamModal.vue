@@ -291,7 +291,6 @@
 import { ref, reactive, onMounted } from 'vue'
 import BaseModal from '~/pages/modals/BaseModal.vue'
 import { teamService } from '~/services/teamService'
-import { taskService } from '~/services/taskService'
 import { useAuthStore } from '~/features/auth/stores/auth.store'
 
 const authStore = useAuthStore()
@@ -360,7 +359,7 @@ const resetForm = () => {
 
 const loadTeamMembers = async () => {
   try {
-    const response = await taskService.getTeamMembers()
+    const response = await teamService.getTeamMembers()
     if (response.success) {
       teamMembers.value = response.data
     }

@@ -333,16 +333,30 @@
                       </svg>
                       <span>Joined {{ formatDate(talent.joinedDate) }}</span>
                     </div>
-                    <button 
-                      @click.stop="contactTalent(talent)"
-                      class="contact-btn"
-                      :disabled="!talent.contactAvailable"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                      </svg>
-                      Contact
-                    </button>
+                    
+                    <div class="card-actions">
+                      <button 
+                        @click.stop="startChat(talent)"
+                        class="action-btn chat-btn"
+                        :disabled="!talent.contactAvailable"
+                        title="Start Chat"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                      </button>
+                      
+                      <button 
+                        @click.stop="contactTalent(talent)"
+                        class="action-btn contact-btn"
+                        :disabled="!talent.contactAvailable"
+                        title="Send Email"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -488,11 +502,21 @@
     @close="closeTalentModal"
     @contact-sent="handleContactSent"
   />
+  <!-- Chat Component -->
+  <ChatComponent 
+    v-if="showChatModal && selectedTalentForChat"
+    :is-open="showChatModal"
+    :talent="selectedTalentForChat"
+    :current-user-id="user?.id || 'anonymous'"
+    @close="closeChatModal"
+    @meeting-scheduled="handleMeetingScheduled"
+  />
 </template>
 
 <script setup>
 import { useAuthStore } from '~/features/auth/stores/auth.store'
 import Sidebar from '@/features/dashboard/components/dashboard-sidebar.vue'
+import ChatComponent from '@/features/dashboard/components/chats.vue'
 import MessagePopup from '~/shared/components/message/MessagePopup.vue'
 import TalentProfileModal from '@/pages/modals/TalentProfileModal.vue'
 import { debounce } from 'lodash'
@@ -500,6 +524,8 @@ import { API_ROUTES } from '~/shared/constants/api-routes'
 
 const alertRef = ref(null)
 const authStore = useAuthStore()
+const showChatModal = ref(false)
+const selectedTalentForChat = ref(null)
 
 // User state
 const user = computed(() => authStore.getUser || {})
@@ -643,7 +669,7 @@ const formatDate = (dateString) => {
 
 // Contact functions
 const contactTalent = (talent) => {
-  if (!talent.contactAvailable) {
+  if (!talent?.contactAvailable) {
     alertRef.value?.warning('Contact information is not available for this talent.')
     return
   }
@@ -654,6 +680,35 @@ const contactTalent = (talent) => {
   // Pre-fill user info if available
   contactForm.value.requesterName = user.value?.name || ''
   contactForm.value.requesterEmail = user.value?.email || ''
+}
+
+// Add new method for starting chat
+const startChat = (talent) => {
+  if (!talent) {
+    alertRef.value?.error('Talent information is not available.')
+    return
+  }
+  
+  selectedTalentForChat.value = talent
+  showChatModal.value = true
+}
+
+// Add new method for closing chat
+const closeChatModal = () => {
+  showChatModal.value = false
+  selectedTalentForChat.value = null
+}
+
+// Update the existing handleMeetingScheduled method
+const handleMeetingScheduled = (meeting) => {
+  const talentName = meeting?.talent?.name || 'the talent'
+  const meetingDate = meeting?.date || 'the scheduled date'
+  const meetingTime = meeting?.time || 'the scheduled time'
+  
+  alertRef.value?.success(`Meeting scheduled with ${talentName} for ${meetingDate} at ${meetingTime}!`)
+  
+  showChatModal.value = false
+  showContactModal.value = false
 }
 
 const closeContactModal = () => {
@@ -1611,7 +1666,49 @@ useHead({
   border: 1px solid rgba(139, 92, 246, 0.2);
 }
 
-/* Card Footer */
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  min-width: 2.5rem;
+  height: 2.5rem;
+}
+
+.chat-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.chat-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.contact-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  color: white;
+}
+
+.contact-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #9ca3af;
+}
+
+/* Update card footer layout */
 .card-footer {
   display: flex;
   align-items: center;
@@ -1619,6 +1716,26 @@ useHead({
   margin-top: auto;
   padding-top: 1rem;
   border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .card-actions {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .action-btn {
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0.375rem;
+  }
+  
+  .card-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
 }
 
 .joined-date {

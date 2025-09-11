@@ -1,7 +1,8 @@
 <template>
   <BaseModal 
     :show="show" 
-    @update:show="$emit('update:show', $event)"
+    @update:show="handleClose"
+    @close="handleClose"
     title="Create New Task"
   >
     <div class="task-content">
@@ -91,10 +92,10 @@
                   v-model="form.priority"
                   class="form-select priority-select"
                 >
-                  <option value="low">🟢 Low Priority</option>
-                  <option value="medium">🟡 Medium Priority</option>
-                  <option value="high">🟠 High Priority</option>
-                  <option value="urgent">🔴 Urgent</option>
+                  <option value="low">Low Priority</option>
+                  <option value="medium">Medium Priority</option>
+                  <option value="high">High Priority</option>
+                  <option value="urgent">Urgent</option>
                 </select>
                 <div class="select-arrow">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,7 +147,7 @@
                 v-model="form.assignedTo"
                 class="form-select"
               >
-                <option value="">👤 Select team member</option>
+                <option value="">Select team member</option>
                 <option v-for="member in teamMembers" :key="member.id" :value="member.id">
                   {{ member.name }} • {{ member.role }}
                 </option>
@@ -203,7 +204,7 @@
           <div class="actions-content">
             <button
               type="button"
-              @click="$emit('update:show', false)"
+              @click="handleClose"
               class="action-btn cancel-btn"
             >
               <div class="btn-backdrop"></div>
@@ -247,7 +248,7 @@ const props = defineProps({
 })
 
 const authStore = useAuthStore()
-const emit = defineEmits(['update:show', 'task-created'])
+const emit = defineEmits(['update:show', 'task-created', 'close'])
 
 const loading = ref(false)
 const teamMembers = ref([])
@@ -264,6 +265,13 @@ const form = reactive({
 const errors = reactive({})
 const currentUser = authStore.getUser
 
+// Handle close events
+const handleClose = () => {
+  emit('update:show', false)
+  emit('close')
+  resetForm()
+}
+
 const submitTask = async () => {
   loading.value = true
   Object.keys(errors).forEach(key => delete errors[key])
@@ -279,8 +287,7 @@ const submitTask = async () => {
     
     if (response.success) {
       emit('task-created', response.data)
-      emit('update:show', false)
-      resetForm()
+      handleClose()
     } else {
       errors.general = response.message || 'Failed to create task'
     }
@@ -300,6 +307,7 @@ const resetForm = () => {
     assignedTo: '',
     tags: ''
   })
+  Object.keys(errors).forEach(key => delete errors[key])
 }
 
 const loadTeamMembers = async () => {
@@ -319,7 +327,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Base Container */
+/* Base Container - Lighter appearance */
 .task-content {
   @apply space-y-6;
 }
@@ -335,7 +343,7 @@ onMounted(() => {
 
 .header-icon {
   @apply w-6 h-6 p-1.5 rounded-xl flex items-center justify-center;
-  @apply shadow-lg transform transition-all duration-300 hover:scale-110;
+  @apply shadow-md transform transition-all duration-300 hover:scale-110;
 }
 
 .header-icon svg {
@@ -343,31 +351,31 @@ onMounted(() => {
 }
 
 .gradient-blue {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, #60a5fa, #3b82f6);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
 }
 
 .gradient-amber {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
 }
 
 .gradient-emerald {
-  background: linear-gradient(135deg, #10b981, #059669);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg, #34d399, #10b981);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
 }
 
 .gradient-purple {
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
 }
 
 .section-title {
-  @apply text-base font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent;
+  @apply text-base font-bold text-slate-800;
 }
 
 .title-glow {
-  @apply flex-1 h-px bg-gradient-to-r from-slate-300 via-blue-300 to-transparent opacity-60;
+  @apply flex-1 h-px bg-gradient-to-r from-slate-200 via-blue-200 to-transparent opacity-50;
 }
 
 /* Fields Grid */
@@ -393,7 +401,7 @@ onMounted(() => {
   @apply block text-sm font-semibold text-slate-700;
 }
 
-/* Input Styling */
+/* Input Styling - Much lighter */
 .input-wrapper,
 .select-wrapper,
 .textarea-wrapper {
@@ -404,11 +412,11 @@ onMounted(() => {
 .form-select,
 .form-textarea {
   @apply w-full px-4 py-3 rounded-xl transition-all duration-300;
-  @apply bg-white/70 backdrop-blur-sm;
-  @apply border border-slate-200/60;
+  @apply bg-white border border-slate-200;
   @apply text-slate-900 placeholder-slate-400;
-  @apply focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400/60;
-  @apply hover:border-slate-300/80;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400;
+  @apply hover:border-slate-300;
+  @apply shadow-sm;
 }
 
 .form-textarea {
@@ -435,7 +443,7 @@ onMounted(() => {
 .input-glow {
   @apply absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300;
   background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
-  filter: blur(4px);
+  filter: blur(2px);
 }
 
 .form-input:focus + .input-glow,
@@ -457,15 +465,14 @@ onMounted(() => {
   @apply text-xs text-slate-500;
 }
 
-/* Error Alert */
+/* Error Alert - Lighter */
 .error-alert {
   @apply relative rounded-xl overflow-hidden;
 }
 
 .error-backdrop {
   @apply absolute inset-0 rounded-xl;
-  background: linear-gradient(135deg, rgba(254, 226, 226, 0.9), rgba(252, 165, 165, 0.3));
-  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(254, 242, 242, 0.9), rgba(252, 165, 165, 0.2));
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
@@ -478,19 +485,18 @@ onMounted(() => {
 }
 
 .error-text {
-  @apply text-sm font-medium text-red-800;
+  @apply text-sm font-medium text-red-700;
 }
 
-/* Action Buttons */
+/* Action Buttons - Lighter */
 .actions-section {
   @apply relative rounded-xl overflow-hidden mt-8;
 }
 
 .actions-backdrop {
   @apply absolute inset-0 rounded-xl;
-  background: linear-gradient(135deg, rgba(248, 250, 252, 0.8), rgba(226, 232, 240, 0.4));
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.7), rgba(241, 245, 249, 0.3));
+  border: 1px solid rgba(148, 163, 184, 0.15);
 }
 
 .actions-content {
@@ -500,36 +506,35 @@ onMounted(() => {
 .action-btn {
   @apply relative px-6 py-3 rounded-xl font-semibold text-sm;
   @apply transform transition-all duration-300;
-  @apply hover:scale-105 hover:shadow-lg;
+  @apply hover:scale-105 hover:shadow-md;
   @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
   @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
 }
 
 .cancel-btn {
-  @apply text-slate-700 focus:ring-slate-500;
+  @apply text-slate-700 focus:ring-slate-400;
 }
 
 .cancel-btn .btn-backdrop {
   @apply absolute inset-0 rounded-xl;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(248, 250, 252, 0.6));
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(203, 213, 225, 0.4);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.7));
+  border: 1px solid rgba(203, 213, 225, 0.3);
 }
 
 .submit-btn {
-  @apply text-white focus:ring-blue-500;
+  @apply text-white focus:ring-blue-400;
 }
 
 .submit-btn .btn-backdrop {
   @apply absolute inset-0 rounded-xl;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, #60a5fa, #3b82f6);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
 }
 
 .btn-glow {
   @apply absolute -inset-px rounded-xl opacity-0 transition-opacity duration-500;
-  background: linear-gradient(45deg, rgba(59, 130, 246, 0.4), rgba(147, 51, 234, 0.4));
-  filter: blur(8px);
+  background: linear-gradient(45deg, rgba(59, 130, 246, 0.3), rgba(147, 51, 234, 0.3));
+  filter: blur(6px);
 }
 
 .submit-btn:hover .btn-glow {
@@ -583,67 +588,29 @@ onMounted(() => {
   }
 }
 
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  .section-title {
-    @apply from-slate-100 to-slate-300;
-  }
-  
-  .form-input,
-  .form-select,
-  .form-textarea {
-    @apply bg-slate-800/70 border-slate-600/60 text-slate-100 placeholder-slate-400;
-  }
-  
-  .actions-backdrop {
-    background: rgba(15, 23, 42, 0.8) !important;
-    border-color: rgba(71, 85, 105, 0.3) !important;
-  }
-  
-  .field-label {
-    @apply text-slate-300;
-  }
-  
-  .hint-text {
-    @apply text-slate-400;
-  }
-  
-  .hint-icon {
-    @apply text-slate-500;
-  }
-}
-
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  .header-icon,
-  .action-btn {
-    transition: none;
-    animation: none;
-  }
-  
-  .header-icon:hover,
-  .action-btn:hover {
-    transform: none;
-  }
-  
-  .spinner-ring {
-    animation: none;
-  }
-}
-
-/* Priority-specific styling */
-.priority-select option {
-  @apply py-2 px-3;
-}
-
 /* Enhanced form interactions */
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
-  @apply shadow-lg shadow-blue-500/10;
+  @apply shadow-md shadow-blue-500/10;
 }
 
 .date-input::-webkit-calendar-picker-indicator {
   @apply cursor-pointer opacity-70 hover:opacity-100 transition-opacity;
+}
+
+/* Priority color indicators */
+.priority-select option[value="low"] {
+  color: #059669;
+}
+.priority-select option[value="medium"] {
+  color: #d97706;
+}
+.priority-select option[value="high"] {
+  color: #dc2626;
+}
+.priority-select option[value="urgent"] {
+  color: #7c2d12;
+  font-weight: bold;
 }
 </style>
