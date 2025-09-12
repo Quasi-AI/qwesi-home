@@ -113,13 +113,12 @@ export const useChatSocket = () => {
       auth: {
         token: token
       },
-      transports: ['websocket', 'polling'],
-      timeout: 10000,
+      transports: ['polling', 'websocket'], // Try polling first
+      timeout: 20000, // Increase timeout
       forceNew: true,
       reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000
+      reconnectionAttempts: 3,
+      reconnectionDelay: 2000
     })
 
     // Connection events
@@ -264,7 +263,7 @@ export const useChatSocket = () => {
 
   const startTyping = (chatId: string): boolean => {
     if (!socket.value?.connected) return false
-    if (!chatId?.trim()) return false
+    if (!chatId || typeof chatId !== 'string' || !chatId.trim()) return false
     
     socket.value.emit('typing_start', { chatId: chatId.trim() })
     return true
@@ -272,7 +271,7 @@ export const useChatSocket = () => {
 
   const stopTyping = (chatId: string): boolean => {
     if (!socket.value?.connected) return false
-    if (!chatId?.trim()) return false
+    if (!chatId || typeof chatId !== 'string' || !chatId.trim()) return false
     
     socket.value.emit('typing_stop', { chatId: chatId.trim() })
     return true

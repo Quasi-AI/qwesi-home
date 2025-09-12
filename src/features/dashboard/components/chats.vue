@@ -494,9 +494,14 @@ const handleTyping = () => {
       clearTimeout(typingTimeout.value)
     }
     
+    // Capture the chatId at this moment to avoid null reference in timeout
+    const chatId = currentChatId.value
+    
     // Stop typing after 3 seconds of inactivity
     typingTimeout.value = setTimeout(() => {
-      stopTyping(currentChatId.value)
+      if (chatId) {  // Additional safety check
+        stopTyping(chatId)
+      }
     }, 3000)
   }
 }

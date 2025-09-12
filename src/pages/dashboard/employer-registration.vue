@@ -383,61 +383,45 @@
                                     </button>
                                 </div>
                                 
-                                <div v-if="selectedJob" class="modal-body">
-                                    <!-- Job Details Section -->
-                                    <div class="job-detail-section">
-                                        <div class="job-detail-header">
-                                            <h4 class="detail-title">{{ selectedJob.title }}</h4>
-                                            <span class="detail-company">{{ selectedJob.employer }}</span>
-                                            <div class="detail-status" :class="`status-${selectedJob.status}`">
-                                                {{ selectedJob.status }}
-                                            </div>
-                                        </div>
+                                  <div v-if="selectedJob" class="modal-body">
+                                <!-- Tab Navigation -->
+                                <div class="tab-navigation">
+                                <button 
+                                    @click="activeTab = 'applications'"
+                                    :class="['tab-button', { active: activeTab === 'applications' }]"
+                                >
+                                    <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 119.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                    Applications
+                                    <span class="tab-badge">{{ jobApplications.length }}</span>
+                                </button>
+                                
+                                <button 
+                                    @click="activeTab = 'jobDetails'"
+                                    :class="['tab-button', { active: activeTab === 'jobDetails' }]"
+                                >
+                                    <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Job Details
+                                </button>
+                                </div>
 
-                                        <div class="job-detail-meta">
-                                            <div class="detail-meta-item">
-                                                <span class="meta-label">Location:</span>
-                                                <span class="meta-value">{{ selectedJob.location }}</span>
-                                            </div>
-                                            <div class="detail-meta-item">
-                                                <span class="meta-label">Salary:</span>
-                                                <span class="meta-value">{{ selectedJob.salary }}</span>
-                                            </div>
-                                            <div class="detail-meta-item">
-                                                <span class="meta-label">Job Type:</span>
-                                                <span class="meta-value">{{ selectedJob.jobType }}</span>
-                                            </div>
-                                            <div class="detail-meta-item">
-                                                <span class="meta-label">Experience:</span>
-                                                <span class="meta-value">{{ selectedJob.experience_level }}</span>
-                                            </div>
-                                            <div v-if="selectedJob.skills" class="detail-meta-item">
-                                                <span class="meta-label">Skills:</span>
-                                                <span class="meta-value">{{ selectedJob.skills }}</span>
-                                            </div>
-                                            <div v-if="selectedJob.deadline" class="detail-meta-item">
-                                                <span class="meta-label">Deadline:</span>
-                                                <span class="meta-value">{{ formatDate(selectedJob.deadline) }}</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="job-detail-description">
-                                            <h5 class="description-title">Job Description</h5>
-                                            <p class="description-text">{{ selectedJob.job_description }}</p>
-                                        </div>
-                                    </div>
-
-                                    <!-- Applications Section -->
-                                    <div class="applications-section">
+                                    <!-- Tab Content -->
+                                    <div class="tab-content">
+                                    <!-- Applications Tab -->
+                                    <div v-if="activeTab === 'applications'" class="tab-panel applications-panel">
+                                        <div class="applications-section">
                                         <div class="section-header">
                                             <h5 class="section-title">Applications ({{ jobApplications.length }})</h5>
                                             <div class="application-filters">
-                                                <select v-model="selectedStatusFilter" class="mini-filter">
-                                                    <option value="">All Status</option>
-                                                    <option v-for="status in applicationStatusOptions" :key="status.value" :value="status.value">
-                                                        {{ status.title }}
-                                                    </option>
-                                                </select>
+                                            <select v-model="selectedStatusFilter" class="mini-filter">
+                                                <option value="">All Status</option>
+                                                <option v-for="status in applicationStatusOptions" :key="status.value" :value="status.value">
+                                                {{ status.title }}
+                                                </option>
+                                            </select>
                                             </div>
                                         </div>
 
@@ -448,120 +432,176 @@
 
                                         <div v-else-if="filteredJobApplications.length === 0" class="no-applications">
                                             <svg class="no-app-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 119.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 119.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                             </svg>
                                             <p>{{ selectedStatusFilter ? 'No applications with selected status' : 'No applications received yet' }}</p>
                                         </div>
 
                                         <div v-else class="applications-list">
                                             <div 
-                                                v-for="application in filteredJobApplications" 
-                                                :key="application._id"
-                                                class="application-item"
+                                            v-for="application in filteredJobApplications" 
+                                            :key="application._id"
+                                            class="application-item"
                                             >
-                                                <div class="application-header">
-                                                    <div class="applicant-info">
-                                                        <div class="applicant-avatar small">
-                                                            {{ getInitials(application.applicantDetails?.firstName, application.applicantDetails?.lastName) }}
-                                                        </div>
-                                                        <div class="applicant-details">
-                                                            <div class="applicant-name">
-                                                                {{ application.applicantDetails?.firstName }} {{ application.applicantDetails?.lastName }}
-                                                            </div>
-                                                            <div class="applicant-email">{{ application.applicantDetails?.email }}</div>
-                                                        </div>
+                                            <div class="application-header">
+                                                <div class="applicant-info">
+                                                <div class="applicant-avatar small">
+                                                    {{ getInitials(application.applicantDetails?.firstName, application.applicantDetails?.lastName) }}
+                                                </div>
+                                                <div class="applicant-details">
+                                                    <div class="applicant-name">
+                                                    {{ application.applicantDetails?.firstName }} {{ application.applicantDetails?.lastName }}
                                                     </div>
-                                                    <div class="application-status">
-                                                        <select
-                                                            :model-value="application.status"
-                                                            @update:model-value="updateApplicationStatus(application._id, $event)"
-                                                            @click.stop
-                                                            class="status-select small"
-                                                        >
-                                                            <option v-for="status in applicationStatusOptions" :key="status.value" :value="status.value">
-                                                                {{ status.title }}
-                                                            </option>
-                                                        </select>
-                                                    </div>
+                                                    <div class="applicant-email">{{ application.applicantDetails?.email }}</div>
                                                 </div>
-
-                                                <div class="application-meta">
-                                                    <span class="meta-item">
-                                                        <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                        </svg>
-                                                        Applied {{ formatDate(application.submittedAt) }}
-                                                    </span>
-                                                    <span v-if="application.experience?.years" class="meta-item">
-                                                        <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h8z" />
-                                                        </svg>
-                                                        {{ application.experience.years }} years exp.
-                                                    </span>
                                                 </div>
-
-                                                <div v-if="application.skills?.length" class="application-skills">
-                                                    <span 
-                                                        v-for="skill in application.skills.slice(0, 4)" 
-                                                        :key="skill"
-                                                        class="skill-tag mini"
-                                                    >
-                                                        {{ skill }}
-                                                    </span>
-                                                    <span v-if="application.skills.length > 4" class="more-skills mini">
-                                                        +{{ application.skills.length - 4 }}
-                                                    </span>
-                                                </div>
-
-                                                <div class="application-actions">
-                                                    <button 
-                                                        v-if="application.resume?.url"
-                                                        class="action-btn mini primary"
-                                                        @click="downloadResume(application.resume.url, application.resume.originalName)"
-                                                        title="Download Resume"
-                                                    >
-                                                        <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                        </svg>
-                                                        Resume
-                                                    </button>
-                                                    
-                                                    <!-- NEW: Schedule Interview Button -->
-                                                    <button 
-                                                        class="action-btn mini interview-btn" 
-                                                        @click="scheduleInterview(application)"
-                                                        title="Schedule Interview"
-                                                    >
-                                                        <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                        </svg>
-                                                        Schedule Interview
-                                                    </button>
-                                                    
-                                                    <button 
-                                                        class="action-btn mini secondary" 
-                                                        @click="contactApplicant(application)"
-                                                        title="Contact Applicant"
-                                                    >
-                                                        <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                        </svg>
-                                                        Contact
-                                                    </button>
-                                                    
-                                                    <button 
-                                                        class="action-btn mini danger" 
-                                                        @click="deleteApplication(application._id)"
-                                                        title="Delete Application"
-                                                    >
-                                                        <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                        Delete
-                                                    </button>
+                                                <div class="application-status">
+                                                <select
+                                                    :value="application.status"
+                                                    @change="updateApplicationStatus(application._id, $event.target.value)"
+                                                    @click.stop
+                                                    class="status-select small"
+                                                >
+                                                    <option v-for="status in applicationStatusOptions" :key="status.value" :value="status.value">
+                                                        {{ status.title }}
+                                                    </option>
+                                                </select>
                                                 </div>
                                             </div>
+
+                                            <div class="application-meta">
+                                                <span class="meta-item">
+                                                <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                Applied {{ formatDate(application.submittedAt) }}
+                                                </span>
+                                                <span v-if="application.experience?.years" class="meta-item">
+                                                <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h8z" />
+                                                </svg>
+                                                {{ application.experience.years }} years exp.
+                                                </span>
+                                            </div>
+
+                                            <div v-if="application.skills?.length" class="application-skills">
+                                                <span 
+                                                v-for="skill in application.skills.slice(0, 4)" 
+                                                :key="skill"
+                                                class="skill-tag mini"
+                                                >
+                                                {{ skill }}
+                                                </span>
+                                                <span v-if="application.skills.length > 4" class="more-skills mini">
+                                                +{{ application.skills.length - 4 }}
+                                                </span>
+                                            </div>
+
+                                            <div class="application-actions">
+                                                <button 
+                                                v-if="application.resume?.url"
+                                                class="action-btn mini primary"
+                                                @click="downloadResume(application.resume.url, application.resume.originalName)"
+                                                title="Download Resume"
+                                                >
+                                                <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                                Resume
+                                                </button>
+                                                
+                                                <button 
+                                                class="action-btn mini interview-btn" 
+                                                @click="scheduleInterview(application)"
+                                                title="Schedule Interview"
+                                                >
+                                                <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                Schedule Interview
+                                                </button>
+                                                
+                                                <button 
+                                                class="action-btn mini secondary" 
+                                                @click="contactApplicant(application)"
+                                                title="Contact Applicant"
+                                                >
+                                                <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                </svg>
+                                                Contact
+                                                </button>
+                                                
+                                                <button 
+                                                class="action-btn mini danger" 
+                                                @click="deleteApplication(application._id)"
+                                                title="Delete Application"
+                                                >
+                                                <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                Delete
+                                                </button>
+                                            </div>
+                                            </div>
                                         </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Job Details Tab -->
+                                    <div v-if="activeTab === 'jobDetails'" class="tab-panel job-details-panel">
+                                        <div class="job-detail-section">
+                                        <div class="job-detail-header">
+                                            <h4 class="detail-title">{{ selectedJob.title }}</h4>
+                                            <span class="detail-company">{{ selectedJob.employer }}</span>
+                                            <div class="detail-status" :class="`status-${selectedJob.status}`">
+                                            {{ selectedJob.status }}
+                                            </div>
+                                        </div>
+
+                                        <div class="job-detail-meta">
+                                            <div class="detail-meta-item">
+                                            <span class="meta-label">Location:</span>
+                                            <span class="meta-value">{{ selectedJob.location }}</span>
+                                            </div>
+                                            <div class="detail-meta-item">
+                                            <span class="meta-label">Salary:</span>
+                                            <span class="meta-value">{{ selectedJob.salary }}</span>
+                                            </div>
+                                            <div class="detail-meta-item">
+                                            <span class="meta-label">Job Type:</span>
+                                            <span class="meta-value">{{ selectedJob.jobType }}</span>
+                                            </div>
+                                            <div class="detail-meta-item">
+                                            <span class="meta-label">Experience:</span>
+                                            <span class="meta-value">{{ selectedJob.experience_level }}</span>
+                                            </div>
+                                            <div v-if="selectedJob.skills" class="detail-meta-item">
+                                            <span class="meta-label">Skills:</span>
+                                            <span class="meta-value">{{ selectedJob.skills }}</span>
+                                            </div>
+                                            <div v-if="selectedJob.deadline" class="detail-meta-item">
+                                            <span class="meta-label">Deadline:</span>
+                                            <span class="meta-value">{{ formatDate(selectedJob.deadline) }}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="job-detail-description">
+                                            <h5 class="description-title">Job Description</h5>
+                                            <p class="description-text">{{ selectedJob.job_description }}</p>
+                                        </div>
+
+                                        <div class="job-detail-requirements" v-if="selectedJob.requirements">
+                                            <h5 class="requirements-title">Requirements</h5>
+                                            <p class="requirements-text">{{ selectedJob.requirements }}</p>
+                                        </div>
+
+                                        <div class="job-detail-benefits" v-if="selectedJob.benefits">
+                                            <h5 class="benefits-title">Benefits</h5>
+                                            <p class="benefits-text">{{ selectedJob.benefits }}</p>
+                                        </div>
+                                        </div>
+                                    </div>
                                     </div>
                                 </div>
                             </div>
@@ -891,6 +931,7 @@ const loadingApplications = ref(false)
 const isSubmitting = ref(false)
 const isDeleting = ref(false)
 
+
 // Search and filter
 const searchQuery = ref('')
 const statusFilter = ref('')
@@ -900,6 +941,26 @@ const showInterviewsList = ref(false)
 
 const showGoogleAuthModal = ref(false)
 const googleAuthUrl = ref('')
+
+const activeTab = ref('applications') // Default to applications tab
+
+
+defineProps({
+  selectedJob: Object,
+  jobApplications: Array,
+  filteredJobApplications: Array,
+  loadingApplications: Boolean,
+  selectedStatusFilter: String,
+  applicationStatusOptions: Array
+})
+
+defineEmits([
+  'updateApplicationStatus',
+  'scheduleInterview', 
+  'contactApplicant',
+  'deleteApplication',
+  'downloadResume'
+])
 
 // Job form data
 const jobForm = ref({
@@ -1444,11 +1505,18 @@ const deleteJobById = async (jobId) => {
 
 const updateApplicationStatus = async (applicationId, newStatus) => {
     try {
+        // Show loading state
+        const selectElement = event?.target;
+        if (selectElement) {
+            selectElement.disabled = true;
+        }
+
         const response = await $fetch(`${API_ROUTES.BASE_URL}applications/${applicationId}/status`, {
             method: 'PUT',
             body: { status: newStatus },
             headers: {
-                'Authorization': `Bearer ${authStore.getToken}`
+                'Authorization': `Bearer ${authStore.getToken}`,
+                'Content-Type': 'application/json'
             },
             throw: false
         })
@@ -1459,13 +1527,40 @@ const updateApplicationStatus = async (applicationId, newStatus) => {
             if (appIndex !== -1) {
                 jobApplications.value[appIndex].status = newStatus
             }
-            alertRef.value.success('Application status updated successfully')
+            
+            // Update application counts
+            await fetchApplicationCounts()
+            
+            alertRef.value?.success('Application status updated successfully')
         } else {
-            alertRef.value.error(response.message || 'Failed to update status')
+            alertRef.value?.error(response.message || 'Failed to update status')
+            
+            // Revert the select value on error
+            if (selectElement) {
+                const originalApp = jobApplications.value.find(app => app._id === applicationId)
+                if (originalApp) {
+                    selectElement.value = originalApp.status
+                }
+            }
         }
     } catch (error) {
         console.error('Update status error:', error)
-        alertRef.value.error('Failed to update application status')
+        alertRef.value?.error('Failed to update application status')
+        
+        // Revert the select value on error
+        const selectElement = event?.target;
+        if (selectElement) {
+            const originalApp = jobApplications.value.find(app => app._id === applicationId)
+            if (originalApp) {
+                selectElement.value = originalApp.status
+            }
+        }
+    } finally {
+        // Re-enable the select element
+        const selectElement = event?.target;
+        if (selectElement) {
+            selectElement.disabled = false;
+        }
     }
 }
 
@@ -3195,6 +3290,220 @@ useHead({
   
   .loading-spinner {
     animation: none;
+  }
+}
+
+/* Tab Navigation Styles */
+.tab-navigation {
+  display: flex;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+  background: rgba(248, 250, 252, 0.5);
+  border-radius: 0.75rem 0.75rem 0 0;
+  padding: 0.5rem;
+  gap: 0.25rem;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-weight: 500;
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.tab-button:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.tab-button.active {
+  background: #3b82f6;
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.tab-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.tab-badge {
+  background: rgba(255, 255, 255, 0.9);
+  color: #3b82f6;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 1rem;
+  min-width: 1.25rem;
+  text-align: center;
+}
+
+.tab-button.active .tab-badge {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1e40af;
+}
+
+/* Tab Content Styles */
+.tab-content {
+  min-height: 400px;
+}
+
+.tab-panel {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Applications Panel Specific Styles */
+.applications-panel {
+  /* Your existing applications styles remain the same */
+}
+
+/* Job Details Panel Specific Styles */
+.job-details-panel {
+  padding: 0.5rem 0;
+}
+
+.job-detail-section {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.job-detail-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.detail-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+}
+
+.detail-company {
+  color: #64748b;
+  font-weight: 500;
+  margin-right: 1rem;
+}
+
+.detail-status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-active {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+}
+
+.status-closed {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.status-draft {
+  background: rgba(249, 115, 22, 0.1);
+  color: #ea580c;
+}
+
+.job-detail-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.meta-label {
+  font-weight: 600;
+  color: #374151;
+  min-width: 80px;
+}
+
+.meta-value {
+  color: #64748b;
+  flex: 1;
+}
+
+.job-detail-description,
+.job-detail-requirements,
+.job-detail-benefits {
+  margin-bottom: 1.5rem;
+}
+
+.description-title,
+.requirements-title,
+.benefits-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.75rem 0;
+}
+
+.description-text,
+.requirements-text,
+.benefits-text {
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .tab-navigation {
+    padding: 0.25rem;
+    gap: 0.125rem;
+  }
+  
+  .tab-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  
+  .tab-icon {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+  
+  .job-detail-meta {
+    grid-template-columns: 1fr;
+  }
+  
+  .detail-meta-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
   }
 }
 
