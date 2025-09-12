@@ -1,4 +1,3 @@
-// composables/useChatSocket.ts
 import { io, type Socket } from 'socket.io-client'
 import { ref, type Ref } from 'vue'
 import { useAuthStore } from '~/features/auth/stores/auth.store'
@@ -108,9 +107,7 @@ export const useChatSocket = () => {
       return
     }
 
-    const socketUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://dark-caldron-448714-u5.uc.r.appspot.com' 
-      : 'http://localhost:5000'
+    const socketUrl ="https://dark-caldron-448714-u5.uc.r.appspot.com"
 
     socket.value = io(socketUrl, {
       auth: {
