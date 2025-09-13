@@ -27,39 +27,32 @@ export const useAuthStore = defineStore("auth", {
 
   actions: {
     // Add JWT token expiration check (client-side)
-    isJWTExpired(token?: string): boolean {
-      const tokenToCheck = token || this.token;
-      if (!tokenToCheck) return true;
-
+    isJWTExpired(token: string): boolean {
       try {
-        const payload = JSON.parse(atob(tokenToCheck.split('.')[1]));
-        const currentTime = Date.now() / 1000;
-        
-        // Check if token has exp field and if it's expired
-        return payload.exp && payload.exp < currentTime;
-      } catch {
-        // If we can't parse the token, consider it expired
-        return true;
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const currentTime = Math.floor(Date.now() / 1000);
+        return payload.exp < currentTime;
+      } catch (error) {
+        console.error('Error parsing JWT:', error);
+        return true; // Treat invalid tokens as expired
       }
     },
 
     // Handle token expiration and redirect to login
     handleTokenExpiration() {
-      console.warn('Token expired, clearing auth state and redirecting to login');
+      console.log('Handling token expiration...');
       
+      // Clear all auth state
       this.user = null;
       this.token = null;
       this.isAuthenticated = false;
       
-      // Clear localStorage on client
+      // Clear from localStorage/sessionStorage
       if (process.client) {
-        // Clear pinia persist storage
-        localStorage.removeItem('auth');
-        // Clear any other auth-related items
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('auth_user');
-        
-        navigateTo('/auth/login');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
       }
     },
 
@@ -232,7 +225,11 @@ export const useAuthStore = defineStore("auth", {
     },
 
     async checkAuth(): Promise<boolean> {
-      // If no token, not authenticated
+       
+      console.log('=== checkAuth called ===');
+      console.log('Current token:', this.token ? 'exists' : 'null');
+      console.log('Current isAuthenticated:', this.isAuthenticated);
+
       if (!this.token) {
         this.isAuthenticated = false;
         return false;

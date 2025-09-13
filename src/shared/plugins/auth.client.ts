@@ -1,6 +1,5 @@
 import { useAuthStore } from "~/features/auth/stores/auth.store";
 
-// plugins/auth.client.ts
 export default defineNuxtPlugin(async () => {
   const authStore = useAuthStore();
   
@@ -11,7 +10,9 @@ export default defineNuxtPlugin(async () => {
   globalThis.$fetch = $fetch.create({
     onResponseError({ response }) {
       if (response.status === 401) {
+        const authStore = useAuthStore();
         const errorMessage = response._data?.message || response._data?.error || '';
+        
         const isTokenExpired = 
           errorMessage.toLowerCase().includes('token expired') ||
           errorMessage.toLowerCase().includes('token has expired') ||
@@ -21,8 +22,13 @@ export default defineNuxtPlugin(async () => {
         if (isTokenExpired) {
           console.warn('API request failed with 401, handling token expiration');
           authStore.handleTokenExpiration();
+          
+          // Navigate to login only if we're not already there
+          if (process.client && window.location.pathname !== '/login') {
+            navigateTo('/login');
+          }
         }
       }
-    },
+    }
   });
 });

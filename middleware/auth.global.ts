@@ -1,7 +1,6 @@
-import { useAuthStore } from "~/features/auth/stores/auth.store";
-
 export default defineNuxtRouteMiddleware(async (to) => {
-  if (!to.path.startsWith("/dashboard")) {
+  // Skip auth check for dashboard route to prevent redirect loop
+  if (to.path.startsWith("/dashboard")) {
     return;
   }
 
@@ -16,7 +15,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
-  // ALWAYS perform authentication check - this is the key fix
+  // ALWAYS perform authentication check
   const isAuthenticated = await authStore.checkAuth();
 
   if (!isAuthenticated) {
@@ -24,10 +23,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
     authStore.user = null;
     authStore.token = null;
     authStore.isAuthenticated = false;
-
-    if (process.client) {
-      localStorage.setItem("redirect_after_login", to.fullPath);
+    
+    // Only redirect if we're trying to access a protected route
+    const publicRoutes = ['/', '/login', '/register', '/forgot-password'];
+    const isPublicRoute = publicRoutes.includes(to.path) || to.path.startsWith('/public');
+    
+    if (!isPublicRoute) {
+      console.log('Redirecting to login due to authentication failure');
+      return navigateTo('/login');
     }
-    return navigateTo("/auth/login");
   }
 });
