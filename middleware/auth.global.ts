@@ -10,26 +10,21 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Initialize auth state from localStorage first
   authStore.initializeAuth();
 
-  // If already authenticated, allow access
-  if (authStore.isAuthenticated && authStore.user) {
-    return;
-  }
-
   // Check if we're on the client side and wait for hydration
   if (process.client) {
     // Small delay to allow Pinia hydration from localStorage
     await new Promise((resolve) => setTimeout(resolve, 100));
-
-    // Check again after hydration
-    if (authStore.isAuthenticated && authStore.user) {
-      return;
-    }
   }
 
-  // Perform authentication check
+  // ALWAYS perform authentication check - this is the key fix
   const isAuthenticated = await authStore.checkAuth();
 
   if (!isAuthenticated) {
+    // Clear any remaining auth state
+    authStore.user = null;
+    authStore.token = null;
+    authStore.isAuthenticated = false;
+
     if (process.client) {
       localStorage.setItem("redirect_after_login", to.fullPath);
     }

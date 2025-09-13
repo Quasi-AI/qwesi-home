@@ -8,6 +8,8 @@ import type {
   ProfileData,
 } from "~/features/auth/types/auth.types";
 
+const API_BASE_URL = "https://dark-caldron-448714-u5.appspot.com";
+
 export const useAuthStore = defineStore("auth", {
   state: (): AuthState => ({
     user: null,
@@ -24,6 +26,23 @@ export const useAuthStore = defineStore("auth", {
   },
 
   actions: {
+    // Add JWT token expiration check (client-side)
+    isJWTExpired(token?: string): boolean {
+      const tokenToCheck = token || this.token;
+      if (!tokenToCheck) return true;
+
+      try {
+        const payload = JSON.parse(atob(tokenToCheck.split('.')[1]));
+        const currentTime = Date.now() / 1000;
+        
+        // Check if token has exp field and if it's expired
+        return payload.exp && payload.exp < currentTime;
+      } catch {
+        // If we can't parse the token, consider it expired
+        return true;
+      }
+    },
+
     // Handle token expiration and redirect to login
     handleTokenExpiration() {
       console.warn('Token expired, clearing auth state and redirecting to login');
@@ -32,8 +51,14 @@ export const useAuthStore = defineStore("auth", {
       this.token = null;
       this.isAuthenticated = false;
       
-      // Redirect to login page (only on client side)
+      // Clear localStorage on client
       if (process.client) {
+        // Clear pinia persist storage
+        localStorage.removeItem('auth');
+        // Clear any other auth-related items
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+        
         navigateTo('/auth/login');
       }
     },
@@ -46,6 +71,7 @@ export const useAuthStore = defineStore("auth", {
       return (
         status === 401 ||
         message.toLowerCase().includes('token expired') ||
+        message.toLowerCase().includes('token has expired') ||
         message.toLowerCase().includes('unauthorized') ||
         message.toLowerCase().includes('invalid token') ||
         message.toLowerCase().includes('jwt expired') ||
@@ -60,7 +86,10 @@ export const useAuthStore = defineStore("auth", {
       }
 
       try {
-        const response = await $fetch<T>(url, {
+        // If the URL doesn't start with http, prepend your backend base URL
+        const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+
+        const response = await $fetch<T>(fullUrl, {
           ...options,
           headers: {
             ...options.headers,
@@ -86,7 +115,7 @@ export const useAuthStore = defineStore("auth", {
     async login(data: LoginData) {
       this.loading = true;
       try {
-        const response = await $fetch<AuthResponse>("/api/auth/login", {
+        const response = await $fetch<AuthResponse>(`${API_BASE_URL}/api/auth/login`, {
           method: "POST",
           body: data,
         });
@@ -128,7 +157,8 @@ export const useAuthStore = defineStore("auth", {
           return { success: false, error: "Session expired. Please login again." };
         }
         
-        return { success: false, error: "Login failed. Please try again." };
+        const errorMessage = error.data?.message || error.message || "Login failed. Please try again.";
+        return { success: false, error: errorMessage };
       } finally {
         this.loading = false;
       }
@@ -137,7 +167,7 @@ export const useAuthStore = defineStore("auth", {
     async signup(userData: SignupData) {
       this.loading = true;
       try {
-        const response = await $fetch<AuthResponse>("/api/auth/signup", {
+        const response = await $fetch<AuthResponse>(`${API_BASE_URL}/api/auth/signup`, {
           method: "POST",
           body: userData,
         });
@@ -169,7 +199,7 @@ export const useAuthStore = defineStore("auth", {
       try {
         // Optionally call logout endpoint
         if (this.token) {
-          await $fetch("/api/auth/logout", {
+          await $fetch(`${API_BASE_URL}/api/auth/logout`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${this.token}`,
@@ -187,6 +217,13 @@ export const useAuthStore = defineStore("auth", {
         this.token = null;
         this.isAuthenticated = false;
         
+        // Clear localStorage
+        if (process.client) {
+          localStorage.removeItem('auth');
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('auth_user');
+        }
+        
         // Redirect to login page
         if (process.client) {
           navigateTo('/auth/login');
@@ -195,48 +232,80 @@ export const useAuthStore = defineStore("auth", {
     },
 
     async checkAuth(): Promise<boolean> {
-      // If already authenticated and have user data, return true
-      if (this.isAuthenticated && this.user && this.token) {
-        return true;
+      // If no token, not authenticated
+      if (!this.token) {
+        this.isAuthenticated = false;
+        return false;
       }
 
-      // If we have a token, verify it with the backend
-      if (this.token) {
-        try {
-          const response = await $fetch<AuthResponse>("/api/auth/verify", {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${this.token}`,
-            },
-          });
+      // Client-side JWT expiration check first
+      if (this.isJWTExpired(this.token)) {
+        console.log('Token expired (client-side check)');
+        this.handleTokenExpiration();
+        return false;
+      }
 
-          if (response.success && response.user) {
-            this.user = response.user;
-            this.isAuthenticated = true;
-            return true;
-          } else {
-            // Invalid token response, clear state and redirect
-            this.handleTokenExpiration();
-            return false;
-          }
-        } catch (error: any) {
-          console.error("Token verification error:", error);
-          
-          // Check if token expired
-          if (this.isTokenExpired(error)) {
-            this.handleTokenExpiration();
-          } else {
-            // Other error, just clear state without redirect
-            this.token = null;
-            this.isAuthenticated = false;
-            this.user = null;
-          }
-          
+      // Server-side verification using your backend endpoint
+      try {
+        const response = await $fetch(`${API_BASE_URL}/api/auth/verify`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        });
+
+        // Check response based on your backend's structure
+        if (response.success && response.tokenValid && response.user) {
+          // Update user data with comprehensive info from your backend
+          this.user = {
+            id: response.user.id,
+            name: response.user.name,
+            email: response.user.email,
+            phone: response.user.phone,
+            dob: response.user.dob,
+            profileImage: response.user.profileImage,
+            referralCode: response.user.referralCode,
+            points: response.user.points,
+            referralStats: response.user.referralStats,
+            isSubscribe: response.user.isSubscribe,
+            subscriptionStartDate: response.user.subscriptionStartDate,
+            currentPeriodEnd: response.user.currentPeriodEnd,
+            date_joined: response.user.date_joined,
+            // Add any other fields your backend returns
+          };
+          this.isAuthenticated = true;
+          return true;
+        } else {
+          console.log('Server verification failed');
+          this.handleTokenExpiration();
           return false;
         }
+      } catch (error: any) {
+        console.error("Token verification error:", error);
+        
+        // Check if token expired based on your backend's error response
+        const status = error.status || error.statusCode;
+        const message = error.data?.message || error.message || '';
+        
+        const isTokenExpired = 
+          status === 401 ||
+          message.toLowerCase().includes('token expired') ||
+          message.toLowerCase().includes('token has expired') ||
+          message.toLowerCase().includes('unauthorized') ||
+          message.toLowerCase().includes('invalid token');
+        
+        if (isTokenExpired) {
+          console.log('Token expired or invalid (server response)');
+          this.handleTokenExpiration();
+        } else {
+          // Other error, clear state but don't redirect (might be network issue)
+          this.token = null;
+          this.isAuthenticated = false;
+          this.user = null;
+        }
+        
+        return false;
       }
-
-      return false;
     },
 
     async fetchUser() {
@@ -292,7 +361,7 @@ export const useAuthStore = defineStore("auth", {
 
     async forgotPassword(email: string) {
       try {
-        const response = await $fetch<AuthResponse>("/api/auth/forgot-password", {
+        const response = await $fetch<AuthResponse>(`${API_BASE_URL}/api/auth/forgot-password`, {
           method: "POST",
           body: { email },
         });
@@ -309,7 +378,7 @@ export const useAuthStore = defineStore("auth", {
 
     async resetPassword(token: string, newPassword: string) {
       try {
-        const response = await $fetch<AuthResponse>("/api/auth/reset-password", {
+        const response = await $fetch<AuthResponse>(`${API_BASE_URL}/api/auth/reset-password`, {
           method: "POST",
           body: { token, newPassword },
         });
@@ -326,18 +395,30 @@ export const useAuthStore = defineStore("auth", {
 
     // Initialize auth state (call this in app.vue or layout)
     async initializeAuth() {
-      // Only run on client side and if we have a token
-      if (!process.client || !this.token) {
+      // Only run on client side
+      if (!process.client) {
         return false;
       }
 
-      try {
-        const isAuthenticated = await this.checkAuth();
-        return isAuthenticated;
-      } catch (error) {
-        console.error('Auth initialization failed:', error);
+      // If we have a token, check if it's expired before using it
+      if (this.token && this.isJWTExpired(this.token)) {
+        console.log('Stored token is expired, clearing auth state');
+        this.handleTokenExpiration();
         return false;
       }
+
+      // If we have a valid token, verify it with the server
+      if (this.token) {
+        try {
+          const isAuthenticated = await this.checkAuth();
+          return isAuthenticated;
+        } catch (error) {
+          console.error('Auth initialization failed:', error);
+          return false;
+        }
+      }
+
+      return false;
     },
 
     // Force refresh user data
@@ -369,9 +450,14 @@ export const useAuth = () => {
   const login = async (credentials: LoginData) => {
     const result = await authStore.login(credentials);
     if (result.success) {
-      // Redirect to dashboard or intended page
-      const redirect = useRoute().query.redirect as string || '/dashboard';
-      await navigateTo(redirect);
+      // Check for redirect query parameter
+      if (process.client) {
+        const redirectUrl = localStorage.getItem("redirect_after_login") || '/dashboard';
+        localStorage.removeItem("redirect_after_login");
+        await navigateTo(redirectUrl);
+      } else {
+        await navigateTo('/dashboard');
+      }
     }
     return result;
   };
@@ -393,6 +479,29 @@ export const useAuth = () => {
     }
     return isAuthenticated;
   };
+
+  // Periodic token check (every 5 minutes)
+  if (process.client) {
+    const checkInterval = setInterval(async () => {
+      if (authStore.isAuthenticated && authStore.token) {
+        // Check if token is about to expire (within 5 minutes)
+        if (authStore.isJWTExpired(authStore.token)) {
+          console.log('Token expired during periodic check');
+          authStore.handleTokenExpiration();
+          clearInterval(checkInterval);
+        }
+      } else {
+        clearInterval(checkInterval);
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+
+    // Clear interval when page unloads
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeunload', () => {
+        clearInterval(checkInterval);
+      });
+    }
+  }
 
   // Watch for authentication state changes
   if (process.client) {
@@ -469,8 +578,10 @@ export const authMiddleware = defineNuxtRouteMiddleware(async (to, from) => {
 
   if (!isAuthenticated) {
     // Store the intended destination for redirect after login
-    const redirectQuery = `?redirect=${encodeURIComponent(to.fullPath)}`;
-    return navigateTo(`/auth/login${redirectQuery}`);
+    if (process.client) {
+      localStorage.setItem("redirect_after_login", to.fullPath);
+    }
+    return navigateTo('/auth/login');
   }
 });
 
@@ -482,13 +593,13 @@ export const authPlugin = defineNuxtPlugin(async () => {
   await authStore.initializeAuth();
   
   // Global error handler for API requests
-  const originalFetch = globalThis.$fetch;
   globalThis.$fetch = $fetch.create({
     onResponseError({ response }) {
       if (response.status === 401) {
         const errorMessage = response._data?.message || response._data?.error || '';
         const isTokenExpired = 
           errorMessage.toLowerCase().includes('token expired') ||
+          errorMessage.toLowerCase().includes('token has expired') ||
           errorMessage.toLowerCase().includes('unauthorized') ||
           errorMessage.toLowerCase().includes('invalid token') ||
           response.status === 401;

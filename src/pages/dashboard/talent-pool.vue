@@ -519,8 +519,20 @@ import Sidebar from '@/features/dashboard/components/dashboard-sidebar.vue'
 import ChatComponent from '@/features/dashboard/components/chats.vue'
 import MessagePopup from '~/shared/components/message/MessagePopup.vue'
 import TalentProfileModal from '@/pages/modals/TalentProfileModal.vue'
-import { debounce } from 'lodash'
 import { API_ROUTES } from '~/shared/constants/api-routes'
+
+// Create debounce function directly instead of importing from lodash
+const debounce = (func, wait) => {
+  let timeout
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout)
+      func(...args)
+    }
+    clearTimeout(timeout)
+    timeout = setTimeout(later, wait)
+  }
+}
 
 const alertRef = ref(null)
 const authStore = useAuthStore()
@@ -549,10 +561,10 @@ const totalTalents = ref(0)
 const currentPage = ref(1)
 const totalPages = ref(1)
 
-
 // Add these reactive variables
 const showTalentModal = ref(false)
 const selectedTalentId = ref(null)
+
 // Filters
 const filters = ref({
   search: '',
@@ -599,7 +611,7 @@ const fetchTalents = async () => {
   }
 }
 
-// Debounced search and filter functions
+// Create debounced functions
 const debouncedSearch = debounce(() => {
   currentPage.value = 1
   fetchTalents()
@@ -765,6 +777,7 @@ const closeTalentModal = () => {
 const handleContactSent = (talentName) => {
   alertRef.value?.success(`Contact request sent to ${talentName}!`)
 }
+
 // Profile actions
 const editProfile = () => {
   profileMenuOpen.value = false

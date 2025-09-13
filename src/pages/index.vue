@@ -56,7 +56,7 @@
               </div>
               
               <NuxtLink v-if="!isLoggedIn" to="/auth/login"
-                class="glass-button text-white px-6 py-3 rounded-full hover:bg-white/20 transition-all duration-300 font-medium shadow-lg hover:shadow-xl hover:scale-105 border border-white/20">
+                class="glass-button  px-6 py-3 rounded-full hover:bg-white/20 transition-all duration-300 font-medium shadow-lg hover:shadow-xl hover:scale-105 border border-white/20">
                 <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
                 </svg>
@@ -66,7 +66,7 @@
               <!-- User Dropdown for logged in users -->
               <div v-else class="relative">
                 <button @click="userMenuOpen = !userMenuOpen" data-user-button
-                  class="glass-button text-white px-4 py-3 rounded-full hover:bg-white/20 transition-all duration-300 font-medium shadow-lg hover:shadow-xl hover:scale-105 flex items-center space-x-3 border border-white/20">
+                  class="glass-button  px-4 py-3 rounded-full hover:bg-white/20 transition-all duration-300 font-medium shadow-lg hover:shadow-xl hover:scale-105 flex items-center space-x-3 border border-white/20">
                   <div v-if="user.profileImage" class="w-8 h-8 rounded-full overflow-hidden border-2 border-white/30">
                     <img :src="user.profileImage" alt="Profile Picture" class="w-full h-full object-cover" />
                   </div>
