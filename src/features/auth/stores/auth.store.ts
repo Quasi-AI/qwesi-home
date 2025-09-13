@@ -160,7 +160,7 @@ export const useAuthStore = defineStore("auth", {
     async signup(userData: SignupData) {
       this.loading = true;
       try {
-        const response = await $fetch<AuthResponse>(`${API_BASE_URL}/api/auth/signup`, {
+        const response = await $fetch<AuthResponse>(`${API_BASE_URL}/qwesi/signup`, {
           method: "POST",
           body: userData,
         });
@@ -307,7 +307,7 @@ export const useAuthStore = defineStore("auth", {
 
     async fetchUser() {
       try {
-        const response = await this.authenticatedFetch<AuthResponse>("/api/auth/user", {
+        const response = await this.authenticatedFetch<AuthResponse>("/qwesi-details", {
           method: "GET",
         });
 
@@ -332,7 +332,7 @@ export const useAuthStore = defineStore("auth", {
 
     async updateProfile(profileData: ProfileData) {
       try {
-        const response = await this.authenticatedFetch<AuthResponse>("/api/auth/profile", {
+        const response = await this.authenticatedFetch<AuthResponse>("/qwesi-edit-profile", {
           method: "PUT",
           body: profileData,
         });
