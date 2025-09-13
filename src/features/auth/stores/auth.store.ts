@@ -108,7 +108,7 @@ export const useAuthStore = defineStore("auth", {
     async login(data: LoginData) {
       this.loading = true;
       try {
-        const response = await $fetch<AuthResponse>(`${API_BASE_URL}/api/auth/login`, {
+        const response = await $fetch<AuthResponse>(`${API_BASE_URL}/qwesi/login`, {
           method: "POST",
           body: data,
         });
