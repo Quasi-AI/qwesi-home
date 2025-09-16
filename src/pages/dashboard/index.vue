@@ -1158,7 +1158,7 @@ const closePitchBanner = () => {
 
 // Lifecycle
 onMounted(async () => {
-    if (!authStore.isAuthenticated) {
+    if (!authStore.checkAuth()) {
         navigateTo('/auth/login')
         return
     }

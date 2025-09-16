@@ -74,15 +74,12 @@ export const useAuthStore = defineStore("auth", {
 
     // Enhanced fetch wrapper with automatic token expiration handling
     async authenticatedFetch<T>(url: string, options: any = {}): Promise<T> {
-      if (!this.token) {
-        throw new Error('No authentication token available');
-      }
-
       try {
-        // If the URL doesn't start with http, prepend your backend base URL
-        const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+        if (!this.token) {
+          throw new Error('No authentication token available');
+        }
 
-        const response = await $fetch<T>(fullUrl, {
+        const response = await $fetch<T>(API_BASE_URL, {
           ...options,
           headers: {
             ...options.headers,

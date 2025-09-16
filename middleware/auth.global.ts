@@ -27,7 +27,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     authStore.isAuthenticated = false;
     
     // Only redirect if we're trying to access a protected route
-    const publicRoutes = ['/', '/login', '/register', '/forgot-password'];
+    const publicRoutes = ['/', '/auth/login', '/auth/signup', 'auth/forgot-password'];
     const isPublicRoute = publicRoutes.includes(to.path) || to.path.startsWith('/public');
     
     if (!isPublicRoute) {
