@@ -1,3 +1,5 @@
+import { useAuthStore } from "~/features/auth/stores/auth.store";
+
 export default defineNuxtRouteMiddleware(async (to) => {
   // Skip auth check for dashboard route to prevent redirect loop
   if (to.path.startsWith("/dashboard")) {
