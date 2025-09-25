@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/RextonItsiah/Documents/GitHub/Qwesi-latest/app/admin/layout.jsx"],"sourcesContent":["import AdminLayout from \"@/components/admin/AdminLayout\";\r\n\r\nexport const metadata = {\r\n    title: \"GoCart. - Admin\",\r\n    description: \"GoCart. - Admin\",\r\n};\r\n\r\nexport default function RootAdminLayout({ children }) {\r\n\r\n    return (\r\n        <>\r\n            <AdminLayout>\r\n                {children}\r\n            </AdminLayout>\r\n        </>\r\n    );\r\n}\r\n"],"names":[],"mappings":";;;;;;;;;;;;AAEO,MAAM,WAAW;IACpB,OAAO;IACP,aAAa;AACjB;AAEe,SAAS,gBAAgB,EAAE,QAAQ,EAAE;IAEhD,qBACI;kBACI,cAAA,8OAAC;sBACI;;;;;;;AAIjB","debugId":null}}]
+}
