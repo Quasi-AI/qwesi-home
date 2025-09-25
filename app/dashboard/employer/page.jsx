@@ -41,7 +41,7 @@ import EmployerDetailModal from '@/modals/EmployerDetailModal'
 import ApprovalModal from '@/modals/ApprovalModal'
 import DeleteConfirmModal from '@/modals/DeleteConfirmModal'
 
-export default function AdminEmployers({ employerId }) {
+export default function AdminEmployers() {
   const authStore = useAuthStore()
   
   // State management
@@ -243,7 +243,12 @@ export default function AdminEmployers({ employerId }) {
     }
   }
 
-  const createEmployer = async (employerId, formData) => {
+  const createEmployer = async (formData) => {
+    const userId = authStore.user?.id
+    if (!userId) {
+      toast.error("User not authenticated")
+      return { success: false }
+    }
     try {
       const response = await fetch(`${API_ROUTES.BASE_URL}job/create`, {
         method: 'POST',
@@ -259,9 +264,9 @@ export default function AdminEmployers({ employerId }) {
       }
 
       const data = await response.json()
-      
+
       if (data.success) {
-        await fetchEmployerJobs(employerId) // Refresh the list
+        await fetchEmployerJobs(userId) // Refresh the list
         toast.success("Employer created successfully!")
         return { success: true }
       } else {
