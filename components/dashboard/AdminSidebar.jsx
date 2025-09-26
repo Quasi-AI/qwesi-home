@@ -39,16 +39,16 @@ const AdminSidebar = () => {
     return (
         <>
             {/* Mobile Menu Button */}
-            <div className="lg:hidden fixed top-4 left-4 z-50">
+            <div className="lg:hidden fixed top-20 left-4 z-50">
                 <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    className="p-2 bg-white rounded-lg shadow-md border border-slate-200 hover:bg-slate-50 transition-colors"
+                    className="p-3 bg-[#5C3AEB] text-white rounded-lg shadow-lg border border-[#5C3AEB] hover:bg-[#3525b8] transition-colors"
                     aria-label="Toggle menu"
                 >
                     {isMobileMenuOpen ? (
-                        <X size={20} className="text-slate-600" />
+                        <X size={20} />
                     ) : (
-                        <Menu size={20} className="text-slate-600" />
+                        <Menu size={20} />
                     )}
                 </button>
             </div>
