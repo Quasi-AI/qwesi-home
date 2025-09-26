@@ -1,3 +1,5 @@
 {
-    "outputDirectory": "dist"
+  "buildCommand": "yarn build",
+  "outputDirectory": ".next",
+  "framework": "nextjs"
 }
