@@ -811,21 +811,21 @@ const JobsPage = () => {
         {/* Jobs Grid */}
         {!loading && !error && filteredJobs.length > 0 && (
           <>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {paginatedJobs.map(job => (
-                <div key={job._id} className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-[#5C3AEB] hover:shadow-lg transition-all duration-300 flex flex-col min-h-[320px]">
+                <div key={job._id} className="group bg-white border border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-[#5C3AEB] hover:shadow-lg transition-all duration-300 flex flex-col">
 
-                  {/* Job Header */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1 min-w-0 pr-2">
-                      <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-[#5C3AEB] transition-colors line-clamp-2">
+                  {/* Job Header - Mobile Optimized */}
+                  <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 group-hover:text-[#5C3AEB] transition-colors line-clamp-2 leading-tight">
                         {job.title}
                       </h3>
-                      <p className="text-[#5C3AEB] font-semibold truncate">{job.employer}</p>
+                      <p className="text-sm sm:text-base text-[#5C3AEB] font-semibold truncate">{job.employer}</p>
                     </div>
                     <button
                       onClick={() => saveJob(job)}
-                      className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
+                      className={`p-1.5 sm:p-2 rounded-lg transition-colors flex-shrink-0 ${
                         savedJobs.includes(job._id)
                           ? 'text-red-500 bg-red-50'
                           : 'text-gray-400 hover:text-red-500 hover:bg-gray-50'
@@ -838,56 +838,56 @@ const JobsPage = () => {
                     </button>
                   </div>
 
-                  {/* Job Details */}
-                  <div className="space-y-3 mb-4 flex-grow">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                  {/* Job Details - Mobile Optimized */}
+                  <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4 flex-grow">
+                    <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                      <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
                       <span className="truncate">{job.location}</span>
                     </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Building className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                      <Building className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
                       <span className="truncate">{job.sector}</span>
                     </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Target className="w-4 h-4 mr-2 flex-shrink-0" />
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getExperienceColor(job.experience_level)}`}>
+                    <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                      <Target className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
+                      <span className={`px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium ${getExperienceColor(job.experience_level)}`}>
                         {job.experience_level}
                       </span>
                     </div>
                     {job.salary && (
-                      <div className="flex items-center text-sm text-gray-600">
-                        <DollarSign className="w-4 h-4 mr-2 flex-shrink-0" />
-                        <span className="font-semibold text-green-600">{job.salary}</span>
+                      <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                        <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
+                        <span className="font-semibold text-green-600 truncate">{job.salary}</span>
                       </div>
                     )}
                   </div>
 
-                  {/* Job Description Preview */}
-                  <div className="mb-4 flex-grow">
-                    <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
+                  {/* Job Description Preview - Mobile Optimized */}
+                  <div className="mb-3 sm:mb-4 flex-grow">
+                    <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 sm:line-clamp-3 leading-relaxed">
                       {job.job_description}
                     </p>
                   </div>
 
-                  {/* Posted Date */}
-                  <div className="flex items-center text-xs text-gray-500 mb-4">
-                    <Clock className="w-3 h-3 mr-1" />
-                    Posted {formatDate(job.posted)}
+                  {/* Posted Date - Mobile Optimized */}
+                  <div className="flex items-center text-xs text-gray-500 mb-3 sm:mb-4">
+                    <Clock className="w-3 h-3 mr-1 flex-shrink-0" />
+                    <span className="truncate">Posted {formatDate(job.posted)}</span>
                   </div>
 
-                  {/* Actions - Always at bottom */}
-                  <div className="flex items-center justify-between mt-auto">
+                  {/* Actions - Mobile Optimized */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-0 mt-auto">
                     <button
                       onClick={() => openJobDetailsModal(job)}
-                      className="text-sm font-semibold text-[#5C3AEB] hover:text-[#342299] transition-colors flex items-center gap-1 flex-shrink-0"
+                      className="text-xs sm:text-sm font-semibold text-[#5C3AEB] hover:text-[#342299] transition-colors flex items-center justify-center sm:justify-start gap-1 py-2 sm:py-0 order-2 sm:order-1"
                     >
-                      View Details
+                      <span>View Details</span>
                       <ArrowRight className="w-3 h-3" />
                     </button>
 
                     <button
                       onClick={() => applyToJob(job)}
-                      className="px-3 py-2 bg-[#5C3AEB] text-white text-sm font-semibold rounded-lg hover:bg-[#342299] transition-colors flex-shrink-0"
+                      className="w-full sm:w-auto px-3 sm:px-3 py-2 bg-[#5C3AEB] text-white text-xs sm:text-sm font-semibold rounded-lg hover:bg-[#342299] transition-colors order-1 sm:order-2"
                     >
                       Apply Now
                     </button>
@@ -896,33 +896,34 @@ const JobsPage = () => {
               ))}
             </div>
 
-            {/* Pagination */}
+            {/* Pagination - Mobile Optimized */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-8">
-                <div className="text-sm text-gray-600">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0 mt-6 sm:mt-8">
+                <div className="text-xs sm:text-sm text-gray-600 order-2 sm:order-1">
                   Page {currentPage} of {totalPages}
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2 order-1 sm:order-2">
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <ChevronLeft className="w-4 h-4" />
-                    Previous
+                    <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">Previous</span>
+                    <span className="sm:hidden">Prev</span>
                   </button>
                   
                   <div className="flex gap-1">
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      const page = currentPage <= 3 ? i + 1 : 
-                                 currentPage >= totalPages - 2 ? totalPages - 4 + i :
-                                 currentPage - 2 + i
+                    {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+                      const page = currentPage <= 2 ? i + 1 : 
+                                 currentPage >= totalPages - 1 ? totalPages - 2 + i :
+                                 currentPage - 1 + i
                       return page > 0 && page <= totalPages ? (
                         <button
                           key={page}
                           onClick={() => setCurrentPage(page)}
-                          className={`px-3 py-2 text-sm rounded-lg transition-colors ${
+                          className={`px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-colors min-w-[32px] sm:min-w-[40px] ${
                             page === currentPage
                               ? 'bg-[#5C3AEB] text-white'
                               : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
@@ -937,10 +938,11 @@ const JobsPage = () => {
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Next
-                    <ChevronRight className="w-4 h-4" />
+                    <span className="hidden sm:inline">Next</span>
+                    <span className="sm:hidden">Next</span>
+                    <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
                   </button>
                 </div>
               </div>
