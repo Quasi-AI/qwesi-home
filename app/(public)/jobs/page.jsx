@@ -813,11 +813,11 @@ const JobsPage = () => {
           <>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {paginatedJobs.map(job => (
-                <div key={job._id} className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-[#5C3AEB] hover:shadow-lg transition-all duration-300">
-                  
+                <div key={job._id} className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-[#5C3AEB] hover:shadow-lg transition-all duration-300 flex flex-col min-h-[320px]">
+
                   {/* Job Header */}
                   <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 pr-2">
                       <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-[#5C3AEB] transition-colors line-clamp-2">
                         {job.title}
                       </h3>
@@ -825,21 +825,21 @@ const JobsPage = () => {
                     </div>
                     <button
                       onClick={() => saveJob(job)}
-                      className={`p-2 rounded-lg transition-colors ${
-                        savedJobs.includes(job._id) 
-                          ? 'text-red-500 bg-red-50' 
+                      className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
+                        savedJobs.includes(job._id)
+                          ? 'text-red-500 bg-red-50'
                           : 'text-gray-400 hover:text-red-500 hover:bg-gray-50'
                       }`}
                     >
-                      <Heart 
-                        fill={savedJobs.includes(job._id) ? 'currentColor' : 'none'} 
-                        className="w-4 h-4" 
+                      <Heart
+                        fill={savedJobs.includes(job._id) ? 'currentColor' : 'none'}
+                        className="w-4 h-4"
                       />
                     </button>
                   </div>
 
                   {/* Job Details */}
-                  <div className="space-y-3 mb-4">
+                  <div className="space-y-3 mb-4 flex-grow">
                     <div className="flex items-center text-sm text-gray-600">
                       <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
                       <span className="truncate">{job.location}</span>
@@ -863,7 +863,7 @@ const JobsPage = () => {
                   </div>
 
                   {/* Job Description Preview */}
-                  <div className="mb-4">
+                  <div className="mb-4 flex-grow">
                     <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
                       {job.job_description}
                     </p>
@@ -875,19 +875,19 @@ const JobsPage = () => {
                     Posted {formatDate(job.posted)}
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center justify-between">
+                  {/* Actions - Always at bottom */}
+                  <div className="flex items-center justify-between mt-auto">
                     <button
                       onClick={() => openJobDetailsModal(job)}
-                      className="text-sm font-semibold text-[#5C3AEB] hover:text-[#342299] transition-colors flex items-center gap-1"
+                      className="text-sm font-semibold text-[#5C3AEB] hover:text-[#342299] transition-colors flex items-center gap-1 flex-shrink-0"
                     >
                       View Details
                       <ArrowRight className="w-3 h-3" />
                     </button>
-                    
+
                     <button
                       onClick={() => applyToJob(job)}
-                      className="px-4 py-2 bg-[#5C3AEB] text-white text-sm font-semibold rounded-lg hover:bg-[#342299] transition-colors"
+                      className="px-3 py-2 bg-[#5C3AEB] text-white text-sm font-semibold rounded-lg hover:bg-[#342299] transition-colors flex-shrink-0"
                     >
                       Apply Now
                     </button>
