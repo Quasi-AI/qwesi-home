@@ -34,9 +34,9 @@ const Footer = () => {
         {
             title: "CONTACT",
             links: [
-                { text: "support@qwesi.org", path: 'mailto:support@qwesi.org', icon: MailIcon },
-                { text: "+1-555-QWESI-AI", path: 'tel:+15557937424', icon: PhoneIcon },
-                { text: "San Francisco, CA", path: '/', icon: MapPinIcon }
+                { text: "info@qwesi.org", path: 'mailto:info@qwesi.org', icon: MailIcon },
+                { text: "+1-555-QWESI-AI", path: 'tel:+12019790148', icon: PhoneIcon },
+                { text: "DeReimer , Brox 10475, NY", path: '/', icon: MapPinIcon }
             ]
         }
     ];

@@ -569,7 +569,7 @@ const JobsPage = () => {
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                   type="text"
                   placeholder="Job title, company, or keywords..."
-                  className="w-full pl-12 pr-32 py-4 bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 text-lg"
+                  className="w-full pl-12 pr-32 py-4 bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl text-white placeholder-white/70 focus:outline-none focus:border-white/50 focus:ring-0 text-lg transition-all duration-200"
                 />
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/70" />
                 <button
@@ -668,7 +668,7 @@ const JobsPage = () => {
                 <select 
                   value={sortBy} 
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-white border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]"
+                  className="bg-white border border-gray-300 rounded-lg px-3 py-3 min-h-[44px] text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors"
                 >
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
@@ -693,7 +693,7 @@ const JobsPage = () => {
                   <select 
                     value={filters.country} 
                     onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 min-h-[44px] text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors"
                   >
                     <option value="">All Countries</option>
                     {uniqueCountries.map(country => (
@@ -708,7 +708,7 @@ const JobsPage = () => {
                   <select 
                     value={filters.location} 
                     onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 min-h-[44px] text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors"
                   >
                     <option value="">All Locations</option>
                     {uniqueLocations.map(location => (
@@ -723,7 +723,7 @@ const JobsPage = () => {
                   <select 
                     value={filters.sector} 
                     onChange={(e) => setFilters(prev => ({ ...prev, sector: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 min-h-[44px] text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors"
                   >
                     <option value="">All Sectors</option>
                     {uniqueSectors.map(sector => (
@@ -738,7 +738,7 @@ const JobsPage = () => {
                   <select 
                     value={filters.experience_level} 
                     onChange={(e) => setFilters(prev => ({ ...prev, experience_level: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 min-h-[44px] text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors"
                   >
                     <option value="">All Levels</option>
                     {uniqueExperienceLevels.map(level => (
@@ -751,7 +751,7 @@ const JobsPage = () => {
                 <div className="flex items-end gap-2">
                   <button
                     onClick={clearFilters}
-                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-semibold"
+                    className="flex-1 px-4 py-3 min-h-[44px] bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-semibold"
                   >
                     Clear
                   </button>
@@ -1084,14 +1084,14 @@ const JobsPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-semibold mb-2">First Name *</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={applicationForm.applicantDetails.firstName}
                         onChange={(e) => setApplicationForm(prev => ({
                           ...prev,
                           applicantDetails: { ...prev.applicantDetails, firstName: e.target.value }
                         }))}
-                        className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C3AEB] ${
+                        className={`w-full border rounded-lg px-3 py-3 min-h-[44px] focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors ${
                           applicationErrors.firstName ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="Enter your first name"
@@ -1103,14 +1103,14 @@ const JobsPage = () => {
 
                     <div>
                       <label className="block text-sm font-semibold mb-2">Last Name *</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={applicationForm.applicantDetails.lastName}
                         onChange={(e) => setApplicationForm(prev => ({
                           ...prev,
                           applicantDetails: { ...prev.applicantDetails, lastName: e.target.value }
                         }))}
-                        className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C3AEB] ${
+                        className={`w-full border rounded-lg px-3 py-3 min-h-[44px] focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors ${
                           applicationErrors.lastName ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="Enter your last name"
@@ -1122,14 +1122,14 @@ const JobsPage = () => {
 
                     <div>
                       <label className="block text-sm font-semibold mb-2">Email Address *</label>
-                      <input 
-                        type="email" 
+                      <input
+                        type="email"
                         value={applicationForm.applicantDetails.email}
                         onChange={(e) => setApplicationForm(prev => ({
                           ...prev,
                           applicantDetails: { ...prev.applicantDetails, email: e.target.value }
                         }))}
-                        className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C3AEB] ${
+                        className={`w-full border rounded-lg px-3 py-3 min-h-[44px] focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors ${
                           applicationErrors.email ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="Enter your email"
@@ -1141,14 +1141,14 @@ const JobsPage = () => {
 
                     <div>
                       <label className="block text-sm font-semibold mb-2">Phone Number *</label>
-                      <input 
-                        type="tel" 
+                      <input
+                        type="tel"
                         value={applicationForm.applicantDetails.phone}
                         onChange={(e) => setApplicationForm(prev => ({
                           ...prev,
                           applicantDetails: { ...prev.applicantDetails, phone: e.target.value }
                         }))}
-                        className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C3AEB] ${
+                        className={`w-full border rounded-lg px-3 py-3 min-h-[44px] focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors ${
                           applicationErrors.phone ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="Enter your phone number"
@@ -1231,13 +1231,13 @@ const JobsPage = () => {
                         value={newSkill}
                         onChange={(e) => setNewSkill(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]"
+                        className="flex-1 border border-gray-300 rounded-lg px-3 py-3 min-h-[44px] focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors"
                         placeholder="Enter a skill"
                       />
                       <button
                         type="button"
                         onClick={addSkill}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="px-4 py-3 min-h-[44px] bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex-shrink-0"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
@@ -1279,7 +1279,7 @@ const JobsPage = () => {
                       onChange={(e) => setApplicationForm(prev => ({ ...prev, coverLetter: e.target.value }))}
                       rows={6}
                       maxLength={5000}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-3 min-h-[120px] focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors resize-vertical"
                       placeholder="Write a personalized cover letter for this position..."
                     />
                     <div className="text-xs text-gray-500 mt-1 text-right">
