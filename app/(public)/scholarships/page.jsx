@@ -1,20 +1,23 @@
 'use client'
-import React, { useState, useEffect, useMemo } from 'react'
-import { 
-  Search, Filter, MapPin, GraduationCap, BookOpen, Clock, 
-  ChevronRight, ChevronLeft, X, ArrowRight, Heart, DollarSign, 
+import React, { useState, useEffect, useMemo, Suspense } from 'react'
+import {
+  Search, Filter, MapPin, GraduationCap, BookOpen, Clock,
+  ChevronRight, ChevronLeft, X, ArrowRight, Heart, DollarSign,
   Calendar, Globe, Loader2, Briefcase, Award, Star
 } from 'lucide-react'
 import Categories from "@/components/Categories"
 import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link";
-import { toast } from 'react-toastify';
+import Link from "next/link"
+import { toast } from 'react-toastify'
 
-const ScholarshipsPage = () => {
+// Separate component that uses useSearchParams
+const ScholarshipsWithParams = () => {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const category = searchParams.get('category')
+
   // State management
   const [loading, setLoading] = useState(true)
-  const searchParams = useSearchParams()
   const [error, setError] = useState(null)
   const [scholarships, setScholarships] = useState([])
   const [viewingScholarship, setViewingScholarship] = useState(null)
@@ -25,7 +28,6 @@ const ScholarshipsPage = () => {
   const [sortBy, setSortBy] = useState('deadline')
   const [savedScholarships, setSavedScholarships] = useState([])
   const [searchLoading, setSearchLoading] = useState(false)
-  const category = searchParams.get('category')
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -42,7 +44,7 @@ const ScholarshipsPage = () => {
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim()
-      result = result.filter(scholarship => 
+      result = result.filter(scholarship =>
         scholarship.title?.toLowerCase().includes(query) ||
         scholarship.provider?.toLowerCase().includes(query) ||
         scholarship.description?.toLowerCase().includes(query) ||
@@ -148,7 +150,7 @@ const ScholarshipsPage = () => {
     const deadlineDate = new Date(deadline)
     const now = new Date()
     const daysUntil = Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-    
+
     if (daysUntil < 0) return 'text-red-600'
     if (daysUntil <= 30) return 'text-orange-600'
     return 'text-gray-600'
@@ -159,7 +161,7 @@ const ScholarshipsPage = () => {
     const deadlineDate = new Date(deadline)
     const now = new Date()
     const daysUntil = Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-    
+
     if (daysUntil < 0) return 'Closed'
     if (daysUntil <= 30) return 'Closing Soon'
     return 'Open'
@@ -178,10 +180,10 @@ const ScholarshipsPage = () => {
   const fetchScholarships = async () => {
     setLoading(true)
     setError(null)
-    
+
     try {
       await new Promise(resolve => setTimeout(resolve, 1500))
-      
+
       const mockScholarships = Array.from({ length: 36 }, (_, i) => ({
         id: `scholarship-${i + 1}`,
         title: ['STEM Scholarship', 'Merit-Based Award', 'International Student Grant', 'Graduate Fellowship', 'Undergraduate Scholarship'][i % 5],
@@ -236,10 +238,10 @@ const ScholarshipsPage = () => {
     if (!scholarshipId) return
 
     setSavedScholarships(prev => {
-      const newSaved = prev.includes(scholarshipId) 
+      const newSaved = prev.includes(scholarshipId)
         ? prev.filter(id => id !== scholarshipId)
         : [...prev, scholarshipId]
-      
+
       localStorage.setItem('savedScholarships', JSON.stringify(newSaved))
       return newSaved
     })
@@ -353,10 +355,10 @@ const ScholarshipsPage = () => {
               Scholarship Opportunities
             </h1>
             <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-              Discover financial support for your educational journey. 
+              Discover financial support for your educational journey.
               Find the perfect scholarship to fund your dreams.
             </p>
-            
+
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto">
               <div className="relative">
@@ -391,7 +393,7 @@ const ScholarshipsPage = () => {
               View All Categories →
             </Link>
           </div>
-          
+
           <div className="flex overflow-x-auto pb-2 gap-3 scrollbar-hide">
             {[
               { id: 'vehicles', name: '🚗 Vehicles', count: '12K+' },
@@ -451,19 +453,19 @@ const ScholarshipsPage = () => {
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-colors ${
-                  showFilters 
-                    ? 'bg-[#432DD7] text-white' 
+                  showFilters
+                    ? 'bg-[#432DD7] text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 <Filter className="w-4 h-4" />
                 Filters
               </button>
-              
+
               <div className="hidden md:flex items-center gap-2">
                 <span className="text-sm text-gray-600">Sort by:</span>
-                <select 
-                  value={sortBy} 
+                <select
+                  value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                   className="bg-white border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#432DD7]"
                 >
@@ -487,8 +489,8 @@ const ScholarshipsPage = () => {
                 {/* Country */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Country</label>
-                  <select 
-                    value={filters.country} 
+                  <select
+                    value={filters.country}
                     onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#432DD7]"
                   >
@@ -502,8 +504,8 @@ const ScholarshipsPage = () => {
                 {/* Study Level */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Study Level</label>
-                  <select 
-                    value={filters.studyLevel} 
+                  <select
+                    value={filters.studyLevel}
                     onChange={(e) => setFilters(prev => ({ ...prev, studyLevel: e.target.value }))}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#432DD7]"
                   >
@@ -517,8 +519,8 @@ const ScholarshipsPage = () => {
                 {/* Field of Study */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Field of Study</label>
-                  <select 
-                    value={filters.fieldOfStudy} 
+                  <select
+                    value={filters.fieldOfStudy}
                     onChange={(e) => setFilters(prev => ({ ...prev, fieldOfStudy: e.target.value }))}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#432DD7]"
                   >
@@ -532,8 +534,8 @@ const ScholarshipsPage = () => {
                 {/* Status */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-                  <select 
-                    value={filters.status} 
+                  <select
+                    value={filters.status}
                     onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#432DD7]"
                   >
@@ -590,8 +592,8 @@ const ScholarshipsPage = () => {
             <Award className="w-24 h-24 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">No Scholarships Found</h3>
             <p className="text-gray-600 mb-6">
-              {searchQuery || Object.values(filters).some(f => f) 
-                ? 'Try adjusting your search criteria or filters' 
+              {searchQuery || Object.values(filters).some(f => f)
+                ? 'Try adjusting your search criteria or filters'
                 : 'No scholarship listings available at the moment'}
             </p>
             {(searchQuery || Object.values(filters).some(f => f)) && (
@@ -611,7 +613,7 @@ const ScholarshipsPage = () => {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {paginatedScholarships.map(scholarship => (
                 <div key={scholarship.id} className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-[#432DD7] hover:shadow-lg transition-all duration-300">
-                  
+
                   {/* Scholarship Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1 min-w-0">
@@ -623,14 +625,14 @@ const ScholarshipsPage = () => {
                     <button
                       onClick={() => saveScholarship(scholarship)}
                       className={`p-2 rounded-lg transition-colors ${
-                        savedScholarships.includes(scholarship.id || '') 
-                          ? 'text-red-500 bg-red-50' 
+                        savedScholarships.includes(scholarship.id || '')
+                          ? 'text-red-500 bg-red-50'
                           : 'text-gray-400 hover:text-red-500 hover:bg-gray-50'
                       }`}
                     >
-                      <Heart 
-                        fill={savedScholarships.includes(scholarship.id || '') ? 'currentColor' : 'none'} 
-                        className="w-4 h-4" 
+                      <Heart
+                        fill={savedScholarships.includes(scholarship.id || '') ? 'currentColor' : 'none'}
+                        className="w-4 h-4"
                       />
                     </button>
                   </div>
@@ -703,7 +705,7 @@ const ScholarshipsPage = () => {
                       View Details
                       <ArrowRight className="w-3 h-3" />
                     </button>
-                    
+
                     <button
                       onClick={() => applyToScholarship(scholarship)}
                       disabled={isDeadlinePassed(scholarship.deadline || '')}
@@ -722,7 +724,7 @@ const ScholarshipsPage = () => {
                 <div className="text-sm text-gray-600">
                   Page {currentPage} of {totalPages}
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <button
                     onClick={prevPage}
@@ -732,10 +734,10 @@ const ScholarshipsPage = () => {
                     <ChevronLeft className="w-4 h-4" />
                     Previous
                   </button>
-                  
+
                   <div className="flex gap-1">
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      const page = currentPage <= 3 ? i + 1 : 
+                      const page = currentPage <= 3 ? i + 1 :
                                  currentPage >= totalPages - 2 ? totalPages - 4 + i :
                                  currentPage - 2 + i
                       return page > 0 && page <= totalPages ? (
@@ -753,7 +755,7 @@ const ScholarshipsPage = () => {
                       ) : null
                     })}
                   </div>
-                  
+
                   <button
                     onClick={nextPage}
                     disabled={currentPage === totalPages}
@@ -779,7 +781,7 @@ const ScholarshipsPage = () => {
                   <h2 className="text-2xl font-bold text-gray-900">{viewingScholarship.title}</h2>
                   <p className="text-lg text-[#432DD7] font-semibold mt-1">{viewingScholarship.provider}</p>
                 </div>
-                <button 
+                <button
                   onClick={closeScholarshipModal}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
@@ -787,7 +789,7 @@ const ScholarshipsPage = () => {
                 </button>
               </div>
             </div>
-            
+
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
               <div className="grid gap-6">
                 {/* Scholarship Details */}
@@ -908,4 +910,23 @@ const ScholarshipsPage = () => {
   )
 }
 
-export default ScholarshipsPage
+// Loading fallback component
+const ScholarshipsLoading = () => (
+  <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="text-center">
+      <Loader2 className="w-12 h-12 animate-spin text-[#432DD7] mx-auto mb-4" />
+      <p className="text-gray-600">Loading scholarships...</p>
+    </div>
+  </div>
+)
+
+// Main component with Suspense boundary
+const ScholarshipsContent = () => {
+  return (
+    <Suspense fallback={<ScholarshipsLoading />}>
+      <ScholarshipsWithParams />
+    </Suspense>
+  )
+}
+
+export default ScholarshipsContent
