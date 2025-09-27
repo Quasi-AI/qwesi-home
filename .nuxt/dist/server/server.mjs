@@ -1,0 +1,1 @@
+export { default } from "file:///Users/user/Documents/GitHub/qwesi-home/node_modules/@nuxt/vite-builder/dist/runtime/vite-node.mjs"
