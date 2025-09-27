@@ -20,6 +20,7 @@ const categories = [{
         { name: 'Trucks & Buses', icon: Truck, color: 'text-orange-500' }
     ]
 },
+
     {
         id: 'property',
         name: 'Property',
