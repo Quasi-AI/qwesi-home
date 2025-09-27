@@ -4,5 +4,6 @@
   "/(public)/scholarships/page": "app/(public)/scholarships/page.js",
   "/(public)/shop/page": "app/(public)/shop/page.js",
   "/_not-found/page": "app/_not-found/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js"
 }

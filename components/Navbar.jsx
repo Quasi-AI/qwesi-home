@@ -423,15 +423,15 @@ const Navbar = () => {
 
                 {/* Mobile Search Bar */}
                 {searchOpen && (
-                    <div className="lg:xl:hidden border-t border-gray-200 bg-white">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+                    <div className="lg:hidden border-t border-gray-200 bg-white">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
                             <form onSubmit={handleSearch} className="relative">
-                                <div className="flex items-center bg-gray-50 rounded-full border border-gray-200 focus-within:border-[#5C3AEB] focus-within:ring-2 focus-within:ring-[#5C3AEB]/20">
-                                    <Search size={20} className="text-gray-400 ml-4" />
+                                <div className="flex items-center bg-gray-50 rounded-lg sm:rounded-full border border-gray-200 focus-within:border-[#5C3AEB] focus-within:ring-2 focus-within:ring-[#5C3AEB]/20 overflow-hidden">
+                                    <Search size={18} className="text-gray-400 ml-3 sm:ml-4 flex-shrink-0" />
                                     <input 
-                                        className="w-full bg-transparent outline-none px-4 py-3 text-sm placeholder-gray-500" 
+                                        className="w-full bg-transparent outline-none px-3 sm:px-4 py-2.5 sm:py-3 text-sm placeholder-gray-500 min-w-0" 
                                         type="text" 
-                                        placeholder="Search products, brands..." 
+                                        placeholder="Search products..." 
                                         value={search} 
                                         onChange={(e) => setSearch(e.target.value)}
                                         autoFocus
@@ -440,9 +440,9 @@ const Navbar = () => {
                                         <button
                                             type="button"
                                             onClick={() => setSearch('')}
-                                            className="mr-2 p-1 rounded-full hover:bg-gray-200 transition-colors"
+                                            className="mr-2 sm:mr-3 p-1 rounded-full hover:bg-gray-200 transition-colors flex-shrink-0"
                                         >
-                                            <X size={16} className="text-gray-400" />
+                                            <X size={14} className="text-gray-400" />
                                         </button>
                                     )}
                                 </div>
@@ -455,28 +455,28 @@ const Navbar = () => {
                 <div className={`lg:hidden border-t border-gray-200 bg-white mobile-menu-container transition-all duration-300 overflow-hidden ${
                     mobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
                 }`}>
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
                         {/* User Info for Mobile (if logged in) */}
                         {user && (
-                                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-                                    <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
-                                        {user.avatar && user.avatar.trim() ? (
-                                            <Image
-                                                src={user.avatar}
-                                                alt={user.name}
-                                                width={40}
-                                                height={40}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : (
-                                            <span className="text-lg font-medium text-gray-600">
-                                                {user.name?.charAt(0) || 'U'}
-                                            </span>
-                                        )}
-                                    </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                                    <p className="text-xs text-gray-500">{user.email}</p>
+                            <div className="flex items-center space-x-3 p-3 sm:p-4 bg-gray-50 rounded-lg">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                                    {user.avatar && user.avatar.trim() ? (
+                                        <Image
+                                            src={user.avatar}
+                                            alt={user.name}
+                                            width={40}
+                                            height={40}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <span className="text-sm sm:text-lg font-medium text-gray-600">
+                                            {user.name?.charAt(0) || 'U'}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
+                                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
                                 </div>
                             </div>
                         )}
@@ -488,7 +488,7 @@ const Navbar = () => {
                                     key={link.href}
                                     href={link.href}
                                     onClick={() => setMobileMenuOpen(false)}
-                                    className={`block text-lg font-medium text-gray-700 hover:text-[#5C3AEB] hover:bg-gray-50 transition-all duration-200 py-3 px-4 rounded-lg transform ${
+                                    className={`block text-base sm:text-lg font-medium text-gray-700 hover:text-[#5C3AEB] hover:bg-gray-50 transition-all duration-200 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg transform ${
                                         mobileMenuOpen 
                                             ? 'translate-x-0 opacity-100' 
                                             : 'translate-x-4 opacity-0'
@@ -505,7 +505,7 @@ const Navbar = () => {
                         <hr className="border-gray-200" />
 
                         {/* Mobile Actions */}
-                        <div className={`space-y-4 transform transition-all duration-300 ${
+                        <div className={`space-y-3 sm:space-y-4 transform transition-all duration-300 ${
                             mobileMenuOpen 
                                 ? 'translate-y-0 opacity-100' 
                                 : 'translate-y-4 opacity-0'
@@ -521,33 +521,33 @@ const Navbar = () => {
                                                 key={item.href}
                                                 href={item.href}
                                                 onClick={() => setMobileMenuOpen(false)}
-                                                className="flex items-center space-x-3 text-gray-700 hover:text-[#5C3AEB] py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors"
+                                                className="flex items-center space-x-3 text-gray-700 hover:text-[#5C3AEB] py-2 px-3 sm:px-4 rounded-lg hover:bg-gray-50 transition-colors"
                                             >
-                                                <IconComponent size={18} />
-                                                <span>{item.label}</span>
+                                                <IconComponent size={16} className="flex-shrink-0" />
+                                                <span className="text-sm sm:text-base">{item.label}</span>
                                             </Link>
                                         )
                                     })}
                                     
                                     <button 
                                         onClick={handleLogout}
-                                        className="w-full flex items-center space-x-3 text-red-600 hover:text-red-700 py-2 px-4 rounded-lg hover:bg-red-50 transition-colors"
+                                        className="w-full flex items-center space-x-3 text-red-600 hover:text-red-700 py-2 px-3 sm:px-4 rounded-lg hover:bg-red-50 transition-colors"
                                     >
-                                        <LogOut size={18} />
-                                        <span>Sign out</span>
+                                        <LogOut size={16} className="flex-shrink-0" />
+                                        <span className="text-sm sm:text-base">Sign out</span>
                                     </button>
                                 </>
                             ) : (
                                 <>
                                     <button 
                                         onClick={handleLoginClick}
-                                        className="w-full bg-[#5C3AEB] hover:bg-[#3525b8] text-white py-3 px-6 rounded-full font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
+                                        className="w-full bg-[#5C3AEB] hover:bg-[#3525b8] text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg sm:rounded-full font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl text-sm sm:text-base"
                                     >
-                                        <User size={18} />
+                                        <User size={16} />
                                         <span>Login</span>
                                     </button>
                                     
-                                    <div className="text-center text-sm text-gray-500">
+                                    <div className="text-center text-xs sm:text-sm text-gray-500">
                                         <span>New customer? </span>
                                         <button 
                                             onClick={handleSignupClick}

@@ -3,6 +3,7 @@ import { StarIcon, HeartIcon, MessageCircleIcon, PhoneIcon, MapPin } from 'lucid
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
 
 const API_BASE_URL = 'https://dark-caldron-448714-u5.uc.r.appspot.com/api'
 
@@ -29,6 +30,7 @@ const ProductCard = ({ product, disabled }) => {
                 }
             } catch (error) {
                 console.error('Error fetching store info:', error)
+                toast.error('Failed to load store information')
             } finally {
                 setLoadingStore(false)
             }
@@ -50,43 +52,111 @@ const ProductCard = ({ product, disabled }) => {
         e.preventDefault()
         e.stopPropagation()
         setIsWishlisted(!isWishlisted)
+        
+        if (!isWishlisted) {
+            toast.success('Added to wishlist!')
+        } else {
+            toast.success('Removed from wishlist')
+        }
         // TODO: Add wishlist API call here
+    }
+
+    // Helper function to clean and format phone number for international use
+    const formatPhoneNumber = (phone) => {
+        if (!phone) return null
+        
+        // Remove all non-digit characters except + at the beginning
+        let cleaned = phone.replace(/[^\d+]/g, '')
+        
+        // If it starts with +, keep it and remove any additional + signs
+        if (cleaned.startsWith('+')) {
+            cleaned = '+' + cleaned.substring(1).replace(/\+/g, '')
+        }
+        
+        // Remove + for WhatsApp URL (WhatsApp expects numbers without +)
+        const whatsappFormat = cleaned.startsWith('+') ? cleaned.substring(1) : cleaned
+        
+        // Basic validation - should have at least 7 digits (minimum international number length)
+        const digitsOnly = whatsappFormat.replace(/\D/g, '')
+        if (digitsOnly.length < 7) {
+            return null
+        }
+        
+        return whatsappFormat
     }
 
     const handleWhatsAppContact = (e) => {
         e.preventDefault()
         e.stopPropagation()
         
-        const sellerPhone = storeInfo?.contact || storeInfo?.phone
+        // Check product contact fields first, then store fields as fallback
+        const sellerPhone = product?.contact || product?.phone || product?.whatsapp || product?.mobile ||
+                           storeInfo?.contact || storeInfo?.phone || storeInfo?.whatsapp || storeInfo?.mobile
+        
         if (!sellerPhone) {
-            alert('Contact information not available')
+            toast.error('Contact information not available for this product')
             return
         }
         
-        const message = `Hi! I'm interested in your ${product.name} listed for ${currency}${product.price}`
-        const whatsappUrl = `https://wa.me/${sellerPhone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`
-        window.open(whatsappUrl, '_blank')
+        const formattedPhone = formatPhoneNumber(sellerPhone)
+        
+        if (!formattedPhone) {
+            toast.error('Invalid phone number format')
+            return
+        }
+        
+        const message = `Hi! I'm interested in your "${product.name}" listed for ${currency}${product.price}. Is it still available?`
+        const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`
+        
+        try {
+            window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
+            toast.success('Opening WhatsApp...')
+        } catch (error) {
+            console.error('Error opening WhatsApp:', error)
+            toast.error('Failed to open WhatsApp. Please try again.')
+        }
     }
 
     const handlePhoneContact = (e) => {
         e.preventDefault()
         e.stopPropagation()
         
-        const sellerPhone = storeInfo?.contact || storeInfo?.phone
+        // Check product contact fields first, then store fields as fallback
+        const sellerPhone = product?.contact || product?.phone || product?.mobile ||
+                           storeInfo?.contact || storeInfo?.phone || storeInfo?.mobile
+        
         if (!sellerPhone) {
-            alert('Contact information not available')
+            toast.error('Phone number not available for this product')
             return
         }
         
-        window.location.href = `tel:${sellerPhone}`
+        try {
+            // For tel: links, we can use the original format
+            window.location.href = `tel:${sellerPhone}`
+            toast.success('Initiating call...')
+        } catch (error) {
+            console.error('Error initiating call:', error)
+            toast.error('Failed to initiate call. Please dial manually: ' + sellerPhone)
+        }
     }
 
     const handleViewStore = (e) => {
         e.preventDefault()
         e.stopPropagation()
         if (storeInfo?._id) {
-            window.open(`/stores/${storeInfo._id}`, '_blank')
+            window.open(`/stores/${storeInfo._id}`, '_blank', 'noopener,noreferrer')
+        } else {
+            toast.error('Store information not available')
         }
+    }
+
+    // Helper function to check if contact info is available
+    const hasContactInfo = () => {
+        // Check product contact fields first, then store fields as fallback
+        const productContact = product?.contact || product?.phone || product?.whatsapp || product?.mobile
+        const storeContact = storeInfo?.contact || storeInfo?.phone || storeInfo?.whatsapp || storeInfo?.mobile
+        
+        return !!(productContact || storeContact)
     }
 
     return (
@@ -217,16 +287,18 @@ const ProductCard = ({ product, disabled }) => {
                         <div className='flex gap-2'>
                             <button
                                 onClick={handleWhatsAppContact}
-                                disabled={loadingStore || !storeInfo?.contact}
-                                className='flex-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium py-2 rounded flex items-center justify-center gap-1 transition-colors'
+                                disabled={loadingStore || !hasContactInfo()}
+                                className='flex-1 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs font-medium py-2 rounded flex items-center justify-center gap-1 transition-colors'
+                                title={!hasContactInfo() ? 'Contact information not available' : 'Chat on WhatsApp'}
                             >
                                 <MessageCircleIcon size={12} />
                                 WhatsApp
                             </button>
                             <button
                                 onClick={handlePhoneContact}
-                                disabled={loadingStore || !storeInfo?.contact}
-                                className='flex-1 bg-[#5C3AEB] hover:bg-[#3525b8] text-white text-xs font-medium py-2 rounded flex items-center justify-center gap-1 transition-colors'
+                                disabled={loadingStore || !hasContactInfo()}
+                                className='flex-1 bg-[#5C3AEB] hover:bg-[#3525b8] disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs font-medium py-2 rounded flex items-center justify-center gap-1 transition-colors'
+                                title={!hasContactInfo() ? 'Phone number not available' : 'Call seller'}
                             >
                                 <PhoneIcon size={12} />
                                 Call
@@ -248,6 +320,13 @@ const ProductCard = ({ product, disabled }) => {
                     {loadingStore && (
                         <div className='mt-2 text-xs text-gray-500 text-center'>
                             Loading contact info...
+                        </div>
+                    )}
+
+                    {/* No Contact Info Available */}
+                    {storeInfo && !loadingStore && !hasContactInfo() && (
+                        <div className='mt-2 text-xs text-orange-600 text-center'>
+                            Contact information not available
                         </div>
                     )}
                 </div>
