@@ -38,8 +38,8 @@ const AdminSidebar = () => {
 
     return (
         <>
-            {/* Mobile Menu Button */}
-            <div className="lg:hidden fixed top-20 left-4 z-50">
+            {/* Mobile Menu Button - Position it away from logo */}
+            <div className="lg:hidden fixed top-24 left-4 z-[60]">
                 <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     className="p-3 bg-[#5C3AEB] text-white rounded-lg shadow-lg border border-[#5C3AEB] hover:bg-[#3525b8] transition-colors"
@@ -53,23 +53,34 @@ const AdminSidebar = () => {
                 </button>
             </div>
 
-            {/* Mobile Overlay (transparent to avoid darkening background but still allow tap-to-close) */}
+            {/* Mobile Overlay - Start below navbar */}
             {isMobileMenuOpen && (
                 <div 
-                    className="lg:hidden fixed inset-0 bg-transparent z-40"
+                    className="lg:hidden fixed bg-black bg-opacity-25 z-[51]"
                     onClick={closeMobileMenu}
+                    style={{ 
+                        top: '80px', // Start below navbar
+                        left: '0',
+                        right: '0',
+                        bottom: '0'
+                    }}
                 />
             )}
 
             {/* Sidebar */}
             <aside className={`
-                fixed lg:static inset-y-0 left-0 z-40
+                fixed lg:static left-0 z-[55]
                 w-64 lg:w-60 xl:w-64
                 bg-white border-r border-slate-200
                 transform transition-transform duration-300 ease-in-out
                 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-                flex flex-col h-full
-            `}>
+                flex flex-col
+            `}
+            style={{ 
+                top: '50px', // Start below navbar on mobile
+                height: 'calc(100vh - 80px)' // Full height minus navbar
+            }}>
+                {/* Remove the mobile header spacer since we're starting below navbar */}
 
                 {/* Navigation Links */}
                 <nav className="flex-1 px-3 py-4 overflow-y-auto">
