@@ -1,7 +1,6 @@
 {
-  "/(public)/page": "app/(public)/page.js",
-  "/_not-found/page": "app/_not-found/page.js",
+  "/dashboard/employer/page": "app/dashboard/employer/page.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/stores/page": "app/dashboard/stores/page.js",
+  "/dashboard/pitch/page": "app/dashboard/pitch/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js"
 }

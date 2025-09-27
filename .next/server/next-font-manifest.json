@@ -1,15 +1,12 @@
 {
   "app": {
-    "[project]/app/(public)/page": [
-      "static/media/QGYvz_MVcBeNP4NJtEtqUYLknw-s.p.07dd827d.woff2"
-    ],
-    "[project]/app/_not-found/page": [
+    "[project]/app/dashboard/employer/page": [
       "static/media/QGYvz_MVcBeNP4NJtEtqUYLknw-s.p.07dd827d.woff2"
     ],
     "[project]/app/dashboard/page": [
       "static/media/QGYvz_MVcBeNP4NJtEtqUYLknw-s.p.07dd827d.woff2"
     ],
-    "[project]/app/dashboard/stores/page": [
+    "[project]/app/dashboard/pitch/page": [
       "static/media/QGYvz_MVcBeNP4NJtEtqUYLknw-s.p.07dd827d.woff2"
     ]
   },
