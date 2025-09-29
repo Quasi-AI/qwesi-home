@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import Title from './Title'
 import ProductCard from './ProductCard'
+import ProductSkeleton from './ProductSkeleton'
 
 const API_BASE_URL = 'https://dark-caldron-448714-u5.uc.r.appspot.com/api'
 
@@ -10,6 +11,17 @@ const LatestProducts = ({ displayQuantity = 4, storeId = null }) => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [meta, setMeta] = useState({ showing: 0, total: 0, limit: displayQuantity })
+    const [selectedCountry, setSelectedCountry] = useState('Ghana')
+
+    // Listen for country change from Hero/Footer
+    useEffect(() => {
+        const handleCountryChange = (event) => {
+            setSelectedCountry(event.detail.country)
+        }
+
+        window.addEventListener('country-change', handleCountryChange)
+        return () => window.removeEventListener('country-change', handleCountryChange)
+    }, [])
 
     useEffect(() => {
         const fetchLatestProducts = async () => {
@@ -19,9 +31,10 @@ const LatestProducts = ({ displayQuantity = 4, storeId = null }) => {
 
                 // Build query parameters
                 const params = new URLSearchParams({
-                    limit: displayQuantity.toString()
+                    limit: displayQuantity.toString(),
+                    country: selectedCountry
                 })
-                
+
                 if (storeId) {
                     params.append('storeId', storeId)
                 }
@@ -52,7 +65,7 @@ const LatestProducts = ({ displayQuantity = 4, storeId = null }) => {
         }
 
         fetchLatestProducts()
-    }, [displayQuantity, storeId])
+    }, [displayQuantity, storeId, selectedCountry])
 
     if (loading) {
         return (
@@ -64,12 +77,7 @@ const LatestProducts = ({ displayQuantity = 4, storeId = null }) => {
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {Array.from({ length: displayQuantity }).map((_, index) => (
-                        <div 
-                            key={index} 
-                            className="bg-gray-200 animate-pulse rounded-lg h-64 flex items-center justify-center"
-                        >
-                            <div className="text-gray-400">Loading...</div>
-                        </div>
+                        <ProductSkeleton key={index} />
                     ))}
                 </div>
             </div>

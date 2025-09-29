@@ -1,21 +1,20 @@
-# Task: Refactor Orders Page to Use Real API Data
+# Shop Page Improvements: Pagination and Categories Filter
 
-## Current Progress
-- [x] Analyze codebase and identify issues (dummy data bug)
-- [x] Create plan and get user approval
-- [x] Integrate authenticated API fetching in app/(public)/orders/page.jsx
-- [ ] Update UI to handle loading and error states
-- [ ] Fix order key from id to _id for API compatibility
-- [ ] Verify order structure (address, items, etc.) and adjust OrderItem if needed
-- [ ] Test functionality (fetch, display, auth handling)
-- [ ] Integrate Redux for addresses if address not in order data
-- [ ] Update empty state for unauthenticated users
-- [ ] Final verification and completion
+## Information Gathered
+- Shop page fetches all products (limit=100) without pagination, leading to performance issues.
+- Category filtering uses product.category field but lacks a dedicated interactive component.
+- API supports page/limit params for server-side pagination.
+- Quick categories exist but need a full Categories component for better UX.
 
-## Next Steps
-1. Edit app/(public)/orders/page.jsx to add loading spinner and error display in the return statement.
-2. Ensure order keys use _id instead of id in the map.
-3. If API order structure differs (e.g., no address), read sample API response or adjust display.
-4. Run `npm run dev` and test /orders page with auth.
-5. Use browser_action to verify rendering if needed.
-6. Mark as complete with attempt_completion once verified.
+## Plan Steps
+- [x] Create components/Categories.jsx: Interactive list of unique categories with counts, clickable for filtering via URL params.
+- [x] Update app/(public)/shop/page.jsx: Add pagination state (currentPage, productsPerPage=12), modify fetchProducts to include page/limit, add pagination UI (buttons, page numbers), reset page on filter changes, integrate Categories component as sidebar/toggle.
+- [x] Test: Load /shop, apply category filter, paginate, verify API calls, mobile responsiveness.
+
+## Dependent Files
+- components/Categories.jsx (new)
+- app/(public)/shop/page.jsx (update)
+
+## Followup
+- No new deps.
+- Test with npm run dev, check Network for paginated requests.

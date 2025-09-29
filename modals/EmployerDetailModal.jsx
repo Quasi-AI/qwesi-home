@@ -23,7 +23,7 @@ const EmployerDetailModal = ({ employer, jobs, applications, interviews, activeT
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/20 z-[60] flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4">
@@ -216,9 +216,12 @@ const EmployerDetailModal = ({ employer, jobs, applications, interviews, activeT
                           <h4 className="font-medium text-slate-800">{application.candidateName}</h4>
                           <p className="text-sm text-slate-600">{application.candidateEmail}</p>
                           <div className="flex items-center gap-4 mt-2">
-                            <span className="text-xs text-slate-500">Applied {formatDate(application.appliedAt)}</span>
+                            <span className="text-xs text-slate-500">Applied {formatDate(application.submittedAt)}</span>
                             {application.resume && (
-                              <button className="text-xs text-blue-600 hover:underline flex items-center gap-1">
+                              <button
+                                onClick={() => window.open(application.resume.url, '_blank')}
+                                className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                              >
                                 <Download size={12} />
                                 Resume
                               </button>

@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect, useMemo, useRef } from "react"
-import Loading from "@/components/Loading"
+import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton"
 import toast from "react-hot-toast"
 import {
   Plus,
@@ -494,7 +494,7 @@ export default function AdminEmployers() {
     }
   }, [currentPage, totalPages])
 
-  if (loading) return <Loading />
+  if (loading) return <DashboardSkeleton type="employer" showHeader={true} showStats={true} showSearch={true} showGrid={true} gridItems={12} statsCount={5} />
 
   const stats = getStatusStats()
 

@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { X } from "lucide-react"
 import { useAuthStore } from '@/stores/authStore'
 
@@ -23,11 +23,18 @@ const CreateEmployerModal = ({ onClose, onSubmit }) => {
   })
   const [loading, setLoading] = useState(false)
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     try {
-      // Ensure user_id is included in the form data
       const submitData = {
         ...formData,
         user_id: authStore.user?.id || formData.user_id
@@ -44,18 +51,28 @@ const CreateEmployerModal = ({ onClose, onSubmit }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4">
+    <div className="fixed inset-0 backdrop-blur-sm bg-black/50 z-[9999] flex items-center justify-center p-4 overflow-y-auto">
+      <div 
+        className="fixed inset-0" 
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      
+      <div className="relative bg-white rounded-lg max-w-3xl w-full my-8 shadow-2xl">
+        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 rounded-t-lg z-10">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-slate-800">Create New Job</h2>
-            <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg">
+            <button 
+              onClick={onClose} 
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              type="button"
+            >
               <X size={20} className="text-slate-600" />
             </button>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[calc(90vh-8rem)] overflow-y-auto">
           {/* Hidden fields */}
           <input type="hidden" name="user_id" value={formData.user_id} />
           <input type="hidden" name="id" value={formData.id} />
@@ -67,7 +84,7 @@ const CreateEmployerModal = ({ onClose, onSubmit }) => {
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#5C3AEB] focus:border-[#5C3AEB] outline-none"
                 required
               />
             </div>
@@ -77,7 +94,7 @@ const CreateEmployerModal = ({ onClose, onSubmit }) => {
                 type="text"
                 value={formData.employer}
                 onChange={(e) => setFormData({ ...formData, employer: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#5C3AEB] focus:border-[#5C3AEB] outline-none"
                 required
               />
             </div>
@@ -90,7 +107,7 @@ const CreateEmployerModal = ({ onClose, onSubmit }) => {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#5C3AEB] focus:border-[#5C3AEB] outline-none"
                 required
               />
             </div>
@@ -100,7 +117,7 @@ const CreateEmployerModal = ({ onClose, onSubmit }) => {
                 type="text"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#5C3AEB] focus:border-[#5C3AEB] outline-none"
                 required
               />
             </div>
@@ -113,7 +130,7 @@ const CreateEmployerModal = ({ onClose, onSubmit }) => {
                 type="text"
                 value={formData.salary}
                 onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#5C3AEB] focus:border-[#5C3AEB] outline-none"
                 placeholder="e.g., $50,000 - $70,000"
                 required
               />
@@ -123,7 +140,7 @@ const CreateEmployerModal = ({ onClose, onSubmit }) => {
               <select
                 value={formData.jobType}
                 onChange={(e) => setFormData({ ...formData, jobType: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#5C3AEB] focus:border-[#5C3AEB] outline-none"
                 required
               >
                 <option value="">Select Job Type</option>
@@ -142,7 +159,7 @@ const CreateEmployerModal = ({ onClose, onSubmit }) => {
               <select
                 value={formData.experience_level}
                 onChange={(e) => setFormData({ ...formData, experience_level: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#5C3AEB] focus:border-[#5C3AEB] outline-none"
                 required
               >
                 <option value="">Select Experience Level</option>
@@ -158,7 +175,7 @@ const CreateEmployerModal = ({ onClose, onSubmit }) => {
                 type="date"
                 value={formData.deadline}
                 onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#5C3AEB] focus:border-[#5C3AEB] outline-none"
                 required
               />
             </div>
@@ -170,7 +187,7 @@ const CreateEmployerModal = ({ onClose, onSubmit }) => {
               type="text"
               value={formData.skills}
               onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#5C3AEB] focus:border-[#5C3AEB] outline-none"
               placeholder="e.g., JavaScript, React, Node.js (comma separated)"
               required
             />
@@ -182,24 +199,24 @@ const CreateEmployerModal = ({ onClose, onSubmit }) => {
               value={formData.job_description}
               onChange={(e) => setFormData({ ...formData, job_description: e.target.value })}
               rows={6}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#5C3AEB] focus:border-[#5C3AEB] outline-none resize-none"
               placeholder="Describe the job responsibilities, requirements, and benefits..."
               required
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 sticky bottom-0 bg-white pb-2">
             <button 
               type="button" 
               onClick={onClose} 
-              className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              className="px-6 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors border border-slate-300 w-full sm:w-auto"
               disabled={loading}
             >
               Cancel
             </button>
             <button 
               type="submit" 
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+              className="px-6 py-2 bg-[#5C3AEB] hover:bg-[#4c2dd4] text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
               disabled={loading}
             >
               {loading ? 'Creating...' : 'Create Job'}
@@ -212,4 +229,3 @@ const CreateEmployerModal = ({ onClose, onSubmit }) => {
 }
 
 export default CreateEmployerModal
-

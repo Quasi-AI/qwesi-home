@@ -56,10 +56,10 @@ const AdminSidebar = () => {
             {/* Mobile Overlay - Start below navbar */}
             {isMobileMenuOpen && (
                 <div 
-                    className="lg:hidden fixed bg-black bg-opacity-25 z-[51]"
+                    className="lg:hidden fixed bg-black/10 z-[51]"
                     onClick={closeMobileMenu}
-                    style={{ 
-                        top: '80px', // Start below navbar
+                    style={{
+                        top: '64px', // Start below navbar on mobile
                         left: '0',
                         right: '0',
                         bottom: '0'
@@ -76,9 +76,9 @@ const AdminSidebar = () => {
                 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
                 flex flex-col
             `}
-            style={{ 
-                top: '50px', // Start below navbar on mobile
-                height: 'calc(100vh - 80px)' // Full height minus navbar
+            style={{
+                top: '64px', // Start below navbar on mobile (h-16 = 64px)
+                height: 'calc(100vh - 64px)' // Full height minus navbar on mobile
             }}>
                 {/* Remove the mobile header spacer since we're starting below navbar */}
 

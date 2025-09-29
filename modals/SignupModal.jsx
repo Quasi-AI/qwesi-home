@@ -1,10 +1,12 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { X, Eye, EyeOff, ChevronDown } from 'lucide-react'
-import { signupWithCredentials, startGoogleOAuth } from '@/lib/auth'
+import { X, Eye, EyeOff, ChevronDown, Mail, Phone, Lock, User, Calendar, Loader2 } from 'lucide-react'
+import { signupWithCredentials, persistAuth } from '@/lib/auth'
+import { useAuthStore } from '@/stores/authStore'
 import { countryCodes, detectCountryByIP, formatPhoneNumber } from '@/utils/countryUtils'
 
 const SignupModal = ({ isOpen, onClose, onSwitchToLogin }) => {
+    const { setAuth } = useAuthStore()
     const [formData, setFormData] = useState({
         phone: '',
         countryCode: '+233',
@@ -38,15 +40,25 @@ const SignupModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                 setShowCountryDropdown(false)
             }
         }
+        
+        const handleClickOutside = (e) => {
+            if (showCountryDropdown && !e.target.closest('.country-dropdown-container')) {
+                setShowCountryDropdown(false)
+            }
+        }
+
         if (isOpen) {
             document.addEventListener('keydown', handleEscape)
+            document.addEventListener('click', handleClickOutside)
             document.body.style.overflow = 'hidden'
         }
+        
         return () => {
             document.removeEventListener('keydown', handleEscape)
+            document.removeEventListener('click', handleClickOutside)
             document.body.style.overflow = 'unset'
         }
-    }, [isOpen, onClose])
+    }, [isOpen, showCountryDropdown, onClose])
 
     const handleChange = (e) => {
         setFormData({
@@ -68,12 +80,24 @@ const SignupModal = ({ isOpen, onClose, onSwitchToLogin }) => {
             // Format phone number with country code
             const fullPhoneNumber = formatPhoneNumber(formData.countryCode, formData.phone)
             
+            // Format DOB from YYYY-MM-DD to DD/MM/YYYY
+            let formattedDob = formData.dob
+            if (formattedDob && formattedDob.includes('-')) {
+                const [year, month, day] = formattedDob.split('-')
+                formattedDob = `${day}/${month}/${year}`
+            }
+            
             const result = await signupWithCredentials({
                 ...formData,
-                phone: fullPhoneNumber
+                phone: fullPhoneNumber,
+                dob: formattedDob
             })
-            
+
             if (result?.success) {
+                // Persist auth data to localStorage (already done in signupWithCredentials)
+                // Update auth store state
+                setAuth(result.user, result.token)
+
                 onClose()
             }
         } catch (err) {
@@ -83,72 +107,80 @@ const SignupModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         }
     }
 
-    const handleGoogleSignup = () => {
-        startGoogleOAuth()
-    }
-
     if (!isOpen) return null
 
     const selectedCountry = countryCodes.find(c => c.code === formData.countryCode)
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Backdrop */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            {/* Enhanced Backdrop with blur */}
             <div 
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/50 to-black/60 backdrop-blur-md"
                 onClick={() => {
                     onClose()
                     setShowCountryDropdown(false)
                 }}
             />
 
-            {/* Modal */}
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                    <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
+            {/* Modal with enhanced styling */}
+            <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl w-full max-w-md mx-auto border border-white/20 overflow-hidden">
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                {/* Form Container */}
+                <div className="p-4 sm:p-6 space-y-4">
                     {error && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex items-center gap-2 animate-in fade-in duration-200">
+                            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                             {error}
                         </div>
                     )}
 
-                    {/* Phone and Name */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <form onSubmit={handleSubmit} className="space-y-3">
+                        {/* Full Name */}
+                        <div className="space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700">
+                                Full name
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <User className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    placeholder="Your full name"
+                                    className="w-full pl-12 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C3AEC]/20 focus:border-[#5C3AEC] transition-all duration-200 bg-gray-50/50 hover:bg-white"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        {/* Phone Number */}
+                        <div className="space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700">
                                 Phone number
                             </label>
                             <div className="flex">
-                                <div className="relative">
+                                <div className="relative country-dropdown-container">
                                     <button
                                         type="button"
                                         onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                                        className="flex items-center gap-2 px-3 py-3 border border-gray-200 rounded-l-xl bg-gray-50 hover:bg-gray-100 transition-colors min-w-[80px]"
+                                        className="flex items-center gap-2 px-3 py-2.5 border border-gray-200 border-r-0 rounded-l-xl bg-gray-50/50 hover:bg-white transition-all duration-200 min-w-[90px] focus:outline-none focus:ring-2 focus:ring-[#5C3AEC]/20 focus:border-[#5C3AEC]"
                                     >
                                         <span className="text-lg">{selectedCountry?.flag}</span>
                                         <span className="text-sm font-medium">{formData.countryCode}</span>
-                                        <ChevronDown className="w-4 h-4" />
+                                        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showCountryDropdown ? 'rotate-180' : ''}`} />
                                     </button>
                                     
                                     {showCountryDropdown && (
-                                        <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                                        <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-48 overflow-y-auto mt-1 animate-in fade-in zoom-in-95 duration-200">
                                             {countryCodes.map((country) => (
                                                 <button
                                                     key={`${country.code}-${country.country}`}
                                                     type="button"
                                                     onClick={() => handleCountrySelect(country.code)}
-                                                    className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 text-left"
+                                                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 text-left transition-colors duration-150 first:rounded-t-xl last:rounded-b-xl"
                                                 >
                                                     <span className="text-lg">{country.flag}</span>
                                                     <span className="text-sm font-medium">{country.code}</span>
@@ -158,137 +190,126 @@ const SignupModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                                         </div>
                                     )}
                                 </div>
+                                <div className="relative flex-1">
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <Phone className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        value={formData.phone}
+                                        onChange={handleChange}
+                                        placeholder="555 000 111"
+                                        className="w-full pl-12 pr-4 py-2.5 border border-gray-200 rounded-r-xl focus:outline-none focus:ring-2 focus:ring-[#5C3AEC]/20 focus:border-[#5C3AEC] transition-all duration-200 bg-gray-50/50 hover:bg-white"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Date of Birth */}
+                        <div className="space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700">
+                                Date of Birth
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <Calendar className="h-5 w-5 text-gray-400" />
+                                </div>
                                 <input
-                                    type="tel"
-                                    name="phone"
-                                    value={formData.phone}
+                                    type="date"
+                                    name="dob"
+                                    value={formData.dob}
                                     onChange={handleChange}
-                                    placeholder="555 000 111"
-                                    className="flex-1 px-4 py-3 border border-l-0 border-gray-200 rounded-r-xl focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]/20 focus:border-[#5C3AEB] transition-colors"
+                                    className="w-full pl-12 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C3AEC]/20 focus:border-[#5C3AEC] transition-all duration-200 bg-gray-50/50 hover:bg-white appearance-none cursor-pointer"
                                     required
                                 />
                             </div>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Full name
+
+                        {/* Email Input */}
+                        <div className="space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700">
+                                Email address
                             </label>
-                            <input
-                                type="text"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleChange}
-                                placeholder="Your full name"
-                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]/20 focus:border-[#5C3AEB] transition-colors"
-                                required
-                            />
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <Mail className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    placeholder="Enter your email address"
+                                    className="w-full pl-12 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C3AEC]/20 focus:border-[#5C3AEC] transition-all duration-200 bg-gray-50/50 hover:bg-white"
+                                    required
+                                />
+                            </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
-                        <input
-                            type="text"
-                            name="dob"
-                            value={formData.dob}
-                            onChange={handleChange}
-                            placeholder="DD/MM/YYYY"
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]/20 focus:border-[#5C3AEB] transition-colors"
-                            required
-                        />
-                    </div>
-
-                    {/* Email Input */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Email address
-                        </label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            placeholder="Enter your email address"
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]/20 focus:border-[#5C3AEB] transition-colors"
-                            required
-                        />
-                    </div>
-
-                    {/* Password Input */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Password
-                        </label>
-                        <div className="relative">
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                name="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                placeholder="Create a password"
-                                className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]/20 focus:border-[#5C3AEB] transition-colors"
-                                required
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
-                            >
-                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                            </button>
+                        {/* Password Input */}
+                        <div className="space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700">
+                                Password
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <Lock className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    placeholder="Create a password"
+                                    className="w-full pl-12 pr-12 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C3AEC]/20 focus:border-[#5C3AEC] transition-all duration-200 bg-gray-50/50 hover:bg-white"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                                >
+                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Submit Button */}
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full bg-[#5C3AEB] text-white py-3 px-4 rounded-xl font-medium hover:bg-[#4C2BD8] focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                        {isLoading ? 'Creating Account...' : 'Create Account'}
-                    </button>
-
-                    {/* Divider */}
-                    <div className="relative my-6">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-200" />
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-4 bg-white text-gray-500">Or continue with</span>
-                        </div>
-                    </div>
-
-                    {/* Google Button */}
-                    <button
-                        type="button"
-                        onClick={handleGoogleSignup}
-                        className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors"
-                    >
-                        <svg className="w-5 h-5" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                        Continue with Google
-                    </button>
+                        {/* Submit Button */}
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full bg-[#5C3AEC] text-white py-2.5 px-4 rounded-xl font-semibold hover:bg-[#3d1fc7] focus:outline-none focus:ring-2 focus:ring-[#5C3AEC]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] disabled:hover:scale-100 shadow-lg hover:shadow-xl"
+                        >
+                            {isLoading ? (
+                                <div className="flex items-center justify-center gap-2">
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    Creating Account...
+                                </div>
+                            ) : (
+                                'Create Account'
+                            )}
+                        </button>
+                    </form>
 
                     {/* Login Link */}
-                    <p className="text-center text-sm text-gray-600">
-                        Already have an account?{' '}
-                        <button
-                            type="button"
-                            onClick={onSwitchToLogin}
-                            className="text-[#5C3AEB] hover:underline font-medium"
-                        >
-                            Sign in
-                        </button>
-                    </p>
-                </form>
+                    <div className="pt-6 border-t border-gray-100">
+                        <p className="text-center text-sm text-gray-600">
+                            Already have an account?{' '}
+                            <button
+                                type="button"
+                                onClick={onSwitchToLogin}
+                                className="text-[#5C3AEC] hover:text-[#3d1fc7] hover:underline font-semibold transition-colors duration-200"
+                            >
+                                Sign in
+                            </button>
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     )
 }
 
 export default SignupModal
-

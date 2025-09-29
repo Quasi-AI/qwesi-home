@@ -5,30 +5,58 @@ import { useEffect, useState } from "react";
 import OrderItem from "@/components/OrderItem";
 import { useAuthStore } from '@/stores/authStore'
 import Loading from "@/components/Loading"
+import { authFetch } from '@/lib/auth'
 
 const API_BASE_URL = 'https://dark-caldron-448714-u5.uc.r.appspot.com/api'
 
 export default function Orders() {
-    const { user } = useAuthStore()
+    const { user, initAuth } = useAuthStore()
     const [orders, setOrders] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    const getUserIdentifier = () => {
+        if (user?.id) return user.id;
+        if (user?._id) return user._id;
+        if (user?.uid) return user.uid;
+        if (user?.userId) return user.userId;
+        return null;
+    };
+
+    const userId = getUserIdentifier();
+
+    useEffect(() => {
+        initAuth();
+    }, []);
+
     useEffect(() => {
         const fetchUserOrders = async () => {
-            if (user?.id) {
+            if (userId) {
                 setLoading(true)
                 try {
-                    const res = await fetch(`${API_BASE_URL}/orders/user/${user.id}`);
-                    const data = await res.json();
-                    setOrders(data);
+                    console.log('Fetching orders for userId:', userId); // Debug log
+                    const response = await authFetch(`${API_BASE_URL}/orders/user/${userId}`);
+                    console.log('API Response status:', response.status); // Debug log
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('API Response data:', data); // Debug log
+                        setOrders(data.data || data);
+                    } else {
+                        console.error('Failed to fetch orders');
+                        setOrders([]);
+                    }
                 } catch (err) {
-                    console.log(err);
+                    console.error('Error fetching orders:', err);
+                    setOrders([]);
                 }
                 setLoading(false)
+            } else {
+                console.log('No valid userId found, skipping fetch'); // Debug log
+                setOrders([]);
+                setLoading(false);
             }
         }
         fetchUserOrders();
-    }, [user?.id]);
+    }, [userId]);
 
     if (loading) return <Loading />
 

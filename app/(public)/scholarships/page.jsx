@@ -182,32 +182,25 @@ const ScholarshipsWithParams = () => {
     setError(null)
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const API_BASE_URL = 'https://dark-caldron-448714-u5.uc.r.appspot.com';
+      const country = filters.country || 'Canada';
+      const response = await fetch(`${API_BASE_URL}/scholarship/country/${country}`);
 
-      const mockScholarships = Array.from({ length: 36 }, (_, i) => ({
-        id: `scholarship-${i + 1}`,
-        title: ['STEM Scholarship', 'Merit-Based Award', 'International Student Grant', 'Graduate Fellowship', 'Undergraduate Scholarship'][i % 5],
-        provider: ['University of Excellence', 'Global Education Fund', 'TechCorp Foundation', 'Government Program', 'Non-Profit Organization'][i % 5],
-        country: ['United States', 'United Kingdom', 'Canada', 'Australia', 'Germany'][i % 5],
-        studyLevel: ['Undergraduate', 'Graduate', 'PhD', 'Postdoctoral'][i % 4],
-        fieldOfStudy: ['Computer Science', 'Engineering', 'Business', 'Medicine', 'Arts'][i % 5],
-        amount: 10000 + (i * 2000),
-        currency: 'USD',
-        deadline: new Date(Date.now() + (i * 7 * 24 * 60 * 60 * 1000)).toISOString(),
-        description: `This scholarship provides financial support for students pursuing excellence in their academic journey. ${i + 1}`,
-        type: ['Merit-Based', 'Need-Based', 'Sports', 'Arts', 'Research'][i % 5],
-        duration: `${i % 4 + 1} year${i % 4 + 1 > 1 ? 's' : ''}`,
-        website: 'https://example.com/apply',
-        contactEmail: 'scholarships@example.com',
-        created_at: new Date(Date.now() - (i * 24 * 60 * 60 * 1000)).toISOString()
-      }))
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      setScholarships(mockScholarships)
+      const result = await response.json();
+      if (result.success) {
+        setScholarships(result.data || []);
+      } else {
+        throw new Error(result.message || 'Failed to fetch scholarships');
+      }
     } catch (err) {
-      setError(err.message || 'Failed to fetch scholarships')
+      setError(err.message || 'Failed to fetch scholarships');
     } finally {
-      setLoading(false)
-      setSearchLoading(false)
+      setLoading(false);
+      setSearchLoading(false);
     }
   }
 
@@ -302,7 +295,7 @@ const ScholarshipsWithParams = () => {
   // Effects
   useEffect(() => {
     fetchScholarships()
-  }, [])
+  }, [filters.country])
 
   useEffect(() => {
     if (currentPage > totalPages) {

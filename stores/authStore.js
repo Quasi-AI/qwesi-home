@@ -1,38 +1,66 @@
 import { create } from 'zustand';
-import { readAuth, persistAuth } from '@/lib/auth';
+import { logoutUser } from '@/lib/auth';
 
 export const useAuthStore = create((set, get) => ({
   user: null,
   token: null,
   isAuthenticated: false,
+  isLoading: true,
+  validationInterval: null,
 
-  // Initialize auth state from localStorage
+  // Initialize auth state
   initAuth: () => {
-    const auth = readAuth();
-    if (auth?.token && auth?.user) {
-      set({
-        user: auth.user,
-        token: auth.token,
-        isAuthenticated: true
-      });
+    set({ isLoading: true });
+
+    // Load API auth from localStorage
+    const storedAuth = localStorage.getItem('auth');
+    if (storedAuth) {
+      try {
+        const { user, token } = JSON.parse(storedAuth);
+        if (user && token && user.expiresAt && new Date(user.expiresAt) > new Date()) {
+          get().setAuth(user, token);
+        } else {
+          localStorage.removeItem('auth');
+        }
+      } catch (e) {
+        localStorage.removeItem('auth');
+      }
     }
+
+    set({ isLoading: false });
   },
 
-  // Set auth data
+  // Set auth data (for manual login/signup)
   setAuth: (user, token) => {
-    persistAuth({ user, token });
+    const state = get();
+    if (state.validationInterval) {
+      clearInterval(state.validationInterval);
+    }
+
+    let interval = null;
+    if (user && user.expiresAt) {
+      interval = setInterval(() => {
+        const currentState = get();
+        if (currentState.user && currentState.user.expiresAt && new Date(currentState.user.expiresAt) < new Date()) {
+          currentState.clearAuth();
+        }
+      }, 30000); // Check every 30 seconds
+    }
+
+    // Persist to localStorage
+    if (user && token) {
+      localStorage.setItem('auth', JSON.stringify({ user, token }));
+    }
+
     set({
       user,
       token,
-      isAuthenticated: true
+      isAuthenticated: !!user,
+      validationInterval: interval
     });
   },
 
   setUser: (user) => {
-    const token = get().token;
-    if (token) {
-      persistAuth({ user, token });
-    }
     set(state => ({
       ...state,
       user,
@@ -41,12 +69,18 @@ export const useAuthStore = create((set, get) => ({
   },
 
   // Clear auth data
-  clearAuth: () => {
-    persistAuth({ user: null, token: null }); // Also clear from storage
+  clearAuth: async () => {
+    const state = get();
+    if (state.validationInterval) {
+      clearInterval(state.validationInterval);
+      set({ validationInterval: null });
+    }
+    await logoutUser();
     set({
       user: null,
       token: null,
-      isAuthenticated: false
+      isAuthenticated: false,
+      validationInterval: null
     });
   },
 
@@ -54,8 +88,27 @@ export const useAuthStore = create((set, get) => ({
   getUser: () => get().user,
 
   // Get current token
-  getToken: () => get().token,
+  getToken: async () => {
+    return get().token;
+  },
 
   // Check if authenticated
-  isAuth: () => get().isAuthenticated
+  isAuth: () => get().isAuthenticated,
+
+  // Check if loading
+  isAuthLoading: () => get().isLoading,
+
+  // Check token expiration
+  checkTokenExpiration: () => {
+    const state = get();
+    if (!state.user || !state.user.expiresAt) return;
+
+    const now = new Date();
+    const expiresAt = new Date(state.user.expiresAt);
+
+    if (now >= expiresAt) {
+      // Token expired, logout
+      get().clearAuth();
+    }
+  }
 }));

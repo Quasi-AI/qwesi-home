@@ -1,9 +1,11 @@
 'use client'
-import { StarIcon, HeartIcon, MessageCircleIcon, PhoneIcon, MapPin } from 'lucide-react'
+import { StarIcon, HeartIcon, MessageCircleIcon, PhoneIcon, MapPin, ShoppingCartIcon } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
+import { useDispatch, useSelector } from 'react-redux'
+import { addToCart } from '@/lib/features/cart/cartSlice'
 
 const API_BASE_URL = 'https://dark-caldron-448714-u5.uc.r.appspot.com/api'
 
@@ -12,6 +14,8 @@ const ProductCard = ({ product, disabled }) => {
     const [storeInfo, setStoreInfo] = useState(null)
     const [loadingStore, setLoadingStore] = useState(false)
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$'
+    const dispatch = useDispatch()
+    const cart = useSelector(state => state.cart.cartItems)
 
     // Fetch store information for contact details
     useEffect(() => {
@@ -52,13 +56,20 @@ const ProductCard = ({ product, disabled }) => {
         e.preventDefault()
         e.stopPropagation()
         setIsWishlisted(!isWishlisted)
-        
+
         if (!isWishlisted) {
             toast.success('Added to wishlist!')
         } else {
             toast.success('Removed from wishlist')
         }
         // TODO: Add wishlist API call here
+    }
+
+    const handleAddToCart = (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        dispatch(addToCart({ productId: product.id }))
+        toast.success('Added to cart!')
     }
 
     // Helper function to clean and format phone number for international use
@@ -283,27 +294,40 @@ const ProductCard = ({ product, disabled }) => {
 
                     {/* Action Buttons */}
                     <div className='space-y-2'>
-                        {/* Contact Buttons */}
-                        <div className='flex gap-2'>
+                        {product.storeId ? (
+                            /* Add to Cart Button for store products */
                             <button
-                                onClick={handleWhatsAppContact}
-                                disabled={loadingStore || !hasContactInfo()}
-                                className='flex-1 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs font-medium py-2 rounded flex items-center justify-center gap-1 transition-colors'
-                                title={!hasContactInfo() ? 'Contact information not available' : 'Chat on WhatsApp'}
+                                onClick={handleAddToCart}
+                                disabled={disabled || product.stock === 0}
+                                className='w-full bg-[#5C3AEB] hover:bg-[#3525b8] disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs font-medium py-2 rounded flex items-center justify-center gap-1 transition-colors'
+                                title={product.stock === 0 ? 'Out of stock' : 'Add to cart'}
                             >
-                                <MessageCircleIcon size={12} />
-                                WhatsApp
+                                <ShoppingCartIcon size={12} />
+                                Add to Cart
                             </button>
-                            <button
-                                onClick={handlePhoneContact}
-                                disabled={loadingStore || !hasContactInfo()}
-                                className='flex-1 bg-[#5C3AEB] hover:bg-[#3525b8] disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs font-medium py-2 rounded flex items-center justify-center gap-1 transition-colors'
-                                title={!hasContactInfo() ? 'Phone number not available' : 'Call seller'}
-                            >
-                                <PhoneIcon size={12} />
-                                Call
-                            </button>
-                        </div>
+                        ) : (
+                            /* Contact Buttons for non-store products */
+                            <div className='flex gap-2'>
+                                <button
+                                    onClick={handleWhatsAppContact}
+                                    disabled={loadingStore || !hasContactInfo()}
+                                    className='flex-1 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs font-medium py-2 rounded flex items-center justify-center gap-1 transition-colors'
+                                    title={!hasContactInfo() ? 'Contact information not available' : 'Chat on WhatsApp'}
+                                >
+                                    <MessageCircleIcon size={12} />
+                                    WhatsApp
+                                </button>
+                                <button
+                                    onClick={handlePhoneContact}
+                                    disabled={loadingStore || !hasContactInfo()}
+                                    className='flex-1 bg-[#5C3AEB] hover:bg-[#3525b8] disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs font-medium py-2 rounded flex items-center justify-center gap-1 transition-colors'
+                                    title={!hasContactInfo() ? 'Phone number not available' : 'Call seller'}
+                                >
+                                    <PhoneIcon size={12} />
+                                    Call
+                                </button>
+                            </div>
+                        )}
 
                         {/* View Store Button */}
                         {storeInfo && (

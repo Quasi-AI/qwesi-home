@@ -1,5 +1,5 @@
 'use client'
-import Loading from "@/components/Loading"
+import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton"
 import PersonalActivityChart from "@/components/PersonalActivityChart"
 import {
     MessageSquare,
@@ -23,7 +23,7 @@ import {
     CheckCircle,
     X
 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import PageHeader from '@/components/dashboard/PageHeader'
 import Image from 'next/image'
 import { useAuthStore } from '@/stores/authStore'
@@ -32,10 +32,16 @@ import { authFetch } from '@/lib/auth'
 const API_BASE_URL = 'https://dark-caldron-448714-u5.uc.r.appspot.com/api'
 
 export default function QwesiPersonalDashboard() {
-    const { user } = useAuthStore()
+    const { user, initAuth } = useAuthStore()
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
-    const userIdentifier = user?.id || ''
+    const getUserIdentifier = () => {
+        if (user?.id) return { param: 'id', value: user.id }
+        if (user?.phone) return { param: 'phone', value: user.phone }
+        if (user?.email) return { param: 'email', value: user.email }
+        return null
+    }
+    const userIdentifier = useMemo(() => getUserIdentifier(), [user])
     const [dashboardData, setDashboardData] = useState({
         profile: {
             name: '',
@@ -82,12 +88,19 @@ export default function QwesiPersonalDashboard() {
     })
 
     useEffect(() => {
+        initAuth();
+    }, [initAuth]);
+
+    useEffect(() => {
         const fetchPersonalDashboard = async () => {
             try {
-                console.log('Fetching dashboard for user:', userIdentifier)
+                console.log('Fetching dashboard for logged-in user:', user?.phone || user?.email || user?.id)
                 setError(null)
-                // Use phone as identifier - adjust based on your auth system
-                const response = await authFetch(`${API_BASE_URL}/dashboard/qwesi/personal?id=${userIdentifier}`)
+                // Fetch personal data using auth token and user identifier (phone, email, or id)
+                if (!userIdentifier) {
+                    throw new Error('No user identifier available')
+                }
+                const response = await authFetch(`${API_BASE_URL}/dashboard/qwesi/personal?${userIdentifier.param}=${userIdentifier.value}`)
 
                 if (response.ok) {
                     const result = await response.json()
@@ -155,10 +168,10 @@ export default function QwesiPersonalDashboard() {
             }
         }
 
-        if (userIdentifier) {
+        if (user && userIdentifier) {
             fetchPersonalDashboard()
         } else {
-            console.log('No user identifier available, using default dashboard data')
+            console.log('No user available, using default dashboard data')
             setLoading(false)
             setDashboardData({
                 profile: {
@@ -205,9 +218,75 @@ export default function QwesiPersonalDashboard() {
                 }
             })
         }
-    }, [userIdentifier, user])
+    }, [user])
 
-    if (loading) return <Loading />
+  if (loading) return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 p-4 sm:p-6">
+      {/* Header Skeleton */}
+      <div className="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 mb-8">
+        <div className="flex items-center gap-6">
+          <div className="w-20 h-20 bg-gray-200 rounded-full animate-pulse"></div>
+          <div className="flex-1">
+            <div className="h-8 bg-gray-200 rounded-lg w-64 mb-2 animate-pulse"></div>
+            <div className="flex items-center gap-4 mb-2">
+              <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-4 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-4 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 bg-gray-200 rounded-full h-2 max-w-xs animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+            </div>
+          </div>
+          <div className="hidden md:flex flex-col gap-2">
+            <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-40 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-28 animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Cards Grid Skeleton */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        {[...Array(4)].map((_, index) => (
+          <div key={index} className="group relative bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex-1 min-w-0">
+                <div className="h-3 bg-gray-200 rounded w-20 mb-2 animate-pulse"></div>
+                <div className="h-8 bg-gray-200 rounded w-16 mb-1 animate-pulse"></div>
+                <div className="h-3 bg-gray-200 rounded w-24 animate-pulse"></div>
+              </div>
+              <div className="w-12 h-12 bg-gray-200 rounded-xl animate-pulse"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Charts Grid Skeleton */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6">
+          <div className="h-6 bg-gray-200 rounded w-48 mb-4 animate-pulse"></div>
+          <div className="h-64 bg-gray-200 rounded-lg animate-pulse"></div>
+        </div>
+        <div className="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6">
+          <div className="h-6 bg-gray-200 rounded w-40 mb-4 animate-pulse"></div>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+                </div>
+                <div className="h-6 bg-gray-200 rounded w-12 animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 
     if (error) {
         return (

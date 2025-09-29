@@ -2,7 +2,7 @@
 import { Suspense, useState, useEffect } from "react"
 import ProductCard from "@/components/ProductCard"
 import Categories from "@/components/Categories"
-import { MoveLeftIcon, FilterIcon, XIcon, SlidersHorizontalIcon, Grid3X3Icon, ListIcon, RefreshCcwIcon } from "lucide-react"
+import { MoveLeftIcon, FilterIcon, XIcon, SlidersHorizontalIcon, Grid3X3Icon, ListIcon, RefreshCcwIcon, ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 
 const API_BASE_URL = 'https://dark-caldron-448714-u5.uc.r.appspot.com/api'
@@ -16,15 +16,31 @@ function ShopContent() {
     const maxPrice = searchParams.get('maxPrice')
     const sortBy = searchParams.get('sort')
     const storeId = searchParams.get('store')
-    
+    const pageParam = searchParams.get('page')
+
     const router = useRouter()
     const [products, setProducts] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [showFilters, setShowFilters] = useState(false)
+    const [showCategories, setShowCategories] = useState(false)
     const [totalProducts, setTotalProducts] = useState(0)
     const [stores, setStores] = useState([])
-    
+    const [selectedCountry, setSelectedCountry] = useState('Ghana')
+    const [currentPage, setCurrentPage] = useState(parseInt(pageParam) || 1)
+    const productsPerPage = 12
+    const totalPages = Math.ceil(totalProducts / productsPerPage)
+
+    // Listen for country change from Hero/Footer
+    useEffect(() => {
+        const handleCountryChange = (event) => {
+            setSelectedCountry(event.detail.country)
+        }
+
+        window.addEventListener('country-change', handleCountryChange)
+        return () => window.removeEventListener('country-change', handleCountryChange)
+    }, [])
+
     const [localFilters, setLocalFilters] = useState({
         category: category || '',
         subcategory: subcategory || '',
@@ -35,8 +51,8 @@ function ShopContent() {
     })
     const [viewMode, setViewMode] = useState('grid')
 
-    // Fetch all active products from backend
-    const fetchProducts = async () => {
+    // Fetch paginated products from backend
+    const fetchProducts = async (page = currentPage) => {
         try {
             setLoading(true)
             setError(null)
@@ -48,7 +64,9 @@ function ShopContent() {
             if (minPrice) params.append('minPrice', minPrice)
             if (maxPrice) params.append('maxPrice', maxPrice)
             if (storeId) params.append('storeId', storeId)
-            params.append('limit', '100') // Adjust as needed
+            params.append('country', selectedCountry)
+            params.append('page', page.toString())
+            params.append('limit', productsPerPage.toString())
             
             const response = await fetch(`${API_BASE_URL}/products?${params.toString()}`)
             
@@ -62,6 +80,7 @@ function ShopContent() {
                     }))
                     setProducts(productsWithId)
                     setTotalProducts(result.meta?.total || productsWithId.length)
+                    setCurrentPage(page)
                 } else {
                     throw new Error(result.message || 'Failed to fetch products')
                 }
@@ -103,12 +122,13 @@ function ShopContent() {
             sortBy: sortBy || 'newest',
             storeId: storeId || ''
         })
+        setCurrentPage(parseInt(pageParam) || 1)
     }, [searchParams])
 
     useEffect(() => {
         fetchProducts()
         fetchStores()
-    }, [searchParams])
+    }, [searchParams, selectedCountry])
 
     const applyFilters = () => {
         const params = new URLSearchParams()
@@ -120,6 +140,7 @@ function ShopContent() {
         if (localFilters.maxPrice) params.set('maxPrice', localFilters.maxPrice)
         if (localFilters.sortBy !== 'newest') params.set('sort', localFilters.sortBy)
         if (localFilters.storeId) params.set('store', localFilters.storeId)
+        params.set('page', '1') // Reset to first page
         
         router.push(`/shop?${params.toString()}`)
         setShowFilters(false)
@@ -128,6 +149,7 @@ function ShopContent() {
     const clearFilters = () => {
         const params = new URLSearchParams()
         if (search) params.set('search', search)
+        params.set('page', '1')
         router.push(`/shop?${params.toString()}`)
         setLocalFilters({
             category: '',
@@ -137,6 +159,27 @@ function ShopContent() {
             sortBy: 'newest',
             storeId: ''
         })
+    }
+
+    const handlePageChange = (newPage) => {
+        if (newPage < 1 || newPage > totalPages) return
+
+        const params = new URLSearchParams(searchParams.toString())
+        params.set('page', newPage.toString())
+        router.push(`/shop?${params.toString()}`)
+        // fetchProducts will be triggered by useEffect on searchParams change
+    }
+
+    const handleCategorySelect = (selectedCategory) => {
+        const params = new URLSearchParams(searchParams.toString())
+        if (selectedCategory) {
+            params.set('category', selectedCategory)
+        } else {
+            params.delete('category')
+        }
+        params.set('page', '1')
+        router.push(`/shop?${params.toString()}`)
+        setShowCategories(false)
     }
 
     // Filter and sort products locally for additional client-side filtering
@@ -162,16 +205,6 @@ function ShopContent() {
 
     // Dynamic categories from products
     const availableCategories = [...new Set(products.map(p => p.category).filter(Boolean))]
-
-    // Quick access categories
-    const quickCategories = [
-        { id: 'Electronics', name: 'Electronics', count: products.filter(p => p.category === 'Electronics').length },
-        { id: 'Clothing', name: 'Clothing', count: products.filter(p => p.category === 'Clothing').length },
-        { id: 'Home & Kitchen', name: 'Home & Kitchen', count: products.filter(p => p.category === 'Home & Kitchen').length },
-        { id: 'Beauty & Health', name: 'Beauty & Health', count: products.filter(p => p.category === 'Beauty & Health').length },
-        { id: 'Sports & Outdoors', name: 'Sports & Outdoors', count: products.filter(p => p.category === 'Sports & Outdoors').length },
-        { id: 'Books & Media', name: 'Books & Media', count: products.filter(p => p.category === 'Books & Media').length }
-    ].filter(cat => cat.count > 0)
 
     if (loading) {
         return (
@@ -288,40 +321,27 @@ function ShopContent() {
                     </div>
                 </div>
 
-                {/* Quick Categories Navigation */}
-                {quickCategories.length > 0 && (
-                    <div className="mb-6">
-                        <div className="flex items-center justify-between mb-3">
-                            <h3 className="text-lg font-semibold text-gray-900">Browse Categories</h3>
-                            <button 
-                                onClick={() => document.getElementById('full-categories')?.scrollIntoView({ behavior: 'smooth' })}
-                                className="text-sm text-[#5C3AEB] hover:text-[#3525b8]"
-                            >
-                                View All Categories
-                            </button>
-                        </div>
-                        <div className="flex overflow-x-auto pb-2 gap-2 scrollbar-hide">
-                            {quickCategories.map((cat) => (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => {
-                                        const params = new URLSearchParams(window.location.search)
-                                        params.set('category', cat.id)
-                                        router.push(`/shop?${params.toString()}`)
-                                    }}
-                                    className={`flex-shrink-0 px-4 py-2 rounded-lg border transition-all ${
-                                        category === cat.id 
-                                            ? 'bg-[#5C3AEB] text-white border-[#5C3AEB]' 
-                                            : 'bg-white text-gray-700 border-gray-200 hover:border-[#5C3AEB] hover:text-[#5C3AEB]'
-                                    }`}
-                                >
-                                    <span className="font-medium">{cat.name}</span>
-                                    <span className="text-xs ml-2 opacity-80">({cat.count})</span>
-                                </button>
-                            ))}
-                        </div>
+                {/* Categories Sidebar Toggle */}
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold text-gray-900">Products</h2>
+                    <button
+                        onClick={() => setShowCategories(!showCategories)}
+                        className="lg:hidden flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50"
+                    >
+                        Categories
+                        <FilterIcon size={16} />
+                    </button>
+                </div>
+
+                {/* Categories Sidebar */}
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+                    <div className={`lg:block ${showCategories ? 'block' : 'hidden'}`}>
+                        <Categories 
+                            products={products} 
+                            onCategorySelect={handleCategorySelect}
+                        />
                     </div>
-                )}
+                    <div className="lg:col-span-3">
 
                 {/* Active Filters Display */}
                 {hasActiveFilters && (
@@ -452,6 +472,7 @@ function ShopContent() {
                         Showing {processedProducts.length} of {totalProducts} products
                         {search && ` for "${search}"`}
                         {category && ` in ${category}`}
+                        {currentPage > 1 && ` (Page ${currentPage} of ${totalPages})`}
                     </p>
                 </div>
 
@@ -480,10 +501,58 @@ function ShopContent() {
                     </div>
                 )}
 
-                {/* Full Categories Section */}
-                <div id="full-categories" className="mt-12 pt-8 border-t">
-                    <Categories />
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-center mt-8 space-x-2">
+                        <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors flex items-center gap-1"
+                        >
+                            <ChevronLeft size={16} />
+                            Previous
+                        </button>
+
+                        {/* Page Numbers */}
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                            const pageNum = currentPage <= 3 
+                                ? i + 1 
+                                : currentPage >= totalPages - 2 
+                                    ? totalPages - 4 + i 
+                                    : currentPage - 2 + i
+                            return (
+                                <button
+                                    key={pageNum}
+                                    onClick={() => handlePageChange(pageNum)}
+                                    className={`px-3 py-2 rounded-lg border transition-colors ${
+                                        currentPage === pageNum
+                                            ? 'bg-[#5C3AEB] text-white border-[#5C3AEB]'
+                                            : 'border-gray-300 hover:bg-gray-50 text-gray-700'
+                                    }`}
+                                >
+                                    {pageNum}
+                                </button>
+                            )
+                        })}
+
+                        {totalPages > 5 && currentPage < totalPages - 2 && (
+                            <span className="px-3 py-2 text-gray-500">...</span>
+                        )}
+
+                        <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors flex items-center gap-1"
+                        >
+                            Next
+                            <ChevronRight size={16} />
+                        </button>
+                    </div>
+                )}
+
+                    </div>
                 </div>
+
             </div>
         </div>
     )

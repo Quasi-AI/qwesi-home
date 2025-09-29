@@ -1,7 +1,149 @@
 import Link from "next/link";
 import Image from 'next/image'
+import React, { useState, useRef, useEffect } from 'react'
+import { useLocationDetection } from '@/hooks/useLocationDetection'
 
 const Footer = () => {
+    const [selectedCountry, setSelectedCountry] = useState('Ghana') // Default fallback
+    const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false)
+    const dropdownRef = useRef(null)
+
+    const { country, loading: isDetectingLocation } = useLocationDetection()
+
+    // Map common country codes to our country names
+    const countryCodeMapping = {
+        'GH': 'Ghana',
+        'NG': 'Nigeria', 
+        'KE': 'Kenya',
+        'ZA': 'South Africa',
+        'EG': 'Egypt',
+        'MA': 'Morocco',
+        'TZ': 'Tanzania',
+        'UG': 'Uganda',
+        'SN': 'Senegal',
+        'CM': 'Cameroon',
+        'US': 'United States',
+        'DE': 'Germany',
+        'GB': 'United Kingdom',
+        'UK': 'United Kingdom', // Alternative UK code
+        'FR': 'France'
+    }
+
+    // List of available countries with flag URLs
+    const countries = [
+        { 
+            name: 'Ghana', 
+            flag: 'https://flagcdn.com/w40/gh.png', 
+            code: 'GH' 
+        },
+        { 
+            name: 'Nigeria', 
+            flag: 'https://flagcdn.com/w40/ng.png', 
+            code: 'NG' 
+        },
+        { 
+            name: 'Kenya', 
+            flag: 'https://flagcdn.com/w40/ke.png', 
+            code: 'KE' 
+        },
+        { 
+            name: 'South Africa', 
+            flag: 'https://flagcdn.com/w40/za.png', 
+            code: 'ZA' 
+        },
+        { 
+            name: 'Egypt', 
+            flag: 'https://flagcdn.com/w40/eg.png', 
+            code: 'EG' 
+        },
+        { 
+            name: 'Morocco', 
+            flag: 'https://flagcdn.com/w40/ma.png', 
+            code: 'MA' 
+        },
+        { 
+            name: 'Tanzania', 
+            flag: 'https://flagcdn.com/w40/tz.png', 
+            code: 'TZ' 
+        },
+        { 
+            name: 'Uganda', 
+            flag: 'https://flagcdn.com/w40/ug.png', 
+            code: 'UG' 
+        },
+        { 
+            name: 'Senegal', 
+            flag: 'https://flagcdn.com/w40/sn.png', 
+            code: 'SN' 
+        },
+        { 
+            name: 'Cameroon', 
+            flag: 'https://flagcdn.com/w40/cm.png', 
+            code: 'CM' 
+        },
+        { 
+            name: 'United States', 
+            flag: 'https://flagcdn.com/w40/us.png', 
+            code: 'US' 
+        },
+        { 
+            name: 'Germany', 
+            flag: 'https://flagcdn.com/w40/de.png', 
+            code: 'DE' 
+        },
+        { 
+            name: 'United Kingdom', 
+            flag: 'https://flagcdn.com/w40/gb.png', 
+            code: 'GB' 
+        },
+        { 
+            name: 'France', 
+            flag: 'https://flagcdn.com/w40/fr.png', 
+            code: 'FR' 
+        }
+    ]
+
+    const handleCountrySelect = (country) => {
+        setSelectedCountry(country.name)
+        setIsCountryDropdownOpen(false)
+
+        // Dispatch country change event for other components to listen
+        window.dispatchEvent(new CustomEvent('country-change', {
+            detail: { country: country.name }
+        }))
+    }
+
+    // Set selected country from detected location
+    useEffect(() => {
+        if (country && !isDetectingLocation) {
+            setSelectedCountry(country)
+            console.log('Auto-detected country:', country)
+        }
+    }, [country, isDetectingLocation])
+
+    // Listen for country change from Hero
+    useEffect(() => {
+        const handleCountryChange = (event) => {
+            setSelectedCountry(event.detail.country)
+        }
+
+        window.addEventListener('country-change', handleCountryChange)
+        return () => window.removeEventListener('country-change', handleCountryChange)
+    }, [])
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsCountryDropdownOpen(false)
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [])
 
     const MailIcon = () => (<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M14.6654 4.66699L8.67136 8.48499C8.46796 8.60313 8.23692 8.66536 8.0017 8.66536C7.76647 8.66536 7.53544 8.60313 7.33203 8.48499L1.33203 4.66699M2.66536 2.66699H13.332C14.0684 2.66699 14.6654 3.26395 14.6654 4.00033V12.0003C14.6654 12.7367 14.0684 13.3337 13.332 13.3337H2.66536C1.92898 13.3337 1.33203 12.7367 1.33203 12.0003V4.00033C1.33203 3.26395 1.92898 2.66699 2.66536 2.66699Z" stroke="#5C3AEB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> </svg>)
     const PhoneIcon = () => (<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M9.22003 11.045C9.35772 11.1082 9.51283 11.1227 9.65983 11.086C9.80682 11.0493 9.93692 10.9636 10.0287 10.843L10.2654 10.533C10.3896 10.3674 10.5506 10.233 10.7357 10.1404C10.9209 10.0479 11.125 9.99967 11.332 9.99967H13.332C13.6857 9.99967 14.0248 10.1402 14.2748 10.3902C14.5249 10.6402 14.6654 10.9794 14.6654 11.333V13.333C14.6654 13.6866 14.5249 14.0258 14.2748 14.2758C14.0248 14.5259 13.6857 14.6663 13.332 14.6663C10.1494 14.6663 7.09719 13.4021 4.84675 11.1516C2.59631 8.90119 1.33203 5.84894 1.33203 2.66634C1.33203 2.31272 1.47251 1.97358 1.72256 1.72353C1.9726 1.47348 2.31174 1.33301 2.66536 1.33301H4.66536C5.01899 1.33301 5.35812 1.47348 5.60817 1.72353C5.85822 1.97358 5.9987 2.31272 5.9987 2.66634V4.66634C5.9987 4.87333 5.9505 5.07749 5.85793 5.26263C5.76536 5.44777 5.63096 5.60881 5.46536 5.73301L5.15336 5.96701C5.03098 6.06046 4.94471 6.1934 4.90923 6.34324C4.87374 6.49308 4.89122 6.65059 4.9587 6.78901C5.86982 8.63959 7.36831 10.1362 9.22003 11.045Z" stroke="#5C3AEB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> </svg>)
@@ -16,17 +158,14 @@ const Footer = () => {
         {
             title: "SERVICES",
             links: [
-                { text: "Job Alerts", path: '/jobs', icon: null },
-                { text: "Homework Help", path: '/homework', icon: null },
-                { text: "Investor Connections", path: '/investors', icon: null },
-                { text: "Career Guidance", path: '/career', icon: null },
+                { text: "Job Alerts", path: `/jobs?country=${selectedCountry}`, icon: null },
+                { text: "Investor Connections", path: `/investors?country=${selectedCountry}`, icon: null },
             ]
         },
         {
             title: "PLATFORM",
             links: [
                 { text: "Home", path: '/', icon: null },
-                { text: "How It Works", path: '/how-it-works', icon: null },
                 { text: "Voice Assistant", path: '/voice', icon: null },
                 { text: "WhatsApp Support", path: '/whatsapp', icon: null },
             ]
@@ -35,17 +174,16 @@ const Footer = () => {
             title: "CONTACT",
             links: [
                 { text: "info@qwesi.org", path: 'mailto:info@qwesi.org', icon: MailIcon },
-                { text: "+1-555-QWESI-AI", path: 'tel:+12019790148', icon: PhoneIcon },
+                { text: "+1(201)979-0148", path: 'tel:+12019790148', icon: PhoneIcon },
                 { text: "DeReimer , Brox 10475, NY", path: '/', icon: MapPinIcon }
             ]
         }
     ];
 
     const socialIcons = [
-        { icon: WhatsAppIcon, link: "https://wa.me/1234567890" },
-        { icon: FacebookIcon, link: "https://facebook.com/qwesi" },
-        { icon: LinkedinIcon, link: "https://linkedin.com/company/qwesi" },
-        { icon: TwitterIcon, link: "https://twitter.com/qwesi" },
+        { icon: WhatsAppIcon, link: "https://api.whatsapp.com/send/?phone=12019790148&text&type=phone_number&app_absent=0" },
+        { icon: FacebookIcon, link: "https://m.me/6157705365549" },
+        { icon: LinkedinIcon, link: "https://www.linkedin.com/company/108025422" }
     ]
 
     return (
@@ -61,6 +199,58 @@ const Footer = () => {
                             alt="Company Logo" 
                         />
                         <p className="max-w-[410px] mt-6 text-sm">Your 24/7 Career & Recruitment Assistant. Get job alerts, homework help, and connect with investors through voice, WhatsApp, and smart conversations. Transforming careers with AI technology.</p>
+                        
+                        {/* Country Selector - Flag Only */}
+                        <div className="mt-4 mb-4">
+                            
+                            <div className="relative" ref={dropdownRef}>
+                                <button
+                                    onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                                    disabled={isDetectingLocation}
+                                    className={`relative flex items-center justify-center w-12 h-8 bg-white border-2 border-gray-200 rounded-lg hover:border-[#5C3AEB] focus:outline-none focus:border-[#5C3AEB] focus:ring-2 focus:ring-[#5C3AEB]/20 transition-colors ${isDetectingLocation ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
+                                    title={isDetectingLocation ? 'Detecting...' : selectedCountry}
+                                >
+                                    {isDetectingLocation ? (
+                                        <div className='w-6 h-4 bg-gray-200 rounded-sm animate-pulse'></div>
+                                    ) : (
+                                        <img
+                                            src={countries.find(c => c.name === selectedCountry)?.flag}
+                                            alt={`${selectedCountry} flag`}
+                                            className='w-6 h-4 object-cover rounded-sm'
+                                            onError={(e) => {
+                                                e.target.style.display = 'none'
+                                            }}
+                                        />
+                                    )}
+                                </button>
+                                
+                                {isCountryDropdownOpen && !isDetectingLocation && (
+                                    <div className='absolute bottom-full left-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto min-w-[200px]'>
+                                        {countries.map((country) => (
+                                            <button
+                                                key={country.code}
+                                                onClick={() => handleCountrySelect(country)}
+                                                className='w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-50 transition-colors text-sm'
+                                            >
+                                                <img 
+                                                    src={country.flag}
+                                                    alt={`${country.name} flag`}
+                                                    className='w-5 h-3 object-cover rounded-sm border border-gray-200'
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none'
+                                                    }}
+                                                />
+                                                <span className='font-medium'>{country.name}</span>
+                                                {country.name === selectedCountry && (
+                                                    <div className='w-2 h-2 bg-[#5C3AEB] rounded-full ml-auto'></div>
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         <div className="flex items-center gap-3 mt-5">
                             {socialIcons.map((item, i) => (
                                 <Link href={item.link} key={i} className="flex items-center justify-center w-10 h-10 bg-white border border-[#5C3AEB] hover:bg-[#5C3AEB] hover:scale-105 transition rounded-full group">

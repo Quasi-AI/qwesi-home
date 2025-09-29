@@ -9,14 +9,16 @@ import {
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { API_ROUTES } from '@/lib/apiRoutes'
+import JobCard from '@/components/JobCard'
+import LoaderSkeleton from '@/components/SkeletonLoader'
+import JobViewModal from '@/modals/JobViewModal'
+import ApplicationModal from '@/modals/ApplicationModal'
 
 const JobsPage = () => {
   // State management
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [jobs, setJobs] = useState([])
-  const [selectedJob, setSelectedJob] = useState(null)
-  const [viewingJob, setViewingJob] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -25,7 +27,6 @@ const JobsPage = () => {
   const [savedJobs, setSavedJobs] = useState([])
   const [userApplications, setUserApplications] = useState([])
   const [searchLoading, setSearchLoading] = useState(false)
-  const [applicationErrors, setApplicationErrors] = useState({})
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -36,68 +37,13 @@ const JobsPage = () => {
     salary_range: ''
   })
 
-  // Application form states
-  const [showApplicationModal, setShowApplicationModal] = useState(false)
-  const [applicationLoading, setApplicationLoading] = useState(false)
+  // Modal states
+  const [showJobViewModal, setShowJobViewModal] = useState(false)
+  const [showApplicationModalNew, setShowApplicationModalNew] = useState(false)
+  const [selectedJobForView, setSelectedJobForView] = useState(null)
+  const [selectedJobForApplication, setSelectedJobForApplication] = useState(null)
 
 
-  // Add state for file handling
-  const [resumeFile, setResumeFile] = useState(null)
-  const fileInputRef = useRef(null)
-
-  // Add file handling functions
-  const handleFileUpload = (event) => {
-    const target = event.target
-    const file = target.files?.[0]
-    
-    if (file) {
-      // Validate file type
-      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-      if (!allowedTypes.includes(file.type)) {
-        toast.error('Please upload a PDF, DOC, or DOCX file')
-        return
-      }
-      
-      // Validate file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('File size must be less than 5MB')
-        return
-      }
-      
-      setResumeFile(file)
-      // Clear any previous resume errors
-      setApplicationErrors(prev => ({ ...prev, resume: '' }))
-      toast.success('Resume uploaded successfully')
-    }
-  }
-
-  const removeFile = () => {
-    setResumeFile(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
-  }
-
-  // Add these state variables for the comprehensive form
-  const [applicationForm, setApplicationForm] = useState({
-    jobId: '',
-    applicantDetails: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      address: '',
-      linkedin: '',
-      portfolio: ''
-    },
-    coverLetter: '',
-    skills: [],
-    experience: {
-      years: 0,
-      description: ''
-    }
-  })
-  const [newSkill, setNewSkill] = useState('')
 
   // Helper function to extract country from location
   const extractCountryFromLocation = (location) => {
@@ -228,7 +174,7 @@ const JobsPage = () => {
       queryParams.append('page', currentPage.toString())
       queryParams.append('limit', jobsPerPage.toString())
       
-      const url = `${API_ROUTES.BASE_URL}getjobs${queryParams.toString() ? '?' + queryParams.toString() : ''}`
+      const url = `${API_ROUTES.BASE_URL}getalljobsHome${queryParams.toString() ? '?' + queryParams.toString() : ''}`
       
       const response = await fetch(url)
       
@@ -284,147 +230,9 @@ const JobsPage = () => {
     }
   }
 
-  const openJobDetailsModal = (job) => {
-    setViewingJob(job)
-  }
 
-  const closeJobDetailsModal = () => {
-    setViewingJob(null)
-  }
 
-  const openApplicationModal = (job) => {
-    const authRaw = localStorage.getItem('auth')
-    const auth = authRaw ? JSON.parse(authRaw) : null
-    if (!auth?.token) {
-      // trigger navbar to open login
-      if (typeof window !== 'undefined') window.dispatchEvent(new Event('auth:open-login'))
-      return
-    }
-    setSelectedJob(job)
-    
-    // Set the jobId in the form
-    setApplicationForm(prev => ({
-      ...prev,
-      jobId: job._id
-    }))
-    
-    setShowApplicationModal(true)
-  }
 
-  const closeApplicationModal = () => {
-    setShowApplicationModal(false)
-    setSelectedJob(null)
-  }
-
-  const applyToJob = (job) => {
-    openApplicationModal(job)
-  }
-
-  // Add proper form validation similar to your Vue composable
-  const validateApplicationForm = (formData, resumeFile) => {
-    const errors = {}
-    
-    // Validate required fields using applicationForm state instead of FormData
-    if (!applicationForm.applicantDetails.firstName?.trim()) {
-      errors.firstName = 'First name is required'
-    }
-
-    if (!applicationForm.applicantDetails.lastName?.trim()) {
-      errors.lastName = 'Last name is required'
-    }
-
-    if (!applicationForm.applicantDetails.email?.trim()) {
-      errors.email = 'Email is required'
-    } else if (!/\S+@\S+\.\S+/.test(applicationForm.applicantDetails.email)) {
-      errors.email = 'Please enter a valid email'
-    }
-
-    if (!applicationForm.applicantDetails.phone?.trim()) {
-      errors.phone = 'Phone number is required'
-    }
-
-    // Validate resume file
-    if (!resumeFile) {
-      errors.resume = 'Resume is required'
-    } else {
-      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-      if (!allowedTypes.includes(resumeFile.type)) {
-        errors.resume = 'Please upload a PDF, DOC, or DOCX file'
-      }
-
-      if (resumeFile.size > 5 * 1024 * 1024) {
-        errors.resume = 'File size must be less than 5MB'
-      }
-    }
-
-    return {
-      isValid: Object.keys(errors).length === 0,
-      errors
-    }
-  }
-
-  const submitApplication = async (e) => {
-    e.preventDefault()
-    
-    const validation = validateApplicationForm(null, resumeFile)
-    
-    if (!validation.isValid) {
-      setApplicationErrors(validation.errors)
-      toast.error('Please correct the errors in the form')
-      return
-    }
-
-    setApplicationLoading(true)
-    setApplicationErrors({})
-
-    try {
-      // Get auth token from localStorage
-      const authRaw = localStorage.getItem('auth')
-      const auth = authRaw ? JSON.parse(authRaw) : null
-      const token = auth?.token
-
-      // Create FormData for API submission
-      const applicationData = new FormData()
-      applicationData.append('jobId', selectedJob._id) // Use selectedJob._id directly
-      applicationData.append('applicantDetails', JSON.stringify(applicationForm.applicantDetails))
-      applicationData.append('coverLetter', applicationForm.coverLetter || '')
-      applicationData.append('skills', JSON.stringify(applicationForm.skills))
-      applicationData.append('experience', JSON.stringify(applicationForm.experience))
-      
-      if (resumeFile) {
-        applicationData.append('resume', resumeFile)
-      }
-      
-      // Make actual API call
-      const response = await fetch(`${API_ROUTES.BASE_URL}/applications/submit`, {
-        method: 'POST',
-        headers: {
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
-        body: applicationData
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const result = await response.json()
-      
-      if (result.success) {
-        toast.success('Application submitted successfully!')
-        closeApplicationModal()
-        resetApplicationForm()
-      } else {
-        throw new Error(result.message || 'Failed to submit application')
-      }
-      
-    } catch (error) {
-      console.error('Application error:', error)
-      toast.error('Failed to submit application. Please try again.')
-    } finally {
-      setApplicationLoading(false)
-    }
-  }
 
   const formatDate = (dateString) => {
     if (!dateString) return ''
@@ -455,50 +263,46 @@ const JobsPage = () => {
     }
   }
 
-  // Add helper functions
-  const addSkill = () => {
-    if (newSkill.trim() && !applicationForm.skills.includes(newSkill.trim())) {
-      setApplicationForm(prev => ({
-        ...prev,
-        skills: [...prev.skills, newSkill.trim()]
-      }))
-      setNewSkill('')
-    }
+  // Modal handlers
+  const handleViewJobDetails = (job) => {
+    setSelectedJobForView(job)
+    setShowJobViewModal(true)
   }
 
-  const removeSkill = (index) => {
-    setApplicationForm(prev => ({
-      ...prev,
-      skills: prev.skills.filter((_, i) => i !== index)
-    }))
+  const handleApplyToJob = (job) => {
+    const authRaw = localStorage.getItem('auth')
+    const auth = authRaw ? JSON.parse(authRaw) : null
+    if (!auth?.token) {
+      // trigger navbar to open login
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('auth:open-login'))
+      return
+    }
+    setSelectedJobForApplication(job)
+    setShowApplicationModalNew(true)
   }
 
-  const resetApplicationForm = () => {
-    setApplicationForm({
-      jobId: '',
-      applicantDetails: {
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        address: '',
-        linkedin: '',
-        portfolio: ''
-      },
-      coverLetter: '',
-      skills: [],
-      experience: {
-        years: 0,
-        description: ''
-      }
-    })
-    setResumeFile(null)
-    setNewSkill('')
-    setApplicationErrors({})
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
+  const closeJobViewModal = () => {
+    setShowJobViewModal(false)
+    setSelectedJobForView(null)
   }
+
+  const closeApplicationModalNew = () => {
+    setShowApplicationModalNew(false)
+    setSelectedJobForApplication(null)
+  }
+
+  // Event listeners for custom events
+  useEffect(() => {
+    const handleOpenJobApplication = (event) => {
+      handleApplyToJob(event.detail)
+    }
+
+    window.addEventListener('open-job-application', handleOpenJobApplication)
+
+    return () => {
+      window.removeEventListener('open-job-application', handleOpenJobApplication)
+    }
+  }, [])
 
   // Effects
   useEffect(() => {
@@ -511,40 +315,6 @@ const JobsPage = () => {
     }
   }, [filteredJobs.length, totalPages, currentPage])
 
-  // Skeleton Loader Component
-  const JobCardSkeleton = () => (
-    <div className="bg-white border border-gray-200 rounded-2xl p-6 animate-pulse">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1 space-y-2">
-          <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-        </div>
-        <div className="h-6 bg-gray-200 rounded w-20"></div>
-      </div>
-      <div className="space-y-3 mb-4">
-        <div className="flex items-center space-x-3">
-          <div className="h-4 bg-gray-200 rounded w-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-32"></div>
-        </div>
-        <div className="flex items-center space-x-3">
-          <div className="h-4 bg-gray-200 rounded w-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-24"></div>
-        </div>
-        <div className="flex items-center space-x-3">
-          <div className="h-4 bg-gray-200 rounded w-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-28"></div>
-        </div>
-      </div>
-      <div className="h-12 bg-gray-200 rounded mb-4"></div>
-      <div className="flex justify-between items-center">
-        <div className="h-4 bg-gray-200 rounded w-20"></div>
-        <div className="flex space-x-2">
-          <div className="h-8 bg-gray-200 rounded w-8"></div>
-          <div className="h-8 bg-gray-200 rounded w-20"></div>
-        </div>
-      </div>
-    </div>
-  )
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -765,7 +535,7 @@ const JobsPage = () => {
         {loading && (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <JobCardSkeleton key={i} />
+              <LoaderSkeleton key={i} />
             ))}
           </div>
         )}
@@ -814,84 +584,7 @@ const JobsPage = () => {
             <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {paginatedJobs.map(job => (
                 <div key={job._id} className="group bg-white border border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-[#5C3AEB] hover:shadow-lg transition-all duration-300 flex flex-col">
-
-                  {/* Job Header - Mobile Optimized */}
-                  <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 group-hover:text-[#5C3AEB] transition-colors line-clamp-2 leading-tight">
-                        {job.title}
-                      </h3>
-                      <p className="text-sm sm:text-base text-[#5C3AEB] font-semibold truncate">{job.employer}</p>
-                    </div>
-                    <button
-                      onClick={() => saveJob(job)}
-                      className={`p-1.5 sm:p-2 rounded-lg transition-colors flex-shrink-0 ${
-                        savedJobs.includes(job._id)
-                          ? 'text-red-500 bg-red-50'
-                          : 'text-gray-400 hover:text-red-500 hover:bg-gray-50'
-                      }`}
-                    >
-                      <Heart
-                        fill={savedJobs.includes(job._id) ? 'currentColor' : 'none'}
-                        className="w-4 h-4"
-                      />
-                    </button>
-                  </div>
-
-                  {/* Job Details - Mobile Optimized */}
-                  <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4 flex-grow">
-                    <div className="flex items-center text-xs sm:text-sm text-gray-600">
-                      <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
-                      <span className="truncate">{job.location}</span>
-                    </div>
-                    <div className="flex items-center text-xs sm:text-sm text-gray-600">
-                      <Building className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
-                      <span className="truncate">{job.sector}</span>
-                    </div>
-                    <div className="flex items-center text-xs sm:text-sm text-gray-600">
-                      <Target className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
-                      <span className={`px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium ${getExperienceColor(job.experience_level)}`}>
-                        {job.experience_level}
-                      </span>
-                    </div>
-                    {job.salary && (
-                      <div className="flex items-center text-xs sm:text-sm text-gray-600">
-                        <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
-                        <span className="font-semibold text-green-600 truncate">{job.salary}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Job Description Preview - Mobile Optimized */}
-                  <div className="mb-3 sm:mb-4 flex-grow">
-                    <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 sm:line-clamp-3 leading-relaxed">
-                      {job.job_description}
-                    </p>
-                  </div>
-
-                  {/* Posted Date - Mobile Optimized */}
-                  <div className="flex items-center text-xs text-gray-500 mb-3 sm:mb-4">
-                    <Clock className="w-3 h-3 mr-1 flex-shrink-0" />
-                    <span className="truncate">Posted {formatDate(job.posted)}</span>
-                  </div>
-
-                  {/* Actions - Mobile Optimized */}
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-0 mt-auto">
-                    <button
-                      onClick={() => openJobDetailsModal(job)}
-                      className="text-xs sm:text-sm font-semibold text-[#5C3AEB] hover:text-[#342299] transition-colors flex items-center justify-center sm:justify-start gap-1 py-2 sm:py-0 order-2 sm:order-1"
-                    >
-                      <span>View Details</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
-
-                    <button
-                      onClick={() => applyToJob(job)}
-                      className="w-full sm:w-auto px-3 sm:px-3 py-2 bg-[#5C3AEB] text-white text-xs sm:text-sm font-semibold rounded-lg hover:bg-[#342299] transition-colors order-1 sm:order-2"
-                    >
-                      Apply Now
-                    </button>
-                  </div>
+                  <JobCard job={job} onViewDetails={handleViewJobDetails} onApply={handleApplyToJob} />
                 </div>
               ))}
             </div>
@@ -951,375 +644,19 @@ const JobsPage = () => {
         )}
       </div>
 
-      {/* Job Details Modal */}
-      {viewingJob && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{viewingJob.title}</h2>
-                  <p className="text-lg text-[#5C3AEB] font-semibold mt-1">{viewingJob.employer}</p>
-                </div>
-                <button 
-                  onClick={closeJobDetailsModal}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-            
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-              <div className="grid gap-6">
-                {/* Job Details */}
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3">
-                    <MapPin className="w-5 h-5 text-gray-400" />
-                    <div>
-                      <div className="text-sm text-gray-600">Location</div>
-                      <div className="font-semibold">{viewingJob.location}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Building className="w-5 h-5 text-gray-400" />
-                    <div>
-                      <div className="text-sm text-gray-600">Sector</div>
-                      <div className="font-semibold">{viewingJob.sector}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Target className="w-5 h-5 text-gray-400" />
-                    <div>
-                      <div className="text-sm text-gray-600">Experience</div>
-                      <div className="font-semibold">{viewingJob.experience_level}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <DollarSign className="w-5 h-5 text-gray-400" />
-                    <div>
-                      <div className="text-sm text-gray-600">Salary</div>
-                      <div className="font-semibold text-green-600">{viewingJob.salary}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Job Description */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Job Description</h3>
-                  <div className="prose prose-gray max-w-none">
-                    <p className="text-gray-700 leading-relaxed">{viewingJob.job_description}</p>
-                  </div>
-                </div>
-
-                {/* Requirements */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Requirements</h3>
-                  <ul className="space-y-2 text-gray-700">
-                    <li className="flex items-center gap-2">
-                      <Star className="w-4 h-4 text-[#5C3AEB] flex-shrink-0" />
-                      {viewingJob.experience_length} of experience in related field
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Star className="w-4 h-4 text-[#5C3AEB] flex-shrink-0" />
-                      Strong communication and teamwork skills
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Star className="w-4 h-4 text-[#5C3AEB] flex-shrink-0" />
-                      Relevant certifications or degrees preferred
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-gray-200">
-              <div className="flex items-center justify-between">
-                <button
-                  onClick={closeJobDetailsModal}
-                  className="px-6 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Close
-                </button>
-                <button
-                  onClick={() => applyToJob(viewingJob)}
-                  className="px-6 py-2 bg-[#5C3AEB] text-white rounded-lg hover:bg-[#342299] transition-colors font-semibold"
-                >
-                  Apply for this Position
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Job View Modal */}
+      <JobViewModal
+        job={selectedJobForView}
+        isOpen={showJobViewModal}
+        onClose={closeJobViewModal}
+      />
 
       {/* Application Modal */}
-      {showApplicationModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold">Apply for Position</h2>
-                  <p className="text-[#5C3AEB] font-semibold">{selectedJob?.title} at {selectedJob?.employer}</p>
-                </div>
-                <button 
-                  onClick={closeApplicationModal}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-            
-            <form onSubmit={submitApplication} className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-              <div className="space-y-6">
-                {/* Personal Information Section */}
-                <div className="space-y-4">
-                  <h4 className="flex items-center gap-2 text-lg font-semibold">
-                    <User className="w-5 h-5 text-blue-600" />
-                    Personal Information
-                  </h4>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold mb-2">First Name *</label>
-                      <input
-                        type="text"
-                        value={applicationForm.applicantDetails.firstName}
-                        onChange={(e) => setApplicationForm(prev => ({
-                          ...prev,
-                          applicantDetails: { ...prev.applicantDetails, firstName: e.target.value }
-                        }))}
-                        className={`w-full border rounded-lg px-3 py-3 min-h-[44px] focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors ${
-                          applicationErrors.firstName ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                        placeholder="Enter your first name"
-                      />
-                      {applicationErrors.firstName && (
-                        <p className="text-red-500 text-xs mt-1">{applicationErrors.firstName}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold mb-2">Last Name *</label>
-                      <input
-                        type="text"
-                        value={applicationForm.applicantDetails.lastName}
-                        onChange={(e) => setApplicationForm(prev => ({
-                          ...prev,
-                          applicantDetails: { ...prev.applicantDetails, lastName: e.target.value }
-                        }))}
-                        className={`w-full border rounded-lg px-3 py-3 min-h-[44px] focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors ${
-                          applicationErrors.lastName ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                        placeholder="Enter your last name"
-                      />
-                      {applicationErrors.lastName && (
-                        <p className="text-red-500 text-xs mt-1">{applicationErrors.lastName}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold mb-2">Email Address *</label>
-                      <input
-                        type="email"
-                        value={applicationForm.applicantDetails.email}
-                        onChange={(e) => setApplicationForm(prev => ({
-                          ...prev,
-                          applicantDetails: { ...prev.applicantDetails, email: e.target.value }
-                        }))}
-                        className={`w-full border rounded-lg px-3 py-3 min-h-[44px] focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors ${
-                          applicationErrors.email ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                        placeholder="Enter your email"
-                      />
-                      {applicationErrors.email && (
-                        <p className="text-red-500 text-xs mt-1">{applicationErrors.email}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold mb-2">Phone Number *</label>
-                      <input
-                        type="tel"
-                        value={applicationForm.applicantDetails.phone}
-                        onChange={(e) => setApplicationForm(prev => ({
-                          ...prev,
-                          applicantDetails: { ...prev.applicantDetails, phone: e.target.value }
-                        }))}
-                        className={`w-full border rounded-lg px-3 py-3 min-h-[44px] focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors ${
-                          applicationErrors.phone ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                        placeholder="Enter your phone number"
-                      />
-                      {applicationErrors.phone && (
-                        <p className="text-red-500 text-xs mt-1">{applicationErrors.phone}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Resume Upload Section */}
-                <div className="space-y-4">
-                  <h4 className="flex items-center gap-2 text-lg font-semibold">
-                    <FileText className="w-5 h-5 text-blue-600" />
-                    Resume/CV
-                  </h4>
-                  
-                  <div>
-                    <label className="block text-sm font-semibold mb-2">Upload Resume *</label>
-                    
-                    {!resumeFile ? (
-                      <div 
-                        className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#5C3AEB] transition-colors cursor-pointer"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600 mb-1">Click to upload resume</p>
-                        <p className="text-xs text-gray-500">PDF, DOC, DOCX (Max 5MB)</p>
-                      </div>
-                    ) : (
-                      <div className="border border-gray-300 rounded-lg p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <FileText className="w-5 h-5 text-[#5C3AEB]" />
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">{resumeFile.name}</p>
-                              <p className="text-xs text-gray-500">
-                                {(resumeFile.size / (1024 * 1024)).toFixed(2)} MB
-                              </p>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={removeFile}
-                            className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                    
-                    <input 
-                      ref={fileInputRef}
-                      type="file" 
-                      accept=".pdf,.doc,.docx"
-                      onChange={handleFileUpload}
-                      className="hidden" 
-                    />
-                    
-                    {applicationErrors.resume && (
-                      <p className="text-red-500 text-xs mt-1">{applicationErrors.resume}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Skills Section */}
-                <div className="space-y-4">
-                  <h4 className="flex items-center gap-2 text-lg font-semibold">
-                    <Zap className="w-5 h-5 text-blue-600" />
-                    Skills
-                  </h4>
-                  
-                  <div>
-                    <label className="block text-sm font-semibold mb-2">Add Skills</label>
-                    <div className="flex space-x-2">
-                      <input
-                        type="text"
-                        value={newSkill}
-                        onChange={(e) => setNewSkill(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-3 min-h-[44px] focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors"
-                        placeholder="Enter a skill"
-                      />
-                      <button
-                        type="button"
-                        onClick={addSkill}
-                        className="px-4 py-3 min-h-[44px] bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex-shrink-0"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
-                    
-                    {applicationForm.skills.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        {applicationForm.skills.map((skill, index) => (
-                          <span
-                            key={index}
-                            className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                          >
-                            {skill}
-                            <button
-                              type="button"
-                              onClick={() => removeSkill(index)}
-                              className="ml-2 text-blue-600 hover:text-blue-800"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Cover Letter Section */}
-                <div className="space-y-4">
-                  <h4 className="flex items-center gap-2 text-lg font-semibold">
-                    <MessageSquare className="w-5 h-5 text-blue-600" />
-                    Cover Letter
-                  </h4>
-                  
-                  <div>
-                    <label className="block text-sm font-semibold mb-2">Cover Letter (Optional)</label>
-                    <textarea
-                      value={applicationForm.coverLetter}
-                      onChange={(e) => setApplicationForm(prev => ({ ...prev, coverLetter: e.target.value }))}
-                      rows={6}
-                      maxLength={5000}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-3 min-h-[120px] focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors resize-vertical"
-                      placeholder="Write a personalized cover letter for this position..."
-                    />
-                    <div className="text-xs text-gray-500 mt-1 text-right">
-                      {applicationForm.coverLetter.length}/5000 characters
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="button"
-                  onClick={closeApplicationModal}
-                  disabled={applicationLoading}
-                  className="flex-1 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={applicationLoading}
-                  className="flex-1 px-4 py-2 bg-[#5C3AEB] text-white rounded-lg hover:bg-[#342299] disabled:opacity-50 transition-colors font-semibold flex items-center justify-center gap-2"
-                >
-                  {applicationLoading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Submitting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" />
-                      <span>Submit Application</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <ApplicationModal
+        job={selectedJobForApplication}
+        isOpen={showApplicationModalNew}
+        onClose={closeApplicationModalNew}
+      />
     </div>
   )
 }

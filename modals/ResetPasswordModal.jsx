@@ -3,15 +3,14 @@ import { useEffect, useState } from 'react'
 import { X, Eye, EyeOff } from 'lucide-react'
 import { resetPassword } from '@/lib/auth'
 
-export default function ResetPasswordModal({ isOpen, onClose }) {
-  const [token, setToken] = useState('')
+export default function ResetPasswordModal({ isOpen, onClose, token: propToken, email: propEmail }) {
   const [password, setPassword] = useState('')
   const [show, setShow] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
-  useEffect(() => { if (!isOpen) { setToken(''); setPassword(''); setError(''); setSuccess(''); setLoading(false) } }, [isOpen])
+  useEffect(() => { if (!isOpen) { setPassword(''); setError(''); setSuccess(''); setLoading(false) } }, [isOpen])
 
   if (!isOpen) return null
 
@@ -21,20 +20,16 @@ export default function ResetPasswordModal({ isOpen, onClose }) {
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-8">
         <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full"><X size={20}/></button>
         <h2 className="text-xl font-bold text-slate-900 mb-1">Reset password</h2>
-        <p className="text-sm text-slate-600 mb-6">Enter your reset token and new password.</p>
+        <p className="text-sm text-slate-600 mb-6">Enter your new password.</p>
         <form onSubmit={async (e) => {
           e.preventDefault(); setLoading(true); setError(''); setSuccess('')
           try {
-            const res = await resetPassword({ token, newPassword: password })
+            const res = await resetPassword({ token: propToken, newPassword: password, email: propEmail })
             setSuccess(res?.message || 'Password reset successfully')
           } catch (err) {
             setError(err?.message || 'Failed to reset password')
           } finally { setLoading(false) }
         }} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Reset token</label>
-            <input className="w-full px-4 py-3 border rounded-xl" value={token} onChange={(e)=>setToken(e.target.value)} required/>
-          </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">New password</label>
             <div className="relative">

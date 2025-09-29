@@ -1,31 +1,21 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { X, Eye, EyeOff, ChevronDown } from 'lucide-react'
+import { X, Eye, EyeOff, ChevronDown, Mail, Phone, Lock, Loader2 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
-import { loginWithCredentials, startGoogleOAuth, persistAuth } from '@/lib/auth'
+import { loginWithCredentials, persistAuth } from '@/lib/auth'
 import { countryCodes, detectCountryByIP, formatPhoneNumber } from '@/utils/countryUtils'
 
 const LoginModal = ({ isOpen, onClose, onSwitchToSignup, onLoggedIn, onForgotPassword }) => {
-    const [phone, setPhone] = useState('')
-    const [countryCode, setCountryCode] = useState('+233')
+    const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    const [loginMethod, setLoginMethod] = useState('email')
+    const [phone, setPhone] = useState('')
+    const [countryCode, setCountryCode] = useState('+233')
     const [showCountryDropdown, setShowCountryDropdown] = useState(false)
     const { setAuth } = useAuthStore()
-
-    // Auto-detect country on component mount
-    useEffect(() => {
-        const detectCountry = async () => {
-            const detectedCode = await detectCountryByIP()
-            setCountryCode(detectedCode)
-        }
-        
-        if (isOpen) {
-            detectCountry()
-        }
-    }, [isOpen])
 
     // Close modal on escape key
     useEffect(() => {
@@ -35,30 +25,36 @@ const LoginModal = ({ isOpen, onClose, onSwitchToSignup, onLoggedIn, onForgotPas
                 setShowCountryDropdown(false)
             }
         }
+        
+        const handleClickOutside = (e) => {
+            if (showCountryDropdown && !e.target.closest('.country-dropdown-container')) {
+                setShowCountryDropdown(false)
+            }
+        }
+
         if (isOpen) {
             document.addEventListener('keydown', handleEscape)
+            document.addEventListener('click', handleClickOutside)
             document.body.style.overflow = 'hidden'
         }
+        
         return () => {
             document.removeEventListener('keydown', handleEscape)
+            document.removeEventListener('click', handleClickOutside)
             document.body.style.overflow = 'unset'
         }
-    }, [isOpen, onClose])
+    }, [isOpen, showCountryDropdown, onClose])
 
+    // Auto-detect country for phone login
     useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const user = urlParams.get('user');
-        const token = urlParams.get('token');
-
-        if (user && token) {
-            const decodedUser = JSON.parse(decodeURIComponent(user));
-            persistAuth({ user: decodedUser, token });
-            setAuth(decodedUser, token);
-            onClose(); // Close the modal after successful login
-            // remove params from url
-            window.history.replaceState({}, document.title, window.location.pathname);
+        if (isOpen && loginMethod === 'phone') {
+            const detectCountry = async () => {
+                const detectedCode = await detectCountryByIP()
+                setCountryCode(detectedCode)
+            }
+            detectCountry()
         }
-    }, [isOpen]);
+    }, [isOpen, loginMethod])
 
     const handleCountrySelect = (code) => {
         setCountryCode(code)
@@ -70,13 +66,20 @@ const LoginModal = ({ isOpen, onClose, onSwitchToSignup, onLoggedIn, onForgotPas
         setIsLoading(true)
         setError('')
         try {
-            const fullPhoneNumber = formatPhoneNumber(countryCode, phone)
-            
-            const result = await loginWithCredentials(fullPhoneNumber, password)
+            let identifier
+            if (loginMethod === 'phone') {
+                identifier = formatPhoneNumber(countryCode, phone)
+            } else {
+                identifier = email
+            }
+            const result = await loginWithCredentials(identifier, password)
             if (result?.success) {
                 // Persist auth data to localStorage
                 persistAuth({ user: result.user, token: result.token })
-                
+
+                // Update auth store state
+                setAuth(result.user, result.token)
+
                 onLoggedIn(result)
                 onClose()
             }
@@ -87,172 +90,202 @@ const LoginModal = ({ isOpen, onClose, onSwitchToSignup, onLoggedIn, onForgotPas
         }
     }
 
-    const handleGoogleLogin = () => {
-        startGoogleOAuth()
-    }
-
     if (!isOpen) return null
 
     const selectedCountry = countryCodes.find(c => c.code === countryCode)
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Backdrop */}
-            <div 
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                onClick={() => {
-                    onClose()
-                    setShowCountryDropdown(false)
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            {/* Enhanced Backdrop with blur */}
+            <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-md"
+                onClick={() => { 
+                    onClose(); 
+                    setShowCountryDropdown(false) 
                 }}
             />
 
-            {/* Modal */}
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                    <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
+            {/* Modal with enhanced styling */}
+            <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl w-full max-w-md mx-auto border border-white/20 overflow-hidden">
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                {/* Form Container */}
+                <div className="p-4 sm:p-6 space-y-4">
                     {error && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex items-center gap-2 animate-in fade-in duration-200">
+                            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                             {error}
                         </div>
                     )}
 
-                    {/* Phone Input */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Phone number
-                        </label>
-                        <div className="flex">
+                    {/* Login Method Toggle */}
+                    <div className="flex bg-gray-100 rounded-xl p-1">
+                        <button
+                            type="button"
+                            onClick={() => setLoginMethod('email')}
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                loginMethod === 'email' 
+                                    ? 'bg-white text-indigo-600 shadow-sm' 
+                                    : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                        >
+                            <Mail className="w-4 h-4" />
+                            Email
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setLoginMethod('phone')}
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                loginMethod === 'phone' 
+                                    ? 'bg-white text-indigo-600 shadow-sm' 
+                                    : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                        >
+                            <Phone className="w-4 h-4" />
+                            Phone
+                        </button>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-3">
+                        {/* Email or Phone Input */}
+                        {loginMethod === 'email' ? (
+                            <div className="space-y-2">
+                                <label className="block text-sm font-semibold text-gray-700">
+                                    Email address
+                                </label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <Mail className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="Enter your email"
+                                        className="w-full pl-12 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C3AEC]/20 focus:border-[#5C3AEC] transition-all duration-200 bg-gray-50/50 hover:bg-white"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                <label className="block text-sm font-semibold text-gray-700">
+                                    Phone number
+                                </label>
+                                <div className="flex">
+                                    <div className="relative country-dropdown-container">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                                            className="flex items-center gap-2 px-3 py-2.5 border border-gray-200 border-r-0 rounded-l-xl bg-gray-50/50 hover:bg-white transition-all duration-200 min-w-[90px] focus:outline-none focus:ring-2 focus:ring-[#5C3AEC]/20 focus:border-[#5C3AEC]"
+                                        >
+                                            <span className="text-lg">{selectedCountry?.flag}</span>
+                                            <span className="text-sm font-medium">{countryCode}</span>
+                                            <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showCountryDropdown ? 'rotate-180' : ''}`} />
+                                        </button>
+
+                                        {showCountryDropdown && (
+                                            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-48 overflow-y-auto mt-1 animate-in fade-in zoom-in-95 duration-200">
+                                                {countryCodes.map((country) => (
+                                                    <button
+                                                        key={`${country.code}-${country.country}`}
+                                                        type="button"
+                                                        onClick={() => handleCountrySelect(country.code)}
+                                                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 text-left transition-colors duration-150 first:rounded-t-xl last:rounded-b-xl"
+                                                    >
+                                                        <span className="text-lg">{country.flag}</span>
+                                                        <span className="text-sm font-medium">{country.code}</span>
+                                                        <span className="text-sm text-gray-600 truncate">{country.country}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="relative flex-1">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <Phone className="h-5 w-5 text-gray-400" />
+                                        </div>
+                                        <input
+                                            type="tel"
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            placeholder="555 000 111"
+                                            className="w-full pl-12 pr-4 py-2.5 border border-gray-200 rounded-r-xl focus:outline-none focus:ring-2 focus:ring-[#5C3AEC]/20 focus:border-[#5C3AEC] transition-all duration-200 bg-gray-50/50 hover:bg-white"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Password Input */}
+                        <div className="space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700">
+                                Password
+                            </label>
                             <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <Lock className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Enter your password"
+                                    className="w-full pl-12 pr-12 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C3AEC]/20 focus:border-[#5C3AEC] transition-all duration-200 bg-gray-50/50 hover:bg-white"
+                                    required
+                                />
                                 <button
                                     type="button"
-                                    onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                                    className="flex items-center gap-2 px-3 py-3 border border-gray-200 rounded-l-xl bg-gray-50 hover:bg-gray-100 transition-colors min-w-[80px]"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
                                 >
-                                    <span className="text-lg">{selectedCountry?.flag}</span>
-                                    <span className="text-sm font-medium">{countryCode}</span>
-                                    <ChevronDown className="w-4 h-4" />
+                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
-                                
-                                {showCountryDropdown && (
-                                    <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
-                                        {countryCodes.map((country) => (
-                                            <button
-                                                key={`${country.code}-${country.country}`}
-                                                type="button"
-                                                onClick={() => handleCountrySelect(country.code)}
-                                                className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 text-left"
-                                            >
-                                                <span className="text-lg">{country.flag}</span>
-                                                <span className="text-sm font-medium">{country.code}</span>
-                                                <span className="text-sm text-gray-600 truncate">{country.country}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
                             </div>
-                            <input
-                                type="tel"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                placeholder="555 000 111"
-                                className="flex-1 px-4 py-3 border border-l-0 border-gray-200 rounded-r-xl focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]/20 focus:border-[#5C3AEB] transition-colors"
-                                required
-                            />
                         </div>
-                    </div>
 
-                    {/* Password Input */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Password
-                        </label>
-                        <div className="relative">
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Enter your password"
-                                className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]/20 focus:border-[#5C3AEB] transition-colors"
-                                required
-                            />
+                        {/* Forgot Password */}
+                        <div className="text-right">
                             <button
                                 type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+                                onClick={onForgotPassword}
+                                className="text-sm text-[#5C3AEC] hover:text-[#3d1fc7] hover:underline transition-colors duration-200 font-medium"
                             >
-                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                Forgot password?
                             </button>
                         </div>
-                    </div>
 
-                    {/* Forgot Password */}
-                    <div className="text-right">
+                        {/* Submit Button */}
                         <button
-                            type="button"
-                            onClick={onForgotPassword}
-                            className="text-sm text-[#5C3AEB] hover:underline"
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full bg-[#5C3AEC] text-white py-2.5 px-4 rounded-xl font-semibold hover:bg-[#3d1fc7] focus:outline-none focus:ring-2 focus:ring-[#5C3AEC]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] disabled:hover:scale-100 shadow-lg hover:shadow-xl"
                         >
-                            Forgot password?
+                            {isLoading ? (
+                                <div className="flex items-center justify-center gap-2">
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    Signing In...
+                                </div>
+                            ) : (
+                                'Sign In'
+                            )}
                         </button>
-                    </div>
-
-                    {/* Submit Button */}
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full bg-[#5C3AEB] text-white py-3 px-4 rounded-xl font-medium hover:bg-[#4C2BD8] focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                        {isLoading ? 'Signing In...' : 'Sign In'}
-                    </button>
-
-                    {/* Divider */}
-                    <div className="relative my-6">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-200" />
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-4 bg-white text-gray-500">Or continue with</span>
-                        </div>
-                    </div>
-
-                    {/* Google Button */}
-                    <button
-                        type="button"
-                        onClick={handleGoogleLogin}
-                        className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors"
-                    >
-                        <svg className="w-5 h-5" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                        Continue with Google
-                    </button>
+                    </form>
 
                     {/* Signup Link */}
-                    <p className="text-center text-sm text-gray-600">
-                        Don't have an account?{' '}
-                        <button
-                            type="button"
-                            onClick={onSwitchToSignup}
-                            className="text-[#5C3AEB] hover:underline font-medium"
-                        >
-                            Sign up
-                        </button>
-                    </p>
-                </form>
+                    <div className="pt-6 border-t border-gray-100">
+                        <p className="text-center text-sm text-gray-600">
+                            Don't have an account?{' '}
+                            <button
+                                type="button"
+                                onClick={onSwitchToSignup}
+                                className="text-[#5C3AEC] hover:text-[#3d1fc7] hover:underline font-semibold transition-colors duration-200"
+                            >
+                                Create one now
+                            </button>
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     )

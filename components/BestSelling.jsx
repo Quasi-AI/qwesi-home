@@ -10,6 +10,17 @@ const BestSelling = ({ displayQuantity = 8, storeId = null, days = 180 }) => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [meta, setMeta] = useState({ showing: 0, total: 0, limit: displayQuantity, days })
+    const [selectedCountry, setSelectedCountry] = useState('Ghana')
+
+    // Listen for country change from Hero/Footer
+    useEffect(() => {
+        const handleCountryChange = (event) => {
+            setSelectedCountry(event.detail.country)
+        }
+
+        window.addEventListener('country-change', handleCountryChange)
+        return () => window.removeEventListener('country-change', handleCountryChange)
+    }, [])
 
     useEffect(() => {
         const fetchBestSellingProducts = async () => {
@@ -20,9 +31,10 @@ const BestSelling = ({ displayQuantity = 8, storeId = null, days = 180 }) => {
                 // Build query parameters
                 const params = new URLSearchParams({
                     limit: displayQuantity.toString(),
-                    days: days.toString()
+                    days: days.toString(),
+                    country: selectedCountry
                 })
-                
+
                 if (storeId) {
                     params.append('storeId', storeId)
                 }
@@ -53,7 +65,7 @@ const BestSelling = ({ displayQuantity = 8, storeId = null, days = 180 }) => {
         }
 
         fetchBestSellingProducts()
-    }, [displayQuantity, storeId, days])
+    }, [displayQuantity, storeId, days, selectedCountry])
 
     if (loading) {
         return (
