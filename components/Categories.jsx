@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-const Categories = ({ products = [], onCategorySelect }) => {
+// Separate the component that uses useSearchParams
+function CategoriesContent({ products = [], onCategorySelect }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const currentCategory = searchParams.get('category') || ''
@@ -83,6 +84,32 @@ const Categories = ({ products = [], onCategorySelect }) => {
         </button>
       )}
     </div>
+  )
+}
+
+// Loading fallback component
+function CategoriesLoading() {
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="h-6 w-24 bg-gray-200 rounded animate-pulse"></div>
+        <div className="h-5 w-5 bg-gray-200 rounded animate-pulse"></div>
+      </div>
+      <div className="space-y-2">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-12 bg-gray-100 rounded-lg animate-pulse"></div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Main component wrapped with Suspense
+const Categories = ({ products = [], onCategorySelect }) => {
+  return (
+    <Suspense fallback={<CategoriesLoading />}>
+      <CategoriesContent products={products} onCategorySelect={onCategorySelect} />
+    </Suspense>
   )
 }
 
