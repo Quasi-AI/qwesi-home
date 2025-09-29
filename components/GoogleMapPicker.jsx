@@ -4,7 +4,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 
 // Mock API key for demo - replace with your actual key
-const GOOGLE_MAPS_API_KEY = 'AIzaSyA7_dAYr-UmBgppmaEf9Jt5xaUQehskT78'
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY 
 
 // Simple wrapper component to simulate @googlemaps/react-wrapper
 const Wrapper = ({ apiKey, render, children }) => {

@@ -6,7 +6,7 @@ import { authFetch } from '@/lib/auth'
 const API_BASE_URL = 'https://dark-caldron-448714-u5.uc.r.appspot.com/api'
 
 // Google Maps API Key
-const GOOGLE_MAPS_API_KEY = 'AIzaSyA7_dAYr-UmBgppmaEf9Jt5xaUQehskT78'
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY
 
 // Simple Map Display Component
 const MapDisplay = ({ latitude, longitude }) => {
