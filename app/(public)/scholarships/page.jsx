@@ -5,10 +5,11 @@ import {
   ChevronRight, ChevronLeft, X, ArrowRight, Heart, DollarSign,
   Calendar, Globe, Loader2, Briefcase, Award, Star
 } from 'lucide-react'
-import Categories from "@/components/Categories"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { toast } from 'react-toastify'
+import { useSubscriptionStore } from '@/stores/subscriptionStore'
+import SubscriptionModal from '@/modals/SubscriptionModal'
 
 // Separate component that uses useSearchParams
 const ScholarshipsWithParams = () => {
@@ -28,6 +29,14 @@ const ScholarshipsWithParams = () => {
   const [sortBy, setSortBy] = useState('deadline')
   const [savedScholarships, setSavedScholarships] = useState([])
   const [searchLoading, setSearchLoading] = useState(false)
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
+
+  // Subscription store
+  const { isPro } = useSubscriptionStore()
+
+  // Check authentication and subscription status
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isSubscribed, setIsSubscribed] = useState(false)
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -99,10 +108,17 @@ const ScholarshipsWithParams = () => {
   }, [scholarships, searchQuery, filters, sortBy])
 
   const paginatedScholarships = useMemo(() => {
+    let scholarshipsToShow = filteredScholarships
+
+    // For authenticated but non-subscribed users, limit to first 3 scholarships
+    if (!isSubscribed) {
+      scholarshipsToShow = filteredScholarships.slice(0, 3)
+    }
+
     const start = (currentPage - 1) * scholarshipsPerPage
     const end = start + scholarshipsPerPage
-    return filteredScholarships.slice(start, end)
-  }, [filteredScholarships, currentPage, scholarshipsPerPage])
+    return scholarshipsToShow.slice(start, end)
+  }, [filteredScholarships, currentPage, scholarshipsPerPage, isAuthenticated, isSubscribed])
 
   const totalPages = Math.max(1, Math.ceil(filteredScholarships.length / scholarshipsPerPage))
 
@@ -292,6 +308,24 @@ const ScholarshipsWithParams = () => {
     }
   }
 
+  // Check authentication and subscription status
+  useEffect(() => {
+    try {
+      const authRaw = localStorage.getItem('auth')
+      const auth = authRaw ? JSON.parse(authRaw) : null
+      const authenticated = !!(auth?.token)
+      setIsAuthenticated(authenticated)
+
+      // Check subscription status
+      const subscribed = authenticated && (typeof isPro === 'function' ? isPro() : isPro)
+      setIsSubscribed(subscribed)
+    } catch (error) {
+      console.error('Error checking auth/subscription:', error)
+      setIsAuthenticated(false)
+      setIsSubscribed(false)
+    }
+  }, [isPro])
+
   // Effects
   useEffect(() => {
     fetchScholarships()
@@ -373,42 +407,6 @@ const ScholarshipsWithParams = () => {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Compact Categories Navigation */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-gray-900">Browse Categories</h3>
-            <Link href="/categories" className="text-sm text-[#432DD7] hover:text-[#3525b8] font-medium">
-              View All Categories →
-            </Link>
-          </div>
-
-          <div className="flex overflow-x-auto pb-2 gap-3 scrollbar-hide">
-            {[
-              { id: 'vehicles', name: '🚗 Vehicles', count: '12K+' },
-              { id: 'electronics', name: '📱 Electronics', count: '15K+' },
-              { id: 'property', name: '🏠 Property', count: '8K+' },
-              { id: 'fashion', name: '👕 Fashion', count: '7K+' },
-              { id: 'jobs', name: '💼 Jobs', count: '5K+' },
-              { id: 'services', name: '🔧 Services', count: '4K+' },
-              { id: 'furniture', name: '🛋️ Home', count: '6K+' },
-              { id: 'pets', name: '🐾 Pets', count: '3K+' },
-              { id: 'baby-kids', name: '🍼 Baby & Kids', count: '3K+' },
-              { id: 'sports', name: '⚽ Sports', count: '2K+' }
-            ].map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/shop?category=${cat.id}`}
-                className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-[#432DD7] hover:text-white rounded-lg border border-gray-200 hover:border-[#432DD7] transition-all text-sm font-medium whitespace-nowrap"
-              >
-                <span>{cat.name}</span>
-                <span className="text-xs opacity-75">{cat.count}</span>
-              </Link>
-            ))}
           </div>
         </div>
       </div>
@@ -603,6 +601,31 @@ const ScholarshipsWithParams = () => {
         {/* Scholarships Grid */}
         {!loading && !error && filteredScholarships.length > 0 && (
           <>
+            {/* Subscription Prompt for Limited Access */}
+            { !isSubscribed && filteredScholarships.length > 3 && (
+              <div className="bg-white border-2 rounded-2xl p-6 mb-6" style={{ borderColor: '#5c3aec' }}>
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-4" style={{ backgroundColor: '#5c3aec20' }}>
+                    <Star className="w-6 h-6" style={{ color: '#5c3aec' }} />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Unlock All Scholarships
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    You're viewing 3 of {filteredScholarships.length} available scholarships.
+                    Upgrade to Pro for unlimited access.
+                  </p>
+                  <button
+                    onClick={() => setShowSubscriptionModal(true)}
+                    className="px-6 py-2 text-white rounded-lg hover:opacity-90 transition-all font-semibold"
+                    style={{ backgroundColor: '#5c3aec' }}
+                  >
+                    Upgrade to Pro
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {paginatedScholarships.map(scholarship => (
                 <div key={scholarship.id} className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-[#432DD7] hover:shadow-lg transition-all duration-300">
@@ -762,6 +785,12 @@ const ScholarshipsWithParams = () => {
             )}
           </>
         )}
+
+      {/* Subscription Modal */}
+      <SubscriptionModal
+        isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+      />
       </div>
 
       {/* Scholarship Details Modal */}

@@ -2,24 +2,24 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { 
-  Search, 
-  Filter, 
-  MapPin, 
-  User, 
-  Briefcase, 
-  Clock, 
-  ChevronRight, 
-  ChevronLeft, 
-  X, 
-  ArrowRight, 
-  Heart, 
+import {
+  Search,
+  Filter,
+  MapPin,
+  User,
+  Briefcase,
+  Clock,
+  ChevronRight,
+  ChevronLeft,
+  X,
+  ArrowRight,
+  Heart,
   MessageCircle,
   Mail,
-  Calendar, 
-  Globe, 
-  Loader2, 
-  Award, 
+  Calendar,
+  Globe,
+  Loader2,
+  Award,
   Star,
   Users,
   TrendingUp,
@@ -34,7 +34,7 @@ import { toast } from 'react-toastify'
 
 const TalentPool = () => {
   const router = useRouter()
-  
+
   // State management
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -74,7 +74,8 @@ const TalentPool = () => {
     skills: '',
     experience: '',
     location: '',
-    availability: ''
+    availability: '',
+    category: ''
   })
 
   // Contact form state
@@ -87,63 +88,8 @@ const TalentPool = () => {
   })
 
   // Computed values
-  const filteredTalents = useMemo(() => {
-    let result = [...talents]
-
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim()
-      result = result.filter(talent => 
-        talent.name?.toLowerCase().includes(query) ||
-        talent.experience?.toLowerCase().includes(query) ||
-        talent.skills?.some(skill => skill.toLowerCase().includes(query)) ||
-        talent.goals?.toLowerCase().includes(query)
-      )
-    }
-
-    // Apply other filters
-    if (filters.skills) {
-      const skillQuery = filters.skills.toLowerCase()
-      result = result.filter(talent => 
-        talent.skills?.some(skill => skill.toLowerCase().includes(skillQuery))
-      )
-    }
-    if (filters.experience) {
-      result = result.filter(t => t.experience?.toLowerCase().includes(filters.experience.toLowerCase()))
-    }
-    if (filters.availability) {
-      result = result.filter(t => {
-        if (filters.availability === 'available') return t.contactAvailable
-        if (filters.availability === 'unavailable') return !t.contactAvailable
-        return true
-      })
-    }
-
-    // Apply sorting
-    result.sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return (a.name || '').localeCompare(b.name || '')
-        case 'experience':
-          return (b.experience || '').localeCompare(a.experience || '')
-        case 'createdAt':
-        default:
-          const dateA = new Date(a.joinedDate || a.created_at || '1970-01-01').getTime()
-          const dateB = new Date(b.joinedDate || b.created_at || '1970-01-01').getTime()
-          return dateB - dateA
-      }
-    })
-
-    return result
-  }, [talents, searchQuery, filters, sortBy])
-
-  const paginatedTalents = useMemo(() => {
-    const start = (currentPage - 1) * talentsPerPage
-    const end = start + talentsPerPage
-    return filteredTalents.slice(start, end)
-  }, [filteredTalents, currentPage, talentsPerPage])
-
-  const computedTotalPages = Math.max(1, Math.ceil(filteredTalents.length / talentsPerPage))
+  // Remove client-side filtering and pagination, use server data directly
+  const paginatedTalents = talents
 
   const uniqueExperienceLevels = useMemo(() => {
     return [...new Set(talents.map(t => t.experience).filter(Boolean))].sort()
@@ -172,25 +118,27 @@ const TalentPool = () => {
   const fetchTalents = async () => {
     setLoading(true)
     setError(null)
-    
+
     try {
       const params = new URLSearchParams()
-      
+
       if (searchQuery) params.append('search', searchQuery)
       if (filters.skills) params.append('skills', filters.skills)
       if (filters.experience) params.append('experience', filters.experience)
+      if (filters.availability) params.append('availability', filters.availability)
+      if (filters.category) params.append('category', filters.category)
       if (sortBy) params.append('sortBy', sortBy)
       params.append('page', currentPage.toString())
       params.append('limit', talentsPerPage.toString())
-      
+
       const response = await fetch(`https://dark-caldron-448714-u5.appspot.com/api/talent/pool?${params}`)
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
+
       const data = await response.json()
-      
+
       if (data.success) {
         setTalents(data.data.talents || [])
         setTotalTalents(data.data.stats?.totalTalents || 0)
@@ -202,39 +150,55 @@ const TalentPool = () => {
     } catch (err) {
       console.error('Error fetching talents:', err)
       setError(err.message || 'Failed to fetch talents')
-      
+
       // Fallback to mock data for development
-      const mockTalents = Array.from({ length: 24 }, (_, i) => ({
-        id: `talent-${i + 1}`,
-        name: ['Sarah Johnson', 'Michael Chen', 'Emily Rodriguez', 'David Kim', 'Lisa Wang'][i % 5],
-        experience: ['Senior Developer', 'UI/UX Designer', 'Data Scientist', 'Product Manager', 'DevOps Engineer'][i % 5],
-        skills: [
+      const mockTalents = Array.from({ length: 24 }, (_, i) => {
+        const experience = ['Senior Developer', 'UI/UX Designer', 'Data Scientist', 'Product Manager', 'DevOps Engineer'][i % 5]
+        const skills = [
           ['JavaScript', 'React', 'Node.js', 'Python', 'AWS'],
           ['Figma', 'Adobe Creative Suite', 'Prototyping', 'User Research'],
           ['Python', 'Machine Learning', 'SQL', 'TensorFlow', 'Pandas'],
           ['Product Strategy', 'Agile', 'Analytics', 'Leadership'],
           ['Docker', 'Kubernetes', 'CI/CD', 'AWS', 'Terraform']
-        ][i % 5],
-        goals: [
-          'Looking to lead innovative projects in fintech and contribute to scalable solutions.',
-          'Passionate about creating intuitive user experiences for mobile applications.',
-          'Interested in applying AI/ML to solve real-world healthcare challenges.',
-          'Focused on building products that make a meaningful impact on users.',
-          'Dedicated to improving development workflows and system reliability.'
-        ][i % 5],
-        helpOptions: [
-          ['Mentorship', 'Job Opportunities'],
-          ['Portfolio Review', 'Networking'],
-          ['Research Collaboration', 'Job Opportunities'],
-          ['Career Guidance', 'Project Collaboration'],
-          ['Technical Consulting', 'Job Opportunities']
-        ][i % 5],
-        contactAvailable: Math.random() > 0.3,
-        profileImage: null,
-        joinedDate: new Date(Date.now() - (i * 7 * 24 * 60 * 60 * 1000)).toISOString(),
-        location: ['San Francisco, CA', 'New York, NY', 'Toronto, CA', 'London, UK', 'Berlin, DE'][i % 5]
-      }))
-      
+        ][i % 5]
+
+        // Infer category based on experience and skills
+        let category = 'Technology' // default
+        if (experience.includes('Developer') || experience.includes('Engineer') || experience.includes('Scientist') || skills.some(s => ['JavaScript', 'Python', 'React', 'Node.js', 'AWS', 'Docker', 'Kubernetes'].includes(s))) {
+          category = 'Technology'
+        } else if (experience.includes('Designer') || skills.some(s => ['Figma', 'Adobe Creative Suite', 'Prototyping'].includes(s))) {
+          category = 'Design'
+        } else if (experience.includes('Manager') || skills.some(s => ['Product Strategy', 'Agile', 'Analytics', 'Leadership'].includes(s))) {
+          category = 'Operations'
+        }
+
+        return {
+          id: `talent-${i + 1}`,
+          name: ['Sarah Johnson', 'Michael Chen', 'Emily Rodriguez', 'David Kim', 'Lisa Wang'][i % 5],
+          experience,
+          skills,
+          category,
+          goals: [
+            'Looking to lead innovative projects in fintech and contribute to scalable solutions.',
+            'Passionate about creating intuitive user experiences for mobile applications.',
+            'Interested in applying AI/ML to solve real-world healthcare challenges.',
+            'Focused on building products that make a meaningful impact on users.',
+            'Dedicated to improving development workflows and system reliability.'
+          ][i % 5],
+          helpOptions: [
+            ['Mentorship', 'Job Opportunities'],
+            ['Portfolio Review', 'Networking'],
+            ['Research Collaboration', 'Job Opportunities'],
+            ['Career Guidance', 'Project Collaboration'],
+            ['Technical Consulting', 'Job Opportunities']
+          ][i % 5],
+          contactAvailable: Math.random() > 0.3,
+          profileImage: null,
+          joinedDate: new Date(Date.now() - (i * 7 * 24 * 60 * 60 * 1000)).toISOString(),
+          location: ['San Francisco, CA', 'New York, NY', 'Toronto, CA', 'London, UK', 'Berlin, DE'][i % 5]
+        }
+      })
+
       const mockPopularSkills = [
         { skill: 'JavaScript', count: 45 },
         { skill: 'Python', count: 38 },
@@ -242,7 +206,7 @@ const TalentPool = () => {
         { skill: 'Node.js', count: 28 },
         { skill: 'AWS', count: 25 }
       ]
-      
+
       setTalents(mockTalents)
       setPopularSkills(mockPopularSkills)
       setTotalTalents(mockTalents.length)
@@ -288,7 +252,8 @@ const TalentPool = () => {
       skills: '',
       experience: '',
       location: '',
-      availability: ''
+      availability: '',
+      category: ''
     })
     setCurrentPage(1)
   }
@@ -313,10 +278,10 @@ const TalentPool = () => {
     if (!talentId) return
 
     setSavedTalents(prev => {
-      const newSaved = prev.includes(talentId) 
+      const newSaved = prev.includes(talentId)
         ? prev.filter(id => id !== talentId)
         : [...prev, talentId]
-      
+
       localStorage.setItem('savedTalents', JSON.stringify(newSaved))
       return newSaved
     })
@@ -351,10 +316,10 @@ const TalentPool = () => {
       toast.error('Contact information is not available for this talent.')
       return
     }
-    
+
     setSelectedTalent(talent)
     setShowContactModal(true)
-    
+
     // Pre-fill form
     setContactForm(prev => ({
       ...prev,
@@ -378,7 +343,7 @@ const TalentPool = () => {
   const submitContactRequest = async (e) => {
     e.preventDefault()
     setIsSubmittingContact(true)
-    
+
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000))
@@ -406,7 +371,7 @@ const TalentPool = () => {
       toast.error('This talent is not available for chat.')
       return
     }
-    
+
     setSelectedTalent(talent)
     setShowChat(true)
   }
@@ -423,20 +388,23 @@ const TalentPool = () => {
 
   // Pagination
   const goToPage = (page) => {
-    if (page >= 1 && page <= computedTotalPages) {
+    if (page >= 1 && page <= totalPages) {
       setCurrentPage(page)
+      fetchTalents()
     }
   }
 
   const nextPage = () => {
-    if (currentPage < computedTotalPages) {
+    if (currentPage < totalPages) {
       setCurrentPage(prev => prev + 1)
+      fetchTalents()
     }
   }
 
   const prevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(prev => prev - 1)
+      fetchTalents()
     }
   }
 
@@ -446,10 +414,10 @@ const TalentPool = () => {
   }, [])
 
   useEffect(() => {
-    if (currentPage > computedTotalPages) {
-      setCurrentPage(Math.max(1, computedTotalPages))
+    if (currentPage > totalPages) {
+      setCurrentPage(Math.max(1, totalPages))
     }
-  }, [filteredTalents.length, computedTotalPages, currentPage])
+  }, [totalPages, currentPage])
 
   // Load saved talents from localStorage
   useEffect(() => {
@@ -498,10 +466,10 @@ const TalentPool = () => {
               Talent Pool
             </h1>
             <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-              Discover skilled professionals ready to contribute to your projects. 
+              Discover skilled professionals ready to contribute to your projects.
               Connect with top talent and build your dream team.
             </p>
-            
+
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto">
               <div className="relative">
@@ -523,40 +491,6 @@ const TalentPool = () => {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Compact Categories Navigation */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-gray-900">Browse Categories</h3>
-            <Link href="/categories" className="text-sm text-[#5C3AEB] hover:text-[#342299] font-medium">
-              View All Categories →
-            </Link>
-          </div>
-          
-          <div className="flex overflow-x-auto pb-2 gap-3 scrollbar-hide">
-            {[
-              { id: 'vehicles', name: '🚗 Vehicles', count: '12K+' },
-              { id: 'electronics', name: '📱 Electronics', count: '15K+' },
-              { id: 'property', name: '🏠 Property', count: '8K+' },
-              { id: 'fashion', name: '👕 Fashion', count: '7K+' },
-              { id: 'jobs', name: '💼 Jobs', count: '5K+' },
-              { id: 'services', name: '🔧 Services', count: '4K+' },
-              { id: 'furniture', name: '🛋️ Home', count: '6K+' },
-              { id: 'pets', name: '🐾 Pets', count: '3K+' }
-            ].map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/shop?category=${cat.id}`}
-                className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-[#5C3AEB] hover:text-white rounded-lg border border-gray-200 hover:border-[#5C3AEB] transition-all text-sm font-medium whitespace-nowrap"
-              >
-                <span>{cat.name}</span>
-                <span className="text-xs opacity-75">{cat.count}</span>
-              </Link>
-            ))}
           </div>
         </div>
       </div>
@@ -594,19 +528,19 @@ const TalentPool = () => {
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-colors ${
-                  showFilters 
-                    ? 'bg-[#5C3AEB] text-white' 
+                  showFilters
+                    ? 'bg-[#5C3AEB] text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 <Filter className="w-4 h-4" />
                 Filters
               </button>
-              
+
               <div className="hidden md:flex items-center gap-2">
                 <span className="text-sm text-gray-600">Sort by:</span>
-                <select 
-                  value={sortBy} 
+                <select
+                  value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                   className="bg-white border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]"
                 >
@@ -618,7 +552,7 @@ const TalentPool = () => {
             </div>
 
             <div className="text-sm text-gray-600">
-              Showing {filteredTalents.length} of {talents.length} talents
+              Showing {talents.length} of {totalTalents} talents
             </div>
           </div>
 
@@ -631,7 +565,7 @@ const TalentPool = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Skills</label>
                   <input
                     type="text"
-                    value={filters.skills} 
+                    value={filters.skills}
                     onChange={(e) => setFilters(prev => ({ ...prev, skills: e.target.value }))}
                     placeholder="e.g., JavaScript, Python"
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]"
@@ -641,8 +575,8 @@ const TalentPool = () => {
                 {/* Experience Level */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Experience</label>
-                  <select 
-                    value={filters.experience} 
+                  <select
+                    value={filters.experience}
                     onChange={(e) => setFilters(prev => ({ ...prev, experience: e.target.value }))}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]"
                   >
@@ -656,14 +590,36 @@ const TalentPool = () => {
                 {/* Availability */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Availability</label>
-                  <select 
-                    value={filters.availability} 
+                  <select
+                    value={filters.availability}
                     onChange={(e) => setFilters(prev => ({ ...prev, availability: e.target.value }))}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]"
                   >
                     <option value="">All Talents</option>
                     <option value="available">Available for Contact</option>
                     <option value="unavailable">Private Profile</option>
+                  </select>
+                </div>
+
+                {/* Category */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                  <select
+                    value={filters.category}
+                    onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3AEB]"
+                  >
+                    <option value="">All Categories</option>
+                    <option value="Technology">Technology</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Education">Education</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Design">Design</option>
+                    <option value="Operations">Operations</option>
+                    <option value="Human Resources">Human Resources</option>
                   </select>
                 </div>
 
@@ -693,7 +649,7 @@ const TalentPool = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Popular Skills</h3>
             <div className="flex flex-wrap gap-3">
               {popularSkills.slice(0, 10).map((skill) => (
-                <button 
+                <button
                   key={skill.skill}
                   onClick={() => filterBySkill(skill.skill)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
@@ -737,13 +693,13 @@ const TalentPool = () => {
         )}
 
         {/* Empty State */}
-        {!loading && !error && filteredTalents.length === 0 && (
+        {!loading && !error && talents.length === 0 && (
           <div className="text-center py-12">
             <Users className="w-24 h-24 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">No Talents Found</h3>
             <p className="text-gray-600 mb-6">
-              {searchQuery || Object.values(filters).some(f => f) 
-                ? 'Try adjusting your search criteria or filters' 
+              {searchQuery || Object.values(filters).some(f => f)
+                ? 'Try adjusting your search criteria or filters'
                 : 'No talent profiles available at the moment'}
             </p>
             {(searchQuery || Object.values(filters).some(f => f)) && (
@@ -757,212 +713,231 @@ const TalentPool = () => {
           </div>
         )}
 
-        {/* Talents Grid */}
-        {!loading && !error && filteredTalents.length > 0 && (
-          <>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {paginatedTalents.map(talent => (
-                <div key={talent.id} className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-[#5C3AEB] hover:shadow-lg transition-all duration-300">
-                  
-                  {/* Talent Header */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-start gap-4 flex-1 min-w-0">
-                      <div className="relative flex-shrink-0">
-                        {talent.profileImage ? (
-                          <img 
-                            src={talent.profileImage} 
-                            alt={talent.name}
-                            className="w-14 h-14 rounded-xl object-cover border-2 border-[#5C3AEB]/20"
-                          />
-                        ) : (
-                          <div className="w-14 h-14 bg-gradient-to-br from-[#5C3AEB] to-[#00C4A7] rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                            {getInitials(talent.name)}
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-gray-900 text-lg mb-1 truncate">{talent.name}</h3>
-                        <p className="text-gray-600 text-sm font-medium truncate">{talent.experience}</p>
-                        {talent.location && (
-                          <div className="flex items-center text-xs text-gray-500 mt-1">
-                            <MapPin className="w-3 h-3 mr-1" />
-                            <span className="truncate">{talent.location}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col items-end gap-2">
-                      <button
-                        onClick={() => saveTalent(talent)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          savedTalents.includes(talent.id || '') 
-                            ? 'text-red-500 bg-red-50' 
-                            : 'text-gray-400 hover:text-red-500 hover:bg-gray-50'
-                        }`}
-                      >
-                        <Heart 
-                          fill={savedTalents.includes(talent.id || '') ? 'currentColor' : 'none'} 
-                          className="w-4 h-4" 
+       {/* Talents Grid - Updated Card Design */}
+      {!loading && !error && talents.length > 0 && (
+        <>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {paginatedTalents.map(talent => (
+              <div key={talent.id} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300">
+
+                {/* Talent Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <div className="relative flex-shrink-0">
+                      {talent.profileImage ? (
+                        <img
+                          src={talent.profileImage}
+                          alt={talent.name}
+                          className="w-12 h-12 rounded-xl object-cover"
+                          style={{ border: '2px solid #5c3aec20' }}
                         />
-                      </button>
-                      
-                      <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${
-                        talent.contactAvailable 
-                          ? 'bg-green-100 text-green-700' 
-                          : 'bg-gray-100 text-gray-600'
-                      }`}>
-                        {talent.contactAvailable && <CheckCircle className="w-3 h-3" />}
-                        <span>{talent.contactAvailable ? 'Available' : 'Private'}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Skills */}
-                  {talent.skills && talent.skills.length > 0 && (
-                    <div className="mb-4">
-                      <h4 className="text-sm font-semibold text-gray-700 mb-2">Skills</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {talent.skills.slice(0, 4).map((skill, index) => (
-                          <span 
-                            key={index}
-                            className="px-2 py-1 bg-[#5C3AEB]/10 text-[#5C3AEB] text-xs font-medium rounded-lg border border-[#5C3AEB]/20"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                        {talent.skills.length > 4 && (
-                          <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg">
-                            +{talent.skills.length - 4} more
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Goals */}
-                  {talent.goals && (
-                    <div className="mb-4">
-                      <h4 className="text-sm font-semibold text-gray-700 mb-2">Career Goals</h4>
-                      <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
-                        {truncateText(talent.goals, 120)}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Help Options */}
-                  {talent.helpOptions && talent.helpOptions.length > 0 && (
-                    <div className="mb-4">
-                      <h4 className="text-sm font-semibold text-gray-700 mb-2">Looking For</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {talent.helpOptions.slice(0, 2).map((option, index) => (
-                          <span 
-                            key={index}
-                            className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-lg border border-purple-200"
-                          >
-                            {option.replace('AI Coach (Interview Prep)', 'Interview Prep')}
-                          </span>
-                        ))}
-                        {talent.helpOptions.length > 2 && (
-                          <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg">
-                            +{talent.helpOptions.length - 2} more
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Footer */}
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-200/50">
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <Calendar className="w-3 h-3" />
-                      <span>Joined {formatDate(talent.joinedDate)}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => startChat(talent)}
-                        disabled={!talent.contactAvailable}
-                        className="p-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105"
-                        title="Start Chat"
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                      </button>
-                      
-                      <button 
-                        onClick={() => contactTalent(talent)}
-                        disabled={!talent.contactAvailable}
-                        className="p-2 bg-gradient-to-r from-[#5C3AEB] to-[#342299] text-white rounded-lg hover:from-[#342299] hover:to-[#5C3AEB] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105"
-                        title="Send Email"
-                      >
-                        <Mail className="w-4 h-4" />
-                      </button>
-                      
-                      <button
-                        onClick={() => openTalentModal(talent)}
-                        className="text-sm font-semibold text-[#5C3AEB] hover:text-[#342299] transition-colors flex items-center gap-1"
-                      >
-                        View
-                        <ArrowRight className="w-3 h-3" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Pagination */}
-            {computedTotalPages > 1 && (
-              <div className="flex items-center justify-between mt-8">
-                <div className="text-sm text-gray-600">
-                  Page {currentPage} of {computedTotalPages}
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={prevPage}
-                    disabled={currentPage === 1}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    Previous
-                  </button>
-                  
-                  <div className="flex gap-1">
-                    {Array.from({ length: Math.min(5, computedTotalPages) }, (_, i) => {
-                      const page = currentPage <= 3 ? i + 1 : 
-                                 currentPage >= computedTotalPages - 2 ? computedTotalPages - 4 + i :
-                                 currentPage - 2 + i
-                      return page > 0 && page <= computedTotalPages ? (
-                        <button
-                          key={page}
-                          onClick={() => goToPage(page)}
-                          className={`px-3 py-2 text-sm rounded-lg transition-colors ${
-                            page === currentPage
-                              ? 'bg-[#5C3AEB] text-white'
-                              : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
-                          }`}
+                      ) : (
+                        <div 
+                          className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-base"
+                          style={{ backgroundColor: '#5c3aec' }}
                         >
-                          {page}
-                        </button>
-                      ) : null
-                    })}
+                          {getInitials(talent.name)}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-gray-900 text-base mb-1 truncate">{talent.name}</h3>
+                      <p className="text-gray-600 text-sm font-medium truncate">{talent.experience}</p>
+                      {talent.location && (
+                        <div className="flex items-center text-xs text-gray-500 mt-1">
+                          <MapPin className="w-3 h-3 mr-1" />
+                          <span className="truncate">{talent.location}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  
-                  <button
-                    onClick={nextPage}
-                    disabled={currentPage === computedTotalPages}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
+
+                  <div className="flex flex-col items-end gap-2">
+                    <button
+                      onClick={() => saveTalent(talent)}
+                      className={`p-2 rounded-lg transition-colors ${
+                        savedTalents.includes(talent.id || '')
+                          ? 'bg-red-50'
+                          : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      <Heart
+                        fill={savedTalents.includes(talent.id || '') ? '#ef4444' : 'none'}
+                        className="w-4 h-4"
+                        style={{ color: savedTalents.includes(talent.id || '') ? '#ef4444' : '#9ca3af' }}
+                      />
+                    </button>
+
+                    <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${
+                      talent.contactAvailable
+                        ? 'bg-green-50 text-green-700'
+                        : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {talent.contactAvailable && <CheckCircle className="w-3 h-3" />}
+                      <span>{talent.contactAvailable ? 'Available' : 'Private'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Skills */}
+                {talent.skills && talent.skills.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Skills</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {talent.skills.slice(0, 4).map((skill, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 text-xs font-medium rounded-lg"
+                          style={{ 
+                            backgroundColor: '#5c3aec15',
+                            color: '#5c3aec',
+                            border: '1px solid #5c3aec30'
+                          }}
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                      {talent.skills.length > 4 && (
+                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg">
+                          +{talent.skills.length - 4}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Goals */}
+                {talent.goals && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Career Goals</h4>
+                    <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
+                      {truncateText(talent.goals, 120)}
+                    </p>
+                  </div>
+                )}
+
+                {/* Help Options */}
+                {talent.helpOptions && talent.helpOptions.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Looking For</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {talent.helpOptions.slice(0, 2).map((option, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 text-xs font-medium rounded-lg"
+                          style={{ 
+                            backgroundColor: '#5c3aec10',
+                            color: '#5c3aec',
+                            border: '1px solid #5c3aec20'
+                          }}
+                        >
+                          {option.replace('AI Coach (Interview Prep)', 'Interview Prep')}
+                        </span>
+                      ))}
+                      {talent.helpOptions.length > 2 && (
+                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg">
+                          +{talent.helpOptions.length - 2}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Footer */}
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <Calendar className="w-3 h-3" />
+                    <span>{formatDate(talent.joinedDate)}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => startChat(talent)}
+                      disabled={!talent.contactAvailable}
+                      className="p-2 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                      style={{ backgroundColor: '#5c3aec' }}
+                      title="Start Chat"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                    </button>
+
+                    <button
+                      onClick={() => contactTalent(talent)}
+                      disabled={!talent.contactAvailable}
+                      className="p-2 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                      style={{ backgroundColor: '#5c3aec' }}
+                      title="Send Email"
+                    >
+                      <Mail className="w-4 h-4" />
+                    </button>
+
+                    <button
+                      onClick={() => openTalentModal(talent)}
+                      className="text-sm font-semibold hover:underline transition-colors"
+                      style={{ color: '#5c3aec' }}
+                    >
+                      View
+                    </button>
+                  </div>
                 </div>
               </div>
-            )}
-          </>
-        )}
+            ))}
+          </div>
+
+          {/* Pagination - Updated */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-8">
+              <div className="text-sm text-gray-600">
+                Page {currentPage} of {totalPages}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Previous
+                </button>
+
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const page = currentPage <= 3 ? i + 1 :
+                              currentPage >= totalPages - 2 ? totalPages - 4 + i :
+                              currentPage - 2 + i
+                    return page > 0 && page <= totalPages ? (
+                      <button
+                        key={page}
+                        onClick={() => goToPage(page)}
+                        className={`px-3 py-2 text-sm rounded-lg transition-colors ${
+                          page === currentPage
+                            ? 'text-white'
+                            : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
+                        }`}
+                        style={page === currentPage ? { backgroundColor: '#5c3aec' } : {}}
+                      >
+                        {page}
+                      </button>
+                    ) : null
+                  })}
+                </div>
+
+                <button
+                  onClick={nextPage}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
       </div>
 
       {/* Contact Modal */}

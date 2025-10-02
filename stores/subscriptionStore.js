@@ -44,11 +44,7 @@ export const useSubscriptionStore = create(
             const subscription = data.user?.subscription || null;
             set({ currentSubscription: subscription });
             return { success: true, subscription };
-          } else {
-            const error = data.message || "Failed to fetch subscription";
-            set({ error });
-            return { success: false, error };
-          }
+          } 
         } catch (error) {
           console.error("Fetch subscription error:", error);
           const errorMsg = "Failed to fetch subscription data";

@@ -3,7 +3,6 @@ import { usePathname } from "next/navigation"
 import { 
     HomeIcon, 
     ShieldCheckIcon, 
-    StoreIcon, 
     TicketPercentIcon,
     UsersIcon,
     PresentationIcon,
@@ -25,8 +24,8 @@ const AdminSidebar = () => {
 
     const sidebarLinks = [
         { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-        { name: 'Stores', href: '/dashboard/stores', icon: StoreIcon },
         { name: 'Post Job', href: '/dashboard/employer', icon: Briefcase },
+        { name: 'Job Seeker', href: '/dashboard/job-seeker', icon: UserIcon },
         { name: 'Pitch', href: '/dashboard/pitch', icon: PresentationIcon },
         { name: 'Investor', href: '/dashboard/investor', icon: TrendingUpIcon },
         { name: 'Subscription', href: '/dashboard/subscription', icon: CreditCardIcon }

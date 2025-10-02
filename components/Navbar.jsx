@@ -1,10 +1,10 @@
 'use client'
-import { Search, ShoppingCart, Menu, X, User, ChevronDown, Settings, Package, LogOut, Plus, Globe, LayoutDashboard } from "lucide-react";
+import { Search, Menu, X, User, ChevronDown, Settings, LogOut, Plus, Globe, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import Image from 'next/image'
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useSelector } from "react-redux";
+
 import TranslateService from '@/services/TranslateService'
 import LoginModal from '@/modals/LoginModal'
 import SignupModal from '@/modals/SignupModal'
@@ -113,7 +113,6 @@ const Navbar = () => {
     const [isClient, setIsClient] = useState(false)
 
     const languageDropdownRef = useRef(null)
-    const cartCount = useSelector(state => state.cart.total)
     
     const [user, setUser] = useState(null)
 
@@ -252,7 +251,7 @@ const Navbar = () => {
     const handleSearch = (e) => {
         e.preventDefault()
         if (search.trim()) {
-            router.push(`/shop?search=${search}`)
+            router.push(`/jobs?search=${search}`)
             setSearchOpen(false)
             setMobileMenuOpen(false)
         }
@@ -317,21 +316,21 @@ const Navbar = () => {
         clearAuth()
         setUser(null)
         setUserDropdownOpen(false)
+        router.push('/')
     }
 
     const navLinks = [
         { href: '/', label: 'Home' },
-        { href: '/shop', label: 'Shop' },
         { href: '/jobs', label: 'Jobs' },
+        { href: '/talent-pool', label: 'Talent' },
         { href: '/scholarships', label: 'Scholarships' },
+        { href: '/investors', label: 'Investors' },
         { href: '/about', label: 'About' }
     ]
 
     const userMenuItems = [
         { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { href: '/profile', label: 'Manage account', icon: Settings },
-        { href: '/cart', label: 'Cart', icon: ShoppingCart },
-        { href: '/orders', label: 'My Orders', icon: Package },
+        { href: '/profile', label: 'Manage account', icon: Settings }
     ]
 
     return (
@@ -379,7 +378,7 @@ const Navbar = () => {
                                     <input 
                                         className="w-full bg-transparent outline-none px-4 py-3 text-sm placeholder-gray-500" 
                                         type="text" 
-                                        placeholder="Search products, brands..." 
+                                        placeholder="Search jobs" 
                                         value={search} 
                                         onChange={(e) => setSearch(e.target.value)}
                                     />
@@ -463,19 +462,6 @@ const Navbar = () => {
                                 <Search size={20} />
                             </button>
 
-                            {/* Cart */}
-                            <Link
-                                href="/cart"
-                                className="relative flex items-center space-x-2 text-gray-700 hover:text-[#5C3AEB] transition-colors duration-200 p-2 hover:bg-gray-50 rounded-full"
-                            >
-                                <ShoppingCart size={20} />
-                                <TranslatedText className="hidden xl:inline font-medium">Cart</TranslatedText>
-                                {isClient && cartCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-[#5C3AEB] text-white text-xs font-bold min-w-[20px] h-5 rounded-full flex items-center justify-center animate-pulse">
-                                        {cartCount > 99 ? '99+' : cartCount}
-                                    </span>
-                                )}
-                            </Link>
 
                             {/* User Profile Dropdown or Login Button */}
                             {user ? (
@@ -634,18 +620,6 @@ const Navbar = () => {
                                 <Search size={20} />
                             </button>
 
-                            {/* Mobile Cart */}
-                            <Link
-                                href="/cart"
-                                className="relative p-2 text-gray-600 hover:text-[#5C3AEB] hover:bg-gray-50 rounded-full transition-all duration-200"
-                            >
-                                <ShoppingCart size={20} />
-                                {isClient && cartCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-[#5C3AEB] text-white text-xs font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center">
-                                        {cartCount > 99 ? '99+' : cartCount}
-                                    </span>
-                                )}
-                            </Link>
 
                             {/* Mobile Menu Button */}
                             <button 
@@ -685,7 +659,7 @@ const Navbar = () => {
                                     <input 
                                         className="w-full bg-transparent outline-none px-3 sm:px-4 py-2.5 sm:py-3 text-sm placeholder-gray-500 min-w-0" 
                                         type="text" 
-                                        placeholder="Search products..." 
+                                        placeholder="Search jobs..." 
                                         value={search} 
                                         onChange={(e) => setSearch(e.target.value)}
                                         autoFocus

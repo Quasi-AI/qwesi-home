@@ -174,8 +174,8 @@ const Footer = () => {
             title: "CONTACT",
             links: [
                 { text: "info@qwesi.org", path: 'mailto:info@qwesi.org', icon: MailIcon },
-                { text: "+1(201)979-0148", path: 'tel:+12019790148', icon: PhoneIcon },
-                { text: "DeReimer , Brox 10475, NY", path: '/', icon: MapPinIcon }
+                { text: "+1(201)-979-0148", path: 'tel:+12019790148', icon: PhoneIcon },
+                { text: "DeReimer , Bronx 10475, NY", path: '/', icon: MapPinIcon }
             ]
         }
     ];

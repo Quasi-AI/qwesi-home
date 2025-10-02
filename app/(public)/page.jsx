@@ -1,13 +1,12 @@
 'use client'
 import { useState } from 'react'
-import BestSelling from "@/components/BestSelling";
 import Hero from "@/components/Hero";
 import Newsletter from "@/components/Newsletter";
 import OurSpecs from "@/components/OurSpec";
-import LatestProducts from "@/components/LatestProducts";
 import JobLatest from "@/components/JobLatest";
 import JobViewModal from "@/modals/JobViewModal";
 import ApplicationModal from "@/modals/ApplicationModal";
+import PricingSectionNew from "@/components/PricingSectionNew";
 import toast from 'react-hot-toast';
 
 export default function Home() {
@@ -47,9 +46,8 @@ export default function Home() {
         <div>
             <Hero />
             <JobLatest onViewDetails={handleViewJobDetails} onApply={handleApplyToJob} />
-            <LatestProducts />
-            <BestSelling />
             <OurSpecs />
+            <PricingSectionNew />
             <Newsletter />
 
             {/* Job View Modal */}

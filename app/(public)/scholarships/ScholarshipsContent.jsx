@@ -9,9 +9,12 @@ import Categories from "@/components/Categories"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link";
 import { toast } from 'react-toastify';
+import { useSubscriptionStore } from '@/stores/subscriptionStore'
+import SubscriptionModal from '@/modals/SubscriptionModal'
 
 const ScholarshipsContent = () => {
   const router = useRouter()
+  const { isAuthenticated, isSubscribed } = useSubscriptionStore()
   // State management
   const [loading, setLoading] = useState(true)
   const searchParams = useSearchParams()
@@ -97,10 +100,12 @@ const ScholarshipsContent = () => {
   }, [scholarships, searchQuery, filters, sortBy])
 
   const paginatedScholarships = useMemo(() => {
+    // Limit to 3 scholarships for non-subscribed users
+    const limitedScholarships = isSubscribed ? filteredScholarships : filteredScholarships.slice(0, 3)
     const start = (currentPage - 1) * scholarshipsPerPage
     const end = start + scholarshipsPerPage
-    return filteredScholarships.slice(start, end)
-  }, [filteredScholarships, currentPage, scholarshipsPerPage])
+    return limitedScholarships.slice(start, end)
+  }, [filteredScholarships, currentPage, scholarshipsPerPage, isSubscribed])
 
   const totalPages = Math.max(1, Math.ceil(filteredScholarships.length / scholarshipsPerPage))
 
@@ -150,7 +155,7 @@ const ScholarshipsContent = () => {
     const daysUntil = Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 
     if (daysUntil < 0) return 'text-red-600'
-    if (daysUntil <= 30) return 'text-orange-600'
+    if (daysUntil <= 30) return 'text-[#5C3AEB]'
     return 'text-gray-600'
   }
 
@@ -169,7 +174,7 @@ const ScholarshipsContent = () => {
     const status = getApplicationStatus(deadline)
     switch (status) {
       case 'Closed': return 'bg-red-100 text-red-700'
-      case 'Closing Soon': return 'bg-orange-100 text-orange-700'
+      case 'Closing Soon': return 'bg-[#5C3AEB]/10 text-[#5C3AEB]'
       default: return 'bg-green-100 text-green-700'
     }
   }
@@ -263,6 +268,14 @@ const ScholarshipsContent = () => {
         return
       }
     } catch {}
+
+    // Check subscription status
+    if (!isSubscribed) {
+      toast.error('Please subscribe to access full scholarship listings and apply')
+      // Open subscription modal
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('subscription:open-modal'))
+      return
+    }
 
     if (isDeadlinePassed(scholarship.deadline || '')) {
       toast.error('Application deadline has passed')
@@ -444,6 +457,30 @@ const ScholarshipsContent = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Subscription Notice for Non-Subscribed Users */}
+        {!isSubscribed && (
+          <div className="bg-gradient-to-r from-[#5C3AEB]/5 to-[#5C3AEB]/10 border border-[#5C3AEB]/20 rounded-2xl p-6 mb-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#5C3AEB]/10 rounded-full flex items-center justify-center">
+                  <Award className="w-5 h-5 text-[#5C3AEB]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-[#5C3AEB]">Limited Access</h3>
+                  <p className="text-[#5C3AEB]/80 text-sm">
+                    You're viewing a preview of 3 scholarships. Subscribe to access the full database and apply to all opportunities.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => window.dispatchEvent(new Event('subscription:open-modal'))}
+                className="px-6 py-2 bg-gradient-to-r from-[#5C3AEB] to-[#5C3AEB] text-white rounded-lg hover:from-[#5C3AEB]/90 hover:to-[#5C3AEB]/90 transition-colors font-semibold"
+              >
+                Subscribe Now
+              </button>
+            </div>
+          </div>
+        )}
         {/* Filters Bar */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">

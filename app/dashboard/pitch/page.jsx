@@ -149,7 +149,6 @@ const PitchCompetition = () => {
                     duration: 4000
                 })
                 
-                // Reset form
                 setFormData({
                     name: '',
                     email: '',
@@ -170,7 +169,6 @@ const PitchCompetition = () => {
                 
                 setHasExistingSubmission(true)
                 
-                // Redirect to dashboard after success
                 setTimeout(() => {
                     window.location.href = '/dashboard'
                 }, 3000)
@@ -204,19 +202,25 @@ const PitchCompetition = () => {
     return (
         <div className="min-h-screen bg-slate-50">
             <PageHeader title="Pitch Competition" subtitle="Submit your innovative ideas and compete for funding opportunities">
-                <button onClick={() => setShowMySubmissions(true)} className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg"> <FileText className="w-4 h-4 inline" /> <span className="hidden sm:inline ml-2">My Submissions</span></button>
-                <button onClick={() => setShowStats(true)} className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg"> <BarChart3 className="w-4 h-4 inline" /> <span className="hidden sm:inline ml-2">Stats</span></button>
+                <button onClick={() => setShowMySubmissions(true)} className="px-4 py-2 rounded-lg text-white hover:opacity-90" style={{ backgroundColor: '#5c3aec' }}> 
+                    <FileText className="w-4 h-4 inline" /> <span className="hidden sm:inline ml-2">My Submissions</span>
+                </button>
+                <button onClick={() => setShowStats(true)} className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200"> 
+                    <BarChart3 className="w-4 h-4 inline" /> <span className="hidden sm:inline ml-2">Stats</span>
+                </button>
             </PageHeader>
 
             <main className="p-6">
                 <div className="max-w-4xl mx-auto space-y-8">
                     {!hasExistingSubmission && (
-                        <div className="bg-blue-600 text-white rounded-2xl p-8">
+                        <div className="text-white rounded-2xl p-8" style={{ backgroundColor: '#5c3aec' }}>
                             <div className="flex items-center space-x-4">
-                                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center"><Star className="w-6 h-6 text-yellow-300" /></div>
+                                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                                    <Star className="w-6 h-6 text-yellow-300" />
+                                </div>
                                 <div>
                                     <h2 className="text-xl font-bold">Showcase Your Innovation!</h2>
-                                    <p className="text-blue-100 mt-1">Submit your groundbreaking ideas, business plans, or innovative solutions to compete for funding, mentorship, and the chance to turn your vision into reality.</p>
+                                    <p className="text-white/90 mt-1">Submit your groundbreaking ideas, business plans, or innovative solutions to compete for funding, mentorship, and the chance to turn your vision into reality.</p>
                                 </div>
                             </div>
                         </div>
@@ -234,20 +238,19 @@ const PitchCompetition = () => {
                                         <div className="text-sm font-medium text-slate-700">Progress</div>
                                         <div className="flex items-center gap-2 mt-1">
                                             <div className="w-24 bg-slate-200 rounded-full h-2">
-                                                <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{ width: `${getFormProgress()}%` }} />
+                                                <div className="h-2 rounded-full transition-all duration-300" style={{ width: `${getFormProgress()}%`, backgroundColor: '#5c3aec' }} />
                                             </div>
-                                            <span className="text-sm font-medium text-blue-600">{getFormProgress()}%</span>
+                                            <span className="text-sm font-medium" style={{ color: '#5c3aec' }}>{getFormProgress()}%</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <form onSubmit={submitForm} className="p-6 space-y-8">
-                                {/* Personal Information Section */}
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
-                                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                            <User className="w-4 h-4 text-blue-600" />
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#5c3aec20' }}>
+                                            <User className="w-4 h-4" style={{ color: '#5c3aec' }} />
                                         </div>
                                         <h4 className="font-semibold text-slate-800">Personal Information</h4>
                                     </div>
@@ -258,7 +261,8 @@ const PitchCompetition = () => {
                                             <input 
                                                 value={formData.name} 
                                                 onChange={e => handleInputChange('name', e.target.value)} 
-                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:border-transparent transition-colors" 
+                                                style={{ '--tw-ring-color': '#5c3aec' }}
                                                 placeholder="Enter your full name"
                                             />
                                             {errors.name && <div className="text-red-600 text-sm mt-1 flex items-center gap-1"><AlertTriangle className="w-4 h-4" />{errors.name}</div>}
@@ -270,7 +274,7 @@ const PitchCompetition = () => {
                                                 value={formData.email} 
                                                 onChange={e => handleInputChange('email', e.target.value)} 
                                                 type="email" 
-                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:border-transparent transition-colors" 
                                                 placeholder="your.email@example.com"
                                             />
                                             {errors.email && <div className="text-red-600 text-sm mt-1 flex items-center gap-1"><AlertTriangle className="w-4 h-4" />{errors.email}</div>}
@@ -282,7 +286,7 @@ const PitchCompetition = () => {
                                                 <select 
                                                     value={formData.countryCode} 
                                                     onChange={e => handleInputChange('countryCode', e.target.value)} 
-                                                    className="px-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                    className="px-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:border-transparent"
                                                 >
                                                     <option value="+233">🇬🇭 +233</option>
                                                     <option value="+1">🇺🇸 +1</option>
@@ -292,7 +296,7 @@ const PitchCompetition = () => {
                                                     value={formData.phone} 
                                                     onChange={e => handleInputChange('phone', e.target.value)} 
                                                     type="tel" 
-                                                    className="flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+                                                    className="flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:border-transparent transition-colors" 
                                                     placeholder="Your phone number" 
                                                 />
                                             </div>
@@ -304,14 +308,13 @@ const PitchCompetition = () => {
                                             <input 
                                                 value={formData.organization} 
                                                 onChange={e => handleInputChange('organization', e.target.value)} 
-                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:border-transparent transition-colors" 
                                                 placeholder="Your organization (optional)"
                                             />
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Project Information Section */}
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
                                         <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
@@ -326,7 +329,7 @@ const PitchCompetition = () => {
                                             <input 
                                                 value={formData.projectName} 
                                                 onChange={e => handleInputChange('projectName', e.target.value)} 
-                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:border-transparent transition-colors" 
                                                 placeholder="Enter your project name"
                                             />
                                             {errors.projectName && <div className="text-red-600 text-sm mt-1 flex items-center gap-1"><AlertTriangle className="w-4 h-4" />{errors.projectName}</div>}
@@ -337,7 +340,7 @@ const PitchCompetition = () => {
                                             <select 
                                                 value={formData.industry} 
                                                 onChange={e => handleInputChange('industry', e.target.value)} 
-                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:border-transparent transition-colors"
                                             >
                                                 <option value="">Select Industry</option>
                                                 {industries.map(i => <option key={i} value={i}>{i}</option>)}
@@ -352,7 +355,7 @@ const PitchCompetition = () => {
                                             value={formData.summary} 
                                             onChange={e => handleInputChange('summary', e.target.value)} 
                                             rows={4} 
-                                            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none" 
+                                            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:border-transparent transition-colors resize-none" 
                                             placeholder="Provide a brief summary of your project (30-500 characters)"
                                         />
                                         <div className="flex justify-between items-center mt-2">
@@ -362,7 +365,6 @@ const PitchCompetition = () => {
                                     </div>
                                 </div>
 
-                                {/* Project Details Section */}
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
                                         <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -377,7 +379,7 @@ const PitchCompetition = () => {
                                             value={formData.description} 
                                             onChange={e => handleInputChange('description', e.target.value)} 
                                             rows={6} 
-                                            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none" 
+                                            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:border-transparent transition-colors resize-none" 
                                             placeholder="Provide a detailed description of your project, including the problem it solves, your solution, and its impact (50-2000 characters)"
                                         />
                                         <div className="flex justify-between items-center mt-2">
@@ -392,7 +394,7 @@ const PitchCompetition = () => {
                                             <select 
                                                 value={formData.stage} 
                                                 onChange={e => handleInputChange('stage', e.target.value)} 
-                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:border-transparent transition-colors"
                                             >
                                                 <option value="">Select Stage</option>
                                                 {projectStages.map(stage => <option key={stage} value={stage}>{stage}</option>)}
@@ -406,7 +408,7 @@ const PitchCompetition = () => {
                                                 value={formData.websiteUrl} 
                                                 onChange={e => handleInputChange('websiteUrl', e.target.value)} 
                                                 type="url"
-                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:border-transparent transition-colors" 
                                                 placeholder="https://yourproject.com"
                                             />
                                             {errors.websiteUrl && <div className="text-red-600 text-sm mt-1 flex items-center gap-1"><AlertTriangle className="w-4 h-4" />{errors.websiteUrl}</div>}
@@ -414,25 +416,25 @@ const PitchCompetition = () => {
                                     </div>
                                 </div>
 
-                                {/* Competition Type Section */}
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
-                                        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                            <Star className="w-4 h-4 text-purple-600" />
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#5c3aec20' }}>
+                                            <Star className="w-4 h-4" style={{ color: '#5c3aec' }} />
                                         </div>
                                         <h4 className="font-semibold text-slate-800">Competition Type *</h4>
                                     </div>
                                     
                                     <div className="grid grid-cols-1 gap-4">
                                         {pitchTypes.map(opt => (
-                                            <label key={opt.value} className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-slate-50 ${formData.submissionType === opt.value ? 'border-blue-500 bg-blue-50' : 'border-slate-200'}`}>
+                                            <label key={opt.value} className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-slate-50 ${formData.submissionType === opt.value ? 'bg-purple-50' : ''}`} style={formData.submissionType === opt.value ? { borderColor: '#5c3aec' } : { borderColor: '#e2e8f0' }}>
                                                 <input 
                                                     type="radio" 
                                                     name="submissionType" 
                                                     value={opt.value} 
                                                     checked={formData.submissionType === opt.value} 
                                                     onChange={e => handleInputChange('submissionType', e.target.value)} 
-                                                    className="mt-1 mr-4 text-blue-600" 
+                                                    className="mt-1 mr-4" 
+                                                    style={{ accentColor: '#5c3aec' }}
                                                 />
                                                 <div className="flex-1">
                                                     <div className="font-semibold text-slate-800">{opt.label}</div>
@@ -444,7 +446,6 @@ const PitchCompetition = () => {
                                     </div>
                                 </div>
 
-                                {/* Submit Button */}
                                 <div className="flex items-center justify-between pt-6 border-t border-slate-200">
                                     <div className="text-sm text-slate-500">
                                         <span className="text-red-500">*</span> Required fields. All submissions will be reviewed by our expert panel.
@@ -452,7 +453,8 @@ const PitchCompetition = () => {
                                     <button 
                                         type="submit" 
                                         disabled={isSubmitting || getFormProgress() < 100} 
-                                        className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
+                                        className="px-8 py-3 hover:opacity-90 disabled:bg-slate-400 text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
+                                        style={{ backgroundColor: '#5c3aec' }}
                                     >
                                         {isSubmitting ? (
                                             <>
@@ -472,11 +474,11 @@ const PitchCompetition = () => {
                     )}
 
                     {showMySubmissions && (
-                        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
+                        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-[60]">
                             <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[80vh] overflow-auto">
                                 <div className="flex items-center justify-between p-4 border-b"><h3 className="font-bold">My Submissions</h3><button onClick={() => setShowMySubmissions(false)} className="p-2"><X className="w-4 h-4" /></button></div>
                                 <div className="p-4">
-                                    {loadingSubmissions ? <div className="py-12 text-center"><Loader2 className="w-8 h-8 text-blue-600 mx-auto" /><div className="mt-3 text-slate-600">Loading...</div></div> : (
+                                    {loadingSubmissions ? <div className="py-12 text-center"><Loader2 className="w-8 h-8 mx-auto animate-spin" style={{ color: '#5c3aec' }} /><div className="mt-3 text-slate-600">Loading...</div></div> : (
                                         userSubmissions.length === 0 ? <div className="text-center py-12"><FileText className="w-12 h-12 text-slate-400 mx-auto" /><div className="mt-3">No submissions yet</div></div> : (
                                             <div className="space-y-3">{userSubmissions.map(s => (<div key={s._id} className="p-3 border rounded"><div className="flex justify-between"><div className="font-semibold">{s.projectName}</div><div className={`px-2 py-1 text-xs rounded-full ${getStatusClass(s.status)}`}>{formatStatus(s.status)}</div></div><div className="text-sm text-slate-600 mt-2">{s.summary}</div></div>))}</div>
                                         )
@@ -487,9 +489,21 @@ const PitchCompetition = () => {
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-blue-50 p-4 rounded"> <div className="w-10 h-10 bg-blue-600 rounded flex items-center justify-center text-white mb-2">$</div><div className="font-semibold">Funding Opportunities</div><div className="text-sm text-slate-600">Win cash prizes and grants.</div></div>
-                        <div className="bg-orange-50 p-4 rounded"> <div className="w-10 h-10 bg-orange-600 rounded flex items-center justify-center text-white mb-2"><Users className="w-4 h-4" /></div><div className="font-semibold">Expert Mentorship</div><div className="text-sm text-slate-600">Guidance from industry experts.</div></div>
-                        <div className="bg-green-50 p-4 rounded"> <div className="w-10 h-10 bg-green-600 rounded flex items-center justify-center text-white mb-2"><Globe className="w-4 h-4" /></div><div className="font-semibold">Network Access</div><div className="text-sm text-slate-600">Connect with investors and partners.</div></div>
+                        <div className="bg-white p-6 rounded-xl border border-slate-200"> 
+                            <div className="w-10 h-10 rounded flex items-center justify-center text-white mb-3" style={{ backgroundColor: '#5c3aec' }}>$</div>
+                            <div className="font-semibold text-slate-900">Funding Opportunities</div>
+                            <div className="text-sm text-slate-600 mt-1">Win cash prizes and grants.</div>
+                        </div>
+                        <div className="bg-white p-6 rounded-xl border border-slate-200"> 
+                            <div className="w-10 h-10 bg-orange-600 rounded flex items-center justify-center text-white mb-3"><Users className="w-5 h-5" /></div>
+                            <div className="font-semibold text-slate-900">Expert Mentorship</div>
+                            <div className="text-sm text-slate-600 mt-1">Guidance from industry experts.</div>
+                        </div>
+                        <div className="bg-white p-6 rounded-xl border border-slate-200"> 
+                            <div className="w-10 h-10 bg-green-600 rounded flex items-center justify-center text-white mb-3"><Globe className="w-5 h-5" /></div>
+                            <div className="font-semibold text-slate-900">Network Access</div>
+                            <div className="text-sm text-slate-600 mt-1">Connect with investors and partners.</div>
+                        </div>
                     </div>
 
                 </div>

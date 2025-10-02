@@ -1,8 +1,8 @@
 <div align="center">
-  <h1><img src="https://Qwesishop.in/favicon.ico" width="20" height="20" alt="Qwesi Favicon">
+  <h1><img src="https://Qwesi.in/favicon.ico" width="20" height="20" alt="Qwesi Favicon">
    Qwesi</h1>
   <p>
-    An open-source multi-vendor e-commerce platform built with Next.js and Tailwind CSS.
+    An open-source job and scholarship platform built with Next.js and Tailwind CSS.
   </p>
   <p>
     <a href="https://github.com/GreatStackDev/Qwesi/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/GreatStackDev/Qwesi?style=for-the-badge" alt="License"></a>
@@ -25,10 +25,12 @@
 
 ## Features
 
-- **Multi-Vendor Architecture:** Allows multiple vendors to register, manage their own products, and sell on a single platform.
-- **Customer-Facing Storefront:** A beautiful and responsive user interface for customers to browse and purchase products.
-- **Vendor Dashboards:** Dedicated dashboards for vendors to manage products, view sales analytics, and track orders.
-- **Admin Panel:** A comprehensive dashboard for platform administrators to oversee vendors, products, and commissions.
+- **Job Portal:** Connect job seekers with employers through a comprehensive job listing platform.
+- **Scholarship Opportunities:** Discover and apply for various scholarships to support education.
+- **Talent Pool:** Showcase skills and connect with potential employers.
+- **Employer Dashboard:** Manage job postings, review applications, and find top talent.
+- **User Authentication:** Secure login and registration for personalized experiences.
+- **Subscription Management:** Access premium features with flexible subscription plans.
 
 ## 🛠️ Tech Stack <a name="-tech-stack"></a>
 

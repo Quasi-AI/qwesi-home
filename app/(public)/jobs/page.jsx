@@ -1,8 +1,8 @@
 'use client'
 import React, { useState, useEffect, useMemo, useRef } from 'react'
-import { 
-  Search, Filter, MapPin, Building, Zap, Clock, ChevronRight, 
-  ChevronLeft, X, Briefcase, ArrowRight, Heart, User, FileText, 
+import {
+  Search, Filter, MapPin, Building, Zap, Clock, ChevronRight,
+  ChevronLeft, X, Briefcase, ArrowRight, Heart, User, FileText,
   Upload, Plus, MessageSquare, Send, Globe, Loader2, ExternalLink,
   Building2, Users, DollarSign, Calendar, Target, Award, Star
 } from 'lucide-react'
@@ -48,14 +48,14 @@ const JobsPage = () => {
   // Helper function to extract country from location
   const extractCountryFromLocation = (location) => {
     if (!location) return ''
-    
+
     const countryPatterns = [
       'Ghana', 'Nigeria', 'Kenya', 'South Africa', 'Egypt', 'Morocco', 'Tunisia',
       'Ethiopia', 'Uganda', 'Tanzania', 'Rwanda', 'Botswana', 'Zambia', 'Zimbabwe',
       'United Kingdom', 'UK', 'Germany', 'France', 'Spain', 'Italy', 'Netherlands',
       'United States', 'USA', 'US', 'Canada', 'Mexico', 'India', 'China', 'Japan'
     ]
-    
+
     for (const country of countryPatterns) {
       if (location.toLowerCase().includes(country.toLowerCase())) {
         if (country.toLowerCase() === 'uk') return 'United Kingdom'
@@ -63,7 +63,7 @@ const JobsPage = () => {
         return country
       }
     }
-    
+
     const parts = location.split(',').map(part => part.trim())
     return parts.length >= 2 ? parts[parts.length - 1] : ''
   }
@@ -148,7 +148,7 @@ const JobsPage = () => {
   }, [jobs, searchQuery, filters, sortBy])
 
   const totalPages = Math.max(1, Math.ceil(filteredJobs.length / jobsPerPage))
-  
+
   const paginatedJobs = useMemo(() => {
     const start = (currentPage - 1) * jobsPerPage
     const end = start + jobsPerPage
@@ -159,11 +159,11 @@ const JobsPage = () => {
   const fetchJobs = async () => {
     setLoading(true)
     setError(null)
-    
+
     try {
       // Build query parameters
       const queryParams = new URLSearchParams()
-      
+
       if (searchQuery) queryParams.append('search', searchQuery)
       if (filters.location) queryParams.append('location', filters.location)
       if (filters.country) queryParams.append('country', filters.country)
@@ -173,19 +173,19 @@ const JobsPage = () => {
       if (sortBy) queryParams.append('sortBy', sortBy)
       queryParams.append('page', currentPage.toString())
       queryParams.append('limit', jobsPerPage.toString())
-      
+
       const url = `${API_ROUTES.BASE_URL}getalljobsHome${queryParams.toString() ? '?' + queryParams.toString() : ''}`
-      
+
       const response = await fetch(url)
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
+
       const data = await response.json()
 
       setJobs(data.data || [])
-      
+
     } catch (err) {
       console.error('Error fetching jobs:', err)
       setError(err.message || 'Failed to fetch jobs')
@@ -236,18 +236,18 @@ const JobsPage = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return ''
-    
+
     try {
       const date = new Date(dateString)
       const now = new Date()
       const diffTime = Math.abs(now.getTime() - date.getTime())
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-      
+
       if (diffDays === 1) return 'yesterday'
       if (diffDays < 7) return `${diffDays} days ago`
       if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`
       if (diffDays < 365) return `${Math.ceil(diffDays / 30)} months ago`
-      
+
       return date.toLocaleDateString()
     } catch {
       return dateString
@@ -326,10 +326,10 @@ const JobsPage = () => {
               Find Your Dream Job
             </h1>
             <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-              Discover thousands of career opportunities from top companies worldwide. 
+              Discover thousands of career opportunities from top companies worldwide.
               Your next career move starts here.
             </p>
-            
+
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto">
               <div className="relative">
@@ -351,42 +351,6 @@ const JobsPage = () => {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Compact Categories Navigation */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-gray-900">Browse Categories</h3>
-            <Link href="/categories" className="text-sm text-[#432DD7] hover:text-[#3525b8] font-medium">
-              View All Categories →
-            </Link>
-          </div>
-          
-          <div className="flex overflow-x-auto pb-2 gap-3 scrollbar-hide">
-            {[
-              { id: 'vehicles', name: '🚗 Vehicles', count: '12K+' },
-              { id: 'electronics', name: '📱 Electronics', count: '15K+' },
-              { id: 'property', name: '🏠 Property', count: '8K+' },
-              { id: 'fashion', name: '👕 Fashion', count: '7K+' },
-              { id: 'jobs', name: '💼 Jobs', count: '5K+' },
-              { id: 'services', name: '🔧 Services', count: '4K+' },
-              { id: 'furniture', name: '🛋️ Home', count: '6K+' },
-              { id: 'pets', name: '🐾 Pets', count: '3K+' },
-              { id: 'baby-kids', name: '🍼 Baby & Kids', count: '3K+' },
-              { id: 'sports', name: '⚽ Sports', count: '2K+' }
-            ].map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/shop?category=${cat.id}`}
-                className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-[#432DD7] hover:text-white rounded-lg border border-gray-200 hover:border-[#432DD7] transition-all text-sm font-medium whitespace-nowrap"
-              >
-                <span>{cat.name}</span>
-                <span className="text-xs opacity-75">{cat.count}</span>
-              </Link>
-            ))}
           </div>
         </div>
       </div>
@@ -424,19 +388,19 @@ const JobsPage = () => {
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-colors ${
-                  showFilters 
-                    ? 'bg-[#5C3AEB] text-white' 
+                  showFilters
+                    ? 'bg-[#5C3AEB] text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 <Filter className="w-4 h-4" />
                 Filters
               </button>
-              
+
               <div className="hidden md:flex items-center gap-2">
                 <span className="text-sm text-gray-600">Sort by:</span>
-                <select 
-                  value={sortBy} 
+                <select
+                  value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                   className="bg-white border border-gray-300 rounded-lg px-3 py-3 min-h-[44px] text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors"
                 >
@@ -460,8 +424,8 @@ const JobsPage = () => {
                 {/* Country */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Country</label>
-                  <select 
-                    value={filters.country} 
+                  <select
+                    value={filters.country}
                     onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
                     className="w-full border border-gray-300 rounded-lg px-3 py-3 min-h-[44px] text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors"
                   >
@@ -475,8 +439,8 @@ const JobsPage = () => {
                 {/* Location */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                  <select 
-                    value={filters.location} 
+                  <select
+                    value={filters.location}
                     onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
                     className="w-full border border-gray-300 rounded-lg px-3 py-3 min-h-[44px] text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors"
                   >
@@ -490,8 +454,8 @@ const JobsPage = () => {
                 {/* Sector */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Sector</label>
-                  <select 
-                    value={filters.sector} 
+                  <select
+                    value={filters.sector}
                     onChange={(e) => setFilters(prev => ({ ...prev, sector: e.target.value }))}
                     className="w-full border border-gray-300 rounded-lg px-3 py-3 min-h-[44px] text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors"
                   >
@@ -505,8 +469,8 @@ const JobsPage = () => {
                 {/* Experience */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Experience</label>
-                  <select 
-                    value={filters.experience_level} 
+                  <select
+                    value={filters.experience_level}
                     onChange={(e) => setFilters(prev => ({ ...prev, experience_level: e.target.value }))}
                     className="w-full border border-gray-300 rounded-lg px-3 py-3 min-h-[44px] text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3AEB] transition-colors"
                   >
@@ -563,8 +527,8 @@ const JobsPage = () => {
             <Briefcase className="w-24 h-24 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">No Jobs Found</h3>
             <p className="text-gray-600 mb-6">
-              {searchQuery || Object.values(filters).some(f => f) 
-                ? 'Try adjusting your search criteria or filters' 
+              {searchQuery || Object.values(filters).some(f => f)
+                ? 'Try adjusting your search criteria or filters'
                 : 'No job listings available at the moment'}
             </p>
             {(searchQuery || Object.values(filters).some(f => f)) && (
@@ -595,7 +559,7 @@ const JobsPage = () => {
                 <div className="text-xs sm:text-sm text-gray-600 order-2 sm:order-1">
                   Page {currentPage} of {totalPages}
                 </div>
-                
+
                 <div className="flex items-center gap-1 sm:gap-2 order-1 sm:order-2">
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
@@ -606,10 +570,10 @@ const JobsPage = () => {
                     <span className="hidden sm:inline">Previous</span>
                     <span className="sm:hidden">Prev</span>
                   </button>
-                  
+
                   <div className="flex gap-1">
                     {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
-                      const page = currentPage <= 2 ? i + 1 : 
+                      const page = currentPage <= 2 ? i + 1 :
                                  currentPage >= totalPages - 1 ? totalPages - 2 + i :
                                  currentPage - 1 + i
                       return page > 0 && page <= totalPages ? (
@@ -627,7 +591,7 @@ const JobsPage = () => {
                       ) : null
                     })}
                   </div>
-                  
+
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
@@ -662,26 +626,3 @@ const JobsPage = () => {
 }
 
 export default JobsPage
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

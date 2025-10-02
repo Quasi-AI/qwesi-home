@@ -1,19 +1,30 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { useAuthStore } from '@/stores/authStore';
 
 export const useChatSocket = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState(null);
+  const [reconnectionAttempts, setReconnectionAttempts] = useState(0);
   const socketRef = useRef(null);
+  const reconnectTimeoutRef = useRef(null);
   const authStore = useAuthStore();
+
+  const disconnect = useCallback(() => {
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+      setIsConnected(false);
+      setConnectionError(null);
+    }
+  }, []);
 
   const connect = useCallback(() => {
     if (socketRef.current?.connected) return;
 
     const auth = JSON.parse(localStorage.getItem('auth') || '{}');
     const token = auth?.token;
-    
+
     if (!token) {
       console.error('No authentication token found');
       setConnectionError('No authentication token found');
@@ -24,14 +35,25 @@ export const useChatSocket = () => {
 
     const socketUrl = "https://dark-caldron-448714-u5.uc.r.appspot.com";
 
+    // Clear any existing reconnect timeout
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+
+    // Check for network connectivity before connecting
+    if (!navigator.onLine) {
+      console.error('No network connection available');
+      setConnectionError('No network connection available');
+      return;
+    }
+
     socketRef.current = io(socketUrl, {
       auth: { token },
       transports: ['polling', 'websocket'],
       timeout: 20000,
       forceNew: true,
-      reconnection: true,
-      reconnectionAttempts: 3,
-      reconnectionDelay: 2000
+      reconnection: false // Disable built-in reconnection to implement custom logic
     });
 
     // Connection events
@@ -39,16 +61,21 @@ export const useChatSocket = () => {
       console.log('✅ Socket connected:', socketRef.current?.id);
       setIsConnected(true);
       setConnectionError(null);
+      setReconnectionAttempts(0);
     });
 
     socketRef.current.on('disconnect', (reason) => {
       console.log('❌ Socket disconnected:', reason);
       setIsConnected(false);
-      
+
       if (reason === 'io server disconnect') {
-        setTimeout(() => {
-          socketRef.current?.connect();
-        }, 1000);
+        // The disconnection was initiated by the server, try to reconnect manually
+        attemptReconnect();
+      } else if (reason === 'io client disconnect') {
+        // Client disconnected manually, do not reconnect
+      } else {
+        // Other reasons, try to reconnect
+        attemptReconnect();
       }
     });
 
@@ -56,17 +83,38 @@ export const useChatSocket = () => {
       console.error('❌ Socket connection error:', error);
       setConnectionError(error.message);
       setIsConnected(false);
+      attemptReconnect();
     });
-  }, []);
 
-  const disconnect = useCallback(() => {
-    if (socketRef.current) {
-      socketRef.current.disconnect();
-      socketRef.current = null;
-      setIsConnected(false);
-      setConnectionError(null);
+    // Listen for online/offline events to update connection status
+    window.addEventListener('online', () => {
+      console.log('Network online - attempting to connect socket');
+      connect();
+    });
+
+    window.addEventListener('offline', () => {
+      console.log('Network offline - disconnecting socket');
+      disconnect();
+      setConnectionError('No network connection available');
+    });
+
+    function attemptReconnect() {
+      if (reconnectionAttempts >= 5) {
+        console.error('Max reconnection attempts reached');
+        setConnectionError('Unable to connect to chat server. Please try again later.');
+        return;
+      }
+
+      const delay = Math.min(1000 * 2 ** reconnectionAttempts, 30000); // Exponential backoff max 30s
+      console.log(`Attempting to reconnect in ${delay}ms`);
+
+      reconnectTimeoutRef.current = setTimeout(() => {
+        setReconnectionAttempts(prev => prev + 1);
+        console.log('Reconnecting socket...');
+        socketRef.current?.connect();
+      }, delay);
     }
-  }, []);
+  }, [reconnectionAttempts, disconnect]);
 
   const joinChat = useCallback((chatId, talentId) => {
     if (!socketRef.current?.connected) {
