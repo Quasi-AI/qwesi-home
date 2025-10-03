@@ -2,9 +2,10 @@
 import { ArrowRight, MessageCircle, Facebook, Linkedin, Star, Users, TrendingUp, Search, Play, Phone, MessageCircleMore, Globe, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import TranslateService from '@/services/TranslateService'
 import { useLocationDetection } from '@/hooks/useLocationDetection'
+import { useAuthStore } from '@/stores/authStore'
 
 // Initialize translation service
 const translateService = new TranslateService();
@@ -129,8 +130,10 @@ const Hero = () => {
     const dropdownRef = useRef(null)
 
     const pathname = usePathname()
+    const router = useRouter()
     const { translate, currentLanguage, isTranslating } = useGoogleTranslate()
     const { country, loading: isDetectingLocation } = useLocationDetection()
+    const { isAuthenticated } = useAuthStore()
 
     // Dynamic content based on current page
     const getHeroContent = () => {
@@ -311,6 +314,17 @@ const Hero = () => {
         }
     }, [])
 
+    // Handle Post Free Ad button click
+    const handlePostFreeAdClick = () => {
+        if (isAuthenticated) {
+            // User is logged in, navigate to dashboard
+            router.push(`/dashboard?country=${selectedCountry}`)
+        } else {
+            // User is not logged in, open login modal
+            window.dispatchEvent(new CustomEvent('auth:open-login'))
+        }
+    }
+
     return (
         <div className='relative z-10'>
             {/* Translation Loading Indicator */}
@@ -455,13 +469,13 @@ const Hero = () => {
 
                             {/* Action Buttons */}
                             <div className='flex flex-col sm:flex-row gap-4'>
-                                <Link
-                                    href={`/dashboard?country=${selectedCountry}`}
+                                <button
+                                    onClick={handlePostFreeAdClick}
                                     className='relative z-20 flex items-center justify-center gap-2 bg-white border-2 border-[#5C3AEB] text-[#5C3AEB] px-8 py-4 rounded-xl text-lg font-semibold hover:bg-[#5C3AEB] hover:text-white transition-all cursor-pointer'
                                 >
                                     <Play className='w-5 h-5' />
                                     <TranslatedText>Post Free Ad</TranslatedText>
-                                </Link>
+                                </button>
                             </div>
 
                             {/* Instant Connection Section */}

@@ -1,21 +1,18 @@
-# Chat Socket and API Error Fixes
+# TODO: Fix "Post Free Ad" Button Authentication Logic
 
-## Current Issues
-- "Socket not connected" error when trying to join chat or send messages
-- "xhr post error" when API fallback calls fail
+## Current Issue
+The "Post Free Ad" button in Hero.jsx uses a Link component that directly navigates to the dashboard, bypassing the login modal logic that other protected routes use.
 
 ## Tasks
-- [x] Improve socket connection handling in useChatSocket.js
-  - [x] Add better error logging and connection status tracking
-  - [x] Implement automatic reconnection with exponential backoff
-  - [x] Add connection timeout handling
-- [ ] Enhance error handling in chat.jsx
-  - [ ] Add retry logic for failed API calls
-  - [ ] Improve user feedback for connection errors
-  - [ ] Add loading states for reconnection attempts
-- [ ] Investigate authFetch implementation
-  - [ ] Check lib/auth.js for authFetch function
-  - [ ] Verify API routes in lib/apiRoutes.js
-  - [ ] Add error logging for API failures
-- [ ] Test socket connection and API fallback behavior
-- [ ] Verify errors are resolved and user experience improved
+- [ ] Import useAuthStore in Hero.jsx
+- [ ] Use isAuthenticated state from authStore
+- [ ] Change "Post Free Ad" Link to button with click handler
+- [ ] Implement click handler: if logged in, navigate to dashboard; if not, open login modal
+- [ ] Test the functionality when logged in and logged out
+
+## Files to Edit
+- components/Hero.jsx
+
+## Expected Behavior
+- When user clicks "Post Free Ad" and is not logged in: Login modal should open
+- When user clicks "Post Free Ad" and is logged in: Navigate to dashboard with country query
