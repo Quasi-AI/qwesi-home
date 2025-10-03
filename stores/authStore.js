@@ -7,6 +7,10 @@ export const useAuthStore = create((set, get) => ({
   isAuthenticated: false,
   isLoading: true,
   validationInterval: null,
+  idleTimeout: null,
+  idleTimeoutDuration: 30 * 60 * 1000, // 30 minutes in milliseconds
+  lastActivity: Date.now(),
+  activityHandler: null,
 
   // Initialize auth state
   initAuth: () => {
@@ -36,6 +40,9 @@ export const useAuthStore = create((set, get) => ({
     if (state.validationInterval) {
       clearInterval(state.validationInterval);
     }
+    if (state.idleTimeout) {
+      clearTimeout(state.idleTimeout);
+    }
 
     let interval = null;
     if (user && user.expiresAt) {
@@ -47,6 +54,14 @@ export const useAuthStore = create((set, get) => ({
       }, 30000); // Check every 30 seconds
     }
 
+    // Start idle timeout tracking
+    const idleTimeout = setTimeout(() => {
+      get().handleIdleTimeout();
+    }, state.idleTimeoutDuration);
+
+    // Set up activity listeners
+    get().setupActivityListeners();
+
     // Persist to localStorage
     if (user && token) {
       localStorage.setItem('auth', JSON.stringify({ user, token }));
@@ -56,7 +71,9 @@ export const useAuthStore = create((set, get) => ({
       user,
       token,
       isAuthenticated: !!user,
-      validationInterval: interval
+      validationInterval: interval,
+      idleTimeout,
+      lastActivity: Date.now()
     });
   },
 
@@ -75,13 +92,75 @@ export const useAuthStore = create((set, get) => ({
       clearInterval(state.validationInterval);
       set({ validationInterval: null });
     }
+    if (state.idleTimeout) {
+      clearTimeout(state.idleTimeout);
+      set({ idleTimeout: null });
+    }
+
+    // Remove activity listeners
+    get().removeActivityListeners();
+
     await logoutUser();
     set({
       user: null,
       token: null,
       isAuthenticated: false,
-      validationInterval: null
+      validationInterval: null,
+      idleTimeout: null,
+      lastActivity: Date.now(),
+      activityHandler: null
     });
+  },
+
+  // Handle idle timeout
+  handleIdleTimeout: () => {
+    console.log('Idle timeout reached, logging out user');
+    get().clearAuth();
+  },
+
+  // Reset idle timer on activity
+  resetIdleTimer: () => {
+    const state = get();
+    if (!state.isAuthenticated) return;
+
+    set({ lastActivity: Date.now() });
+
+    if (state.idleTimeout) {
+      clearTimeout(state.idleTimeout);
+    }
+
+    const newIdleTimeout = setTimeout(() => {
+      get().handleIdleTimeout();
+    }, state.idleTimeoutDuration);
+
+    set({ idleTimeout: newIdleTimeout });
+  },
+
+  // Set up activity event listeners
+  setupActivityListeners: () => {
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+
+    const handleActivity = () => {
+      get().resetIdleTimer();
+    };
+
+    events.forEach(event => {
+      document.addEventListener(event, handleActivity, true);
+    });
+
+    // Store the handler for cleanup
+    set({ activityHandler: handleActivity });
+  },
+
+  // Remove activity event listeners
+  removeActivityListeners: () => {
+    const state = get();
+    if (state.activityHandler) {
+      const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+      events.forEach(event => {
+        document.removeEventListener(event, state.activityHandler, true);
+      });
+    }
   },
 
   // Get current user
