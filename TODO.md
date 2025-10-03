@@ -62,3 +62,30 @@ The subscription modal distorts the page layout on mobile view when opened from 
 - Content is scrollable if it exceeds viewport height
 - Text and buttons are appropriately sized for mobile screens
 - Modal maintains proper spacing and readability on all screen sizes
+
+---
+
+# TODO: Fix Investors Page Mobile Responsiveness
+
+## Current Issue
+The investors page layout is not optimized for mobile devices, causing poor user experience on smaller screens.
+
+## Tasks
+- [x] Make hero section responsive with proper text sizing (text-3xl sm:text-4xl md:text-5xl)
+- [x] Optimize search bar for mobile (responsive padding, button sizing)
+- [x] Improve stats grid responsiveness (text-xl sm:text-2xl, text-xs sm:text-sm)
+- [x] Make filters section mobile-friendly (stack vertically on small screens)
+- [x] Optimize investor cards for mobile (responsive padding, text sizes, button spacing)
+- [x] Improve pagination for mobile (stack controls, hide text on small screens, add overflow-x-auto)
+- [x] Make investor detail modal mobile-responsive (responsive padding, button layout, text truncation)
+- [x] Add proper responsive grid layouts throughout (grid-cols-1 sm:grid-cols-2 lg:grid-cols-3)
+
+## Files to Edit
+- app/(public)/investors/page.jsx
+
+## Expected Behavior
+- Page displays properly on all screen sizes from mobile to desktop
+- Text and elements scale appropriately for readability
+- Touch targets are appropriately sized for mobile interaction
+- Content flows naturally without horizontal scrolling on mobile
+- Modal dialogs are fully functional on mobile devices
