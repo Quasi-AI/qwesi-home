@@ -38,3 +38,27 @@ Users remain logged in indefinitely, which is a security concern.
 - User is automatically logged out after 30 minutes of inactivity
 - Activity (mouse, keyboard, touch) resets the idle timer
 - Event listeners are properly cleaned up
+
+---
+
+# TODO: Fix Subscription Modal Mobile Responsiveness
+
+## Current Issue
+The subscription modal distorts the page layout on mobile view when opened from the investors page.
+
+## Tasks
+- [x] Update modal container with responsive padding (p-2 sm:p-4)
+- [x] Add max-height constraint (max-h-[90vh]) to prevent overflow
+- [x] Implement responsive text sizes and spacing
+- [x] Change button layout to stack vertically on mobile (flex-col sm:flex-row)
+- [x] Add proper overflow handling for scrollable content
+- [x] Adjust icon sizes for mobile (w-3 h-3 sm:w-4 sm:h-4)
+
+## Files to Edit
+- modals/SubscriptionModal.jsx
+
+## Expected Behavior
+- Modal displays properly on mobile without distorting the page
+- Content is scrollable if it exceeds viewport height
+- Text and buttons are appropriately sized for mobile screens
+- Modal maintains proper spacing and readability on all screen sizes
