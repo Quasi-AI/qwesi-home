@@ -1,1 +1,25 @@
-{}
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/detect/route": "app/api/detect/route.js",
+  "/api/translate/route": "app/api/translate/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/reset-password/page": "app/reset-password/page.js",
+  "/(public)/investors/page": "app/(public)/investors/page.js",
+  "/(public)/loading/page": "app/(public)/loading/page.js",
+  "/(public)/pricing/page": "app/(public)/pricing/page.js",
+  "/(public)/jobs/page": "app/(public)/jobs/page.js",
+  "/(public)/about/page": "app/(public)/about/page.js",
+  "/(public)/profile/page": "app/(public)/profile/page.js",
+  "/(public)/page": "app/(public)/page.js",
+  "/(public)/whatsapp-support/page": "app/(public)/whatsapp-support/page.js",
+  "/(public)/privacy/page": "app/(public)/privacy/page.js",
+  "/(public)/talent-pool/page": "app/(public)/talent-pool/page.js",
+  "/(public)/scholarships/page": "app/(public)/scholarships/page.js",
+  "/(public)/terms/page": "app/(public)/terms/page.js",
+  "/dashboard/job-seeker/page": "app/dashboard/job-seeker/page.js",
+  "/dashboard/employer/page": "app/dashboard/employer/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/subscription/page": "app/dashboard/subscription/page.js",
+  "/dashboard/pitch/page": "app/dashboard/pitch/page.js",
+  "/dashboard/investor/page": "app/dashboard/investor/page.js"
+}
