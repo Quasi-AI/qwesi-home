@@ -89,3 +89,28 @@ The investors page layout is not optimized for mobile devices, causing poor user
 - Touch targets are appropriately sized for mobile interaction
 - Content flows naturally without horizontal scrolling on mobile
 - Modal dialogs are fully functional on mobile devices
+
+---
+
+# TODO: Fix Dashboard Interview Page Not Showing
+
+## Current Issue
+The dashboard interview page was not accessible due to incorrect file naming and missing navigation link.
+
+## Tasks
+- [x] Rename interview file from pages.jsx to page.jsx (Next.js App Router requirement)
+- [x] Add "use client" directive to enable React hooks in Next.js App Router
+- [x] Add MessageSquare icon import to AdminSidebar
+- [x] Add Interview link to sidebar navigation menu between Pitch and Investor
+- [x] Fix avatar display with loading states and error fallback
+
+## Files to Edit
+- app/dashboard/interview/pages.jsx → app/dashboard/interview/page.jsx
+- components/dashboard/AdminSidebar.jsx
+
+## Expected Behavior
+- Interview page is accessible via /dashboard/interview route
+- Interview link appears in dashboard sidebar navigation
+- Page loads properly with AI Interview Simulator functionality
+- Speech recognition, text-to-speech, and avatar features work correctly
+- Avatar displays with loading spinner and fallback user icon on error

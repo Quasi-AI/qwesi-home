@@ -1,8 +1,8 @@
 'use client'
 import { usePathname } from "next/navigation"
-import { 
-    HomeIcon, 
-    ShieldCheckIcon, 
+import {
+    HomeIcon,
+    ShieldCheckIcon,
     TicketPercentIcon,
     UsersIcon,
     PresentationIcon,
@@ -11,7 +11,8 @@ import {
     CreditCardIcon,
     UserIcon,
     Menu,
-    X
+    X,
+    MessageSquare
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -27,6 +28,7 @@ const AdminSidebar = () => {
         { name: 'Post Job', href: '/dashboard/employer', icon: Briefcase },
         { name: 'Job Seeker', href: '/dashboard/job-seeker', icon: UserIcon },
         { name: 'Pitch', href: '/dashboard/pitch', icon: PresentationIcon },
+        { name: 'Interview', href: '/dashboard/interview', icon: MessageSquare },
         { name: 'Investor', href: '/dashboard/investor', icon: TrendingUpIcon },
         { name: 'Subscription', href: '/dashboard/subscription', icon: CreditCardIcon }
     ]

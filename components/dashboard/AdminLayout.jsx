@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState, useRef } from "react"
+import { usePathname } from "next/navigation"
 import Loading from "../Loading"
 import Link from "next/link"
 import { ArrowRightIcon } from "lucide-react"
@@ -13,6 +14,7 @@ const AdminLayout = ({ children }) => {
     const [loading, setLoading] = useState(true)
     const { checkTokenExpiration } = useAuthStore()
     const intervalRef = useRef(null)
+    const pathname = usePathname()
 
     useEffect(() => {
         const init = async () => {
@@ -113,17 +115,23 @@ const AdminLayout = ({ children }) => {
             </div>
         </div>
     ) : isAdmin ? (
-        <div className="flex flex-col h-screen bg-gray-50">
-            <Navbar />
-            <div className="flex flex-1 overflow-hidden">
-                <AdminSidebar />
-                <main className="flex-1 overflow-y-auto">
-                    <div className="p-4 md:p-6 lg:p-8">
-                        {children}
-                    </div>
-                </main>
+        pathname === '/dashboard/interview' ? (
+            <div className="min-h-screen bg-white">
+                {children}
             </div>
-        </div>
+        ) : (
+            <div className="flex flex-col h-screen bg-gray-50">
+                <Navbar />
+                <div className="flex flex-1 overflow-hidden">
+                    <AdminSidebar />
+                    <main className="flex-1 overflow-y-auto">
+                        <div className="p-4 md:p-6 lg:p-8">
+                            {children}
+                        </div>
+                    </main>
+                </div>
+            </div>
+        )
     ) : (
         <div className="min-h-screen flex flex-col items-center justify-center text-center px-6">
             <h1 className="text-2xl sm:text-4xl font-semibold text-slate-400">You are not authorized to access this page</h1>
