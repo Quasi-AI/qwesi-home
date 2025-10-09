@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { API_ROUTES } from '@/lib/apiRoutes'
+import { uploadResume } from '@/lib/storage';
 
 const JobSeekerRegistration = () => {
   const router = useRouter();
@@ -17,6 +18,7 @@ const JobSeekerRegistration = () => {
     experience: ''
   });
 
+  const [resume, setResume] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isFormValid = form.name.trim() !== '' &&
@@ -33,6 +35,10 @@ const JobSeekerRegistration = () => {
     }));
   };
 
+  const handleResumeChange = (e) => {
+    setResume(e.target.files[0]);
+  };
+
   const handleSubmit = async () => {
     if (!isFormValid) {
       toast.error('Please fill in all required fields');
@@ -42,12 +48,22 @@ const JobSeekerRegistration = () => {
     setIsSubmitting(true);
 
     try {
+      let resumeURL = null;
+      if (resume) {
+        resumeURL = await uploadResume(resume);
+      }
+
+      const formData = {
+        ...form,
+        resumeURL: resumeURL,
+      };
+
       const response = await fetch(`${API_ROUTES.BASE_URL}/register-on-page`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify(formData)
       });
 
       const data = await response.json();
@@ -63,6 +79,7 @@ const JobSeekerRegistration = () => {
           skills: '',
           experience: ''
         });
+        setResume(null); // Reset resume after successful submission
         setTimeout(() => {
           router.push('/dashboard');
         }, 2000);
@@ -184,6 +201,18 @@ const JobSeekerRegistration = () => {
                 style={{ '--tw-ring-color': '#5c3aec' }}
                 required
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Resume</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={handleResumeChange}
+                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:border-transparent transition-all duration-300"
+                style={{ '--tw-ring-color': '#5c3aec' }}
+              />
+              {resume && <p className="mt-2 text-sm text-slate-600">Selected file: {resume.name}</p>}
             </div>
 
             <div className="flex flex-col sm:flex-row justify-between items-center pt-6 border-t border-slate-200">

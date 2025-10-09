@@ -1,13 +1,29 @@
 'use client';
 import React, { useState, useEffect, useRef, Suspense } from 'react';
-import { Mic, MicOff, Play, RotateCcw, Settings, User, Volume2, CheckCircle, Clock, Video, Download, Camera, CameraOff, AlertTriangle, X } from 'lucide-react';
+import { Mic, Play, RotateCcw, Settings, User, Volume2, CheckCircle, Clock, Video, Download, Camera, CameraOff, AlertTriangle, X } from 'lucide-react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { generateSpeech } from '../../../lib/tts';
 
+// ============================================================================
+// CONSTANTS
+// ============================================================================
 const API_BASE_URL = 'https://dark-caldron-448714-u5.uc.r.appspot.com';
+const SILENCE_TIMEOUT_MS = 3000;
+const AVATAR_DEFAULT_URL = 'https://models.readyplayer.me/68e257931df78dfe0f4b5b72.glb';
 
+const INTERVIEW_QUESTIONS = [
+  "Hello! Welcome to your interview. Can you tell me about yourself?",
+  "What are your greatest strengths and how do they relate to this position?",
+  "Can you describe a challenging situation you faced and how you handled it?",
+  "Where do you see yourself in five years?",
+  "Why are you interested in this position and our company?",
+  "Do you have any questions for me?"
+];
+
+// ============================================================================
+// 3D AVATAR COMPONENTS
+// ============================================================================
 const AvatarModel = ({ url }) => {
   const { scene } = useGLTF(url);
   
@@ -80,32 +96,46 @@ const AvatarDisplay = ({ avatarUrl, isSpeaking }) => {
   );
 };
 
-export default function InterviewSimulator() {
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+const InterviewPage = () => {
+  // STATE - Session
   const [sessionId, setSessionId] = useState(null);
   const [sessionStats, setSessionStats] = useState(null);
-  const [isListening, setIsListening] = useState(false);
-  const [transcript, setTranscript] = useState('');
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState([]);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState('https://models.readyplayer.me/68e257931df78dfe0f4b5b72.glb');
   const [interviewStarted, setInterviewStarted] = useState(false);
   const [interviewComplete, setInterviewComplete] = useState(false);
-  const [startTime, setStartTime] = useState(null);
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [questionStartTime, setQuestionStartTime] = useState(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordedChunks, setRecordedChunks] = useState([]);
-  const [recordingUrl, setRecordingUrl] = useState(null);
-  const [cameraEnabled, setCameraEnabled] = useState(false);
-  const [cheatingWarnings, setCheatingWarnings] = useState([]);
-  const [isLookingAway, setIsLookingAway] = useState(false);
   const [permissionsGranted, setPermissionsGranted] = useState(false);
   const [checkingPermissions, setCheckingPermissions] = useState(false);
   const [error, setError] = useState(null);
+
+  // STATE - Interview Progress
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [answers, setAnswers] = useState([]);
+  const [transcript, setTranscript] = useState('');
+  const [questionStartTime, setQuestionStartTime] = useState(null);
+
+  // STATE - Audio/Speech
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
 
+  // STATE - Recording
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingUrl, setRecordingUrl] = useState(null);
+  const [cameraEnabled, setCameraEnabled] = useState(false);
+
+  // STATE - Proctoring
+  const [cheatingWarnings, setCheatingWarnings] = useState([]);
+  const [isLookingAway, setIsLookingAway] = useState(false);
+
+  // STATE - UI
+  const [showSettings, setShowSettings] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(AVATAR_DEFAULT_URL);
+  const [startTime, setStartTime] = useState(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  // REFS
   const recognitionRef = useRef(null);
   const synthRef = useRef(typeof window !== 'undefined' ? window.speechSynthesis : null);
   const timerRef = useRef(null);
@@ -114,16 +144,12 @@ export default function InterviewSimulator() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionIntervalRef = useRef(null);
+  const silenceTimerRef = useRef(null);
+  const lastTranscriptRef = useRef('');
 
-  const interviewQuestions = [
-    "Hello! Welcome to your interview. Can you tell me about yourself?",
-    "What are your greatest strengths and how do they relate to this position?",
-    "Can you describe a challenging situation you faced and how you handled it?",
-    "Where do you see yourself in five years?",
-    "Why are you interested in this position and our company?",
-    "Do you have any questions for me?"
-  ];
-
+  // ============================================================================
+  // UTILITY FUNCTIONS
+  // ============================================================================
   const getAuthToken = () => {
     try {
       const auth = localStorage.getItem('auth');
@@ -135,6 +161,15 @@ export default function InterviewSimulator() {
     return '';
   };
 
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // ============================================================================
+  // API FUNCTIONS
+  // ============================================================================
   const startSession = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/interview-simulator/sessions/start`, {
@@ -157,7 +192,6 @@ export default function InterviewSimulator() {
       }
     } catch (err) {
       console.warn('API unavailable, running in local mode:', err.message);
-      // Generate a local session ID for offline mode
       const localSessionId = `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       setSessionId(localSessionId);
       return localSessionId;
@@ -167,10 +201,9 @@ export default function InterviewSimulator() {
   const saveAnswer = async (questionNum, questionText, answerText, startedAt, submittedAt) => {
     if (!sessionId) return;
     try {
-      // Calculate response time in milliseconds
       const responseTime = new Date(submittedAt).getTime() - new Date(startedAt).getTime();
 
-      const response = await fetch(`${API_BASE_URL}/interview-simulator/sessions/${sessionId}/answers`, {
+      await fetch(`${API_BASE_URL}/interview-simulator/sessions/${sessionId}/answers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -185,18 +218,8 @@ export default function InterviewSimulator() {
           responseTime: responseTime
         })
       });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Failed to save answer:', response.status, errorData);
-        throw new Error(`Failed to save answer: ${response.status}`);
-      }
-
-      console.log('Answer saved successfully');
     } catch (err) {
       console.error('Error saving answer:', err);
-      // Don't throw the error to prevent breaking the interview flow
-      // Just log it and continue
     }
   };
 
@@ -223,7 +246,6 @@ export default function InterviewSimulator() {
   const completeSession = async () => {
     if (!sessionId) return;
     try {
-      // Stop screen recording before completing session
       if (isRecording) {
         stopScreenRecording();
       }
@@ -239,8 +261,6 @@ export default function InterviewSimulator() {
       const data = await response.json();
       if (response.ok && data.success) {
         await fetchSessionStats();
-        // Don't redirect immediately, let user see the completion screen with download option
-        // window.location.href = '/dashboard';
       }
     } catch (err) {
       console.error('Error completing session:', err);
@@ -264,123 +284,226 @@ export default function InterviewSimulator() {
     }
   };
 
-  useEffect(() => {
-    if (interviewStarted && !interviewComplete) {
-      timerRef.current = setInterval(() => {
-        setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
-      }, 1000);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [interviewStarted, interviewComplete, startTime]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-      setSpeechSupported(true);
-
-      recognitionRef.current.onresult = (event) => {
-        let interimTranscript = '';
-        let finalTranscript = '';
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript + ' ';
-          } else {
-            interimTranscript += transcript;
-          }
-        }
-
-        setTranscript(finalTranscript || interimTranscript);
-      };
-
-      recognitionRef.current.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        setIsListening(false);
-      };
-    } else {
-      setSpeechSupported(false);
-    }
-
-    return () => {
-      if (recognitionRef.current) recognitionRef.current.stop();
-    };
-  }, []);
-
+  // ============================================================================
+  // SPEECH FUNCTIONS
+  // ============================================================================
   const speakQuestion = async (text) => {
+    if (!synthRef.current) return;
+    
     setIsSpeaking(true);
-    try {
-      const audioBuffer = await generateSpeech(text);
-      const blob = new Blob([audioBuffer], { type: 'audio/mpeg' });
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      audio.onended = () => {
+    
+    return new Promise((resolve) => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      
+      utterance.onend = () => {
         setIsSpeaking(false);
-        URL.revokeObjectURL(url);
+        resolve();
       };
-      audio.onerror = () => setIsSpeaking(false);
-      audio.play();
-    } catch (error) {
-      console.error('Error speaking:', error);
-      setIsSpeaking(false);
-    }
+      
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+        resolve();
+      };
+      
+      synthRef.current.speak(utterance);
+    });
   };
 
-  const startInterview = async () => {
-    setCheckingPermissions(true);
-    setError(null);
+  const logState = () => {
+    console.log('=== CURRENT STATE ===');
+    console.log('isListening:', isListening);
+    console.log('interviewStarted:', interviewStarted);
+    console.log('interviewComplete:', interviewComplete);
+    console.log('currentQuestion:', currentQuestion);
+    console.log('transcript:', transcript);
+    console.log('lastTranscript:', lastTranscriptRef.current);
+    console.log('=====================');
+  };
 
-    const token = getAuthToken();
-    if (!token) {
-      setError('Please log in to start the interview.');
-      setCheckingPermissions(false);
+  const startListening = () => {
+    console.log('=== startListening called ===');
+    console.log('speechSupported:', speechSupported);
+    console.log('recognitionRef.current:', recognitionRef.current);
+    console.log('isListening:', isListening);
+    
+    if (!recognitionRef.current) {
+      console.error('Speech recognition not initialized!');
+      setError('Speech recognition not initialized. Please refresh the page.');
       return;
     }
-
+    
+    if (isListening) {
+      console.log('Already listening, skipping...');
+      return;
+    }
+    
+    lastTranscriptRef.current = '';
+    setTranscript('');
+    
     try {
-      if (sessionId) {
-        await fetch(`${API_BASE_URL}/interview-simulator/sessions/${sessionId}/complete`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getAuthToken()}`
-          },
-          body: JSON.stringify({})
-        });
+      recognitionRef.current.start();
+      setIsListening(true);
+      console.log('Speech recognition start command sent');
+    } catch (e) {
+      console.error('Error starting recognition:', e);
+      if (e.message && e.message.includes('already started')) {
+        console.log('Recognition already started, setting state');
+        setIsListening(true);
+      } else {
+        setError('Failed to start speech recognition: ' + e.message);
       }
-
-      const newSessionId = await startSession();
-      if (!newSessionId) throw new Error('Failed to create session');
-
-      setInterviewStarted(true);
-      await startCamera();
-      await startScreenRecording();
-
-      setPermissionsGranted(true);
-      setStartTime(Date.now());
-      setCurrentQuestion(0);
-      setAnswers([]);
-      setTranscript('');
-      setCheckingPermissions(false);
-      setQuestionStartTime(new Date().toISOString());
-
-      setTimeout(() => {
-        speakQuestion(interviewQuestions[0]);
-      }, 1000);
-    } catch (error) {
-      setCheckingPermissions(false);
-      setInterviewStarted(false);
-      setError('You must grant camera and screen recording permissions to start the interview. Error: ' + error.message);
     }
   };
 
+  const stopListeningAndProgress = async () => {
+      console.log('=== stopListeningAndProgress called ===');
+      
+      // Immediately set flag to prevent any restarts
+      setIsListening(false);
+      window.recognitionRestarting = false; // Clear any restart flags
+      
+      // Clear ALL timers immediately
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+      
+      // Force stop recognition and clear any pending operations
+      if (recognitionRef.current) {
+        recognitionRef.current.onend = null; // Temporarily disable onend handler
+        try {
+          recognitionRef.current.abort(); // Use abort instead of stop for immediate termination
+          console.log('Recognition aborted');
+        } catch (e) {
+          console.log('Recognition abort error:', e);
+        }
+      }
+
+      const finalTranscript = lastTranscriptRef.current.trim();
+      console.log('Final transcript to save:', finalTranscript);
+      
+      if (!finalTranscript) {
+        console.log('No transcript to save, restarting listening...');
+        // Re-attach the onend handler before restarting
+        if (recognitionRef.current) {
+          recognitionRef.current.onend = () => {
+            console.log('Speech recognition ended, isListening:', isListening);
+            if (window.recognitionRestarting) return;
+            const shouldRestart = isListening && !interviewComplete && interviewStarted;
+            if (shouldRestart && recognitionRef.current) {
+              window.recognitionRestarting = true;
+              setTimeout(() => {
+                try {
+                  recognitionRef.current.start();
+                } catch (e) {
+                  if (e.message && !e.message.includes('already started')) {
+                    setIsListening(false);
+                  }
+                } finally {
+                  window.recognitionRestarting = false;
+                }
+              }, 500);
+            }
+          };
+        }
+        setTimeout(() => {
+          startListening();
+        }, 500);
+        return;
+      }
+      
+      // Save the answer
+      const answerData = { 
+        question: INTERVIEW_QUESTIONS[currentQuestion], 
+        answer: finalTranscript,
+        timestamp: new Date().toLocaleTimeString()
+      };
+      
+      console.log('Saving answer:', answerData);
+      setAnswers(prev => [...prev, answerData]);
+      
+      const submittedAt = new Date().toISOString();
+      await saveAnswer(
+        currentQuestion + 1,
+        INTERVIEW_QUESTIONS[currentQuestion],
+        finalTranscript,
+        questionStartTime,
+        submittedAt
+      );
+
+      // Move to next question or complete
+      if (currentQuestion < INTERVIEW_QUESTIONS.length - 1) {
+        const newQuestion = currentQuestion + 1;
+        console.log('Moving to question', newQuestion + 1);
+        
+        // Check if already speaking to prevent duplicate calls
+        if (isSpeakingQuestion) {
+          console.log('Already speaking a question, skipping duplicate call');
+          return;
+        }
+        
+        setCurrentQuestion(newQuestion);
+        setTranscript('');
+        lastTranscriptRef.current = '';
+        setQuestionStartTime(new Date().toISOString());
+        
+        // Re-initialize recognition for the new question
+        if (recognitionRef.current) {
+          recognitionRef.current.onend = () => {
+            console.log('Speech recognition ended, isListening:', isListening);
+            if (window.recognitionRestarting) return;
+            const shouldRestart = isListening && !interviewComplete && interviewStarted;
+            if (shouldRestart && recognitionRef.current) {
+              window.recognitionRestarting = true;
+              setTimeout(() => {
+                try {
+                  recognitionRef.current.start();
+                } catch (e) {
+                  if (e.message && !e.message.includes('already started')) {
+                    setIsListening(false);
+                  }
+                } finally {
+                  window.recognitionRestarting = false;
+                }
+              }, 500);
+            }
+          };
+        }
+        
+        // Set flag to prevent duplicate speech
+        setIsSpeakingQuestion(true);
+        
+        // Wait longer before speaking next question to ensure clean state
+        setTimeout(async () => {
+          console.log('Speaking next question...');
+          // Cancel any ongoing speech first
+          if (synthRef.current) {
+            synthRef.current.cancel();
+            synthRef.current.cancel(); // Double cancel to be sure
+          }
+          
+          await speakQuestion(INTERVIEW_QUESTIONS[newQuestion]);
+          setIsSpeakingQuestion(false);
+          
+          // Even longer delay before starting recognition
+          setTimeout(() => {
+            console.log('Starting listening for next answer...');
+            startListening();
+          }, 2500); // Increased to 2500ms
+        }, 2000); // Increased to 2000ms
+      } else {
+        console.log('Interview complete!');
+        setInterviewComplete(true);
+        completeSession();
+      }
+  };
+
+  // ============================================================================
+  // RECORDING FUNCTIONS
+  // ============================================================================
   const startScreenRecording = async () => {
     try {
       const displayStream = await navigator.mediaDevices.getDisplayMedia({
@@ -417,7 +540,6 @@ export default function InterviewSimulator() {
         const blob = new Blob(chunks, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
         setRecordingUrl(url);
-        setRecordedChunks(chunks);
         combinedStream.getTracks().forEach(track => track.stop());
       };
 
@@ -433,7 +555,7 @@ export default function InterviewSimulator() {
 
       return true;
     } catch (error) {
-      throw new Error('Screen recording permission denied');
+      throw new Error('Screen recording permission denied: ' + error.message);
     }
   };
 
@@ -456,6 +578,9 @@ export default function InterviewSimulator() {
     }
   };
 
+  // ============================================================================
+  // CAMERA & PROCTORING FUNCTIONS
+  // ============================================================================
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -547,52 +672,57 @@ export default function InterviewSimulator() {
     }
   };
 
-  const startListening = () => {
-    if (!speechSupported) {
-      setError('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+  // ============================================================================
+  // INTERVIEW CONTROL FUNCTIONS
+  // ============================================================================
+  const startInterview = async () => {
+    setCheckingPermissions(true);
+    setError(null);
+
+    const token = getAuthToken();
+    if (!token) {
+      setError('Please log in to start the interview.');
+      setCheckingPermissions(false);
       return;
     }
-    if (recognitionRef.current && !isSpeaking) {
-      setTranscript('');
-      setQuestionStartTime(new Date().toISOString());
-      recognitionRef.current.start();
-      setIsListening(true);
-    }
-  };
 
-  const stopListening = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-      if (transcript.trim()) {
-        const answerData = { 
-          question: interviewQuestions[currentQuestion], 
-          answer: transcript,
-          timestamp: new Date().toLocaleTimeString()
-        };
-        setAnswers([...answers, answerData]);
-        const submittedAt = new Date().toISOString();
-        saveAnswer(
-          currentQuestion + 1,
-          interviewQuestions[currentQuestion],
-          transcript,
-          questionStartTime,
-          submittedAt
-        );
-      }
-    }
-  };
+    try {
+      const newSessionId = await startSession();
+      if (!newSessionId) throw new Error('Failed to create session');
 
-  const nextQuestion = () => {
-    if (currentQuestion < interviewQuestions.length - 1) {
-      const newQuestion = currentQuestion + 1;
-      setCurrentQuestion(newQuestion);
+      setInterviewStarted(true);
+      
+      // Start camera first
+      console.log('Starting camera...');
+      await startCamera();
+      
+      // Then screen recording
+      console.log('Starting screen recording...');
+      await startScreenRecording();
+
+      setPermissionsGranted(true);
+      setStartTime(Date.now());
+      setCurrentQuestion(0);
+      setAnswers([]);
       setTranscript('');
+      lastTranscriptRef.current = '';
+      setCheckingPermissions(false);
       setQuestionStartTime(new Date().toISOString());
-      setTimeout(() => speakQuestion(interviewQuestions[newQuestion]), 500);
-    } else {
-      setInterviewComplete(true);
-      completeSession();
+
+      // Speak first question
+      console.log('Speaking first question...');
+      await speakQuestion(INTERVIEW_QUESTIONS[0]);
+      
+      // Wait a bit then start listening
+      console.log('Starting speech recognition...');
+      setTimeout(() => {
+        startListening();
+      }, 1000);
+    } catch (error) {
+      console.error('Interview start error:', error);
+      setCheckingPermissions(false);
+      setInterviewStarted(false);
+      setError('Failed to start interview: ' + error.message);
     }
   };
 
@@ -600,6 +730,7 @@ export default function InterviewSimulator() {
     setCurrentQuestion(0);
     setAnswers([]);
     setTranscript('');
+    lastTranscriptRef.current = '';
     setIsListening(false);
     setInterviewStarted(false);
     setInterviewComplete(false);
@@ -614,17 +745,197 @@ export default function InterviewSimulator() {
     if (synthRef.current) synthRef.current.cancel();
     if (isRecording) stopScreenRecording();
     if (cameraEnabled) stopCamera();
+    if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
   };
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  // ============================================================================
+  // EFFECTS
+  // ============================================================================
+  
+  // Check browser compatibility
+  useEffect(() => {
+    console.log('=== Browser compatibility check ===');
+    
+    if (!window.MediaRecorder) {
+      setError('Your browser does not support screen recording. Please use Chrome or Edge.');
+      return;
+    }
+    
+    if (typeof window !== 'undefined') {
+      synthRef.current = window.speechSynthesis;
+      console.log('Speech synthesis initialized');
+    }
+    
+    // Check speech recognition support
+    const hasSpeechRecognition = typeof window !== 'undefined' && 
+      ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
+    
+    console.log('Speech recognition supported:', hasSpeechRecognition);
+    
+    if (!hasSpeechRecognition) {
+      setError('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+      setSpeechSupported(false);
+    }
+  }, []);
 
+  // Timer Effect
+  useEffect(() => {
+    if (interviewStarted && !interviewComplete) {
+      timerRef.current = setInterval(() => {
+        setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+      }, 1000);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [interviewStarted, interviewComplete, startTime]);
+
+  // Speech Recognition Setup Effect
+  useEffect(() => {
+    if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = 'en-US';
+      setSpeechSupported(true);
+
+      console.log('Speech recognition initialized');
+
+      recognitionRef.current.onstart = () => {
+        console.log('Speech recognition started');
+      };
+
+      recognitionRef.current.onresult = (event) => {
+        console.log('Speech result received');
+        let finalTranscript = '';
+        let interimTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+            console.log('Final transcript:', transcript);
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        if (finalTranscript) {
+          setTranscript(prev => {
+            const updated = prev + finalTranscript;
+            lastTranscriptRef.current = updated;
+            console.log('Updated full transcript:', updated);
+            return updated;
+          });
+        } else if (interimTranscript) {
+          setTranscript(prev => {
+            const updated = lastTranscriptRef.current + interimTranscript;
+            return updated;
+          });
+        }
+
+        // Reset silence timer on ANY speech
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
+          console.log('Silence timer cleared');
+        }
+
+        // Set new silence detection timeout
+        console.log('Setting silence timer for', SILENCE_TIMEOUT_MS, 'ms');
+        silenceTimerRef.current = setTimeout(() => {
+          console.log('Silence timeout triggered!');
+          console.log('Current transcript:', lastTranscriptRef.current);
+          console.log('Is listening:', isListening);
+          
+          const currentTranscript = lastTranscriptRef.current.trim();
+          if (currentTranscript.length > 0) {
+            console.log('Valid transcript detected, auto-progressing...');
+            stopListeningAndProgress();
+          } else {
+            console.log('No transcript yet, continuing to listen...');
+          }
+        }, SILENCE_TIMEOUT_MS);
+      };
+
+      recognitionRef.current.onend = () => {
+        console.log('Speech recognition ended, isListening:', isListening);
+        
+        // Add a flag to prevent multiple simultaneous restarts
+        if (window.recognitionRestarting) {
+          console.log('Recognition restart already in progress, skipping...');
+          return;
+        }
+        
+        // Only restart if we're still supposed to be listening AND interview is active
+        const shouldRestart = isListening && !interviewComplete && interviewStarted;
+        console.log('Should restart recognition:', shouldRestart);
+        
+        if (shouldRestart && recognitionRef.current) {
+          window.recognitionRestarting = true;
+          
+          setTimeout(() => {
+            try {
+              console.log('Restarting recognition...');
+              recognitionRef.current.start();
+            } catch (e) {
+              console.error('Recognition restart error:', e);
+              // Only set error if it's not "already started"
+              if (e.message && !e.message.includes('already started')) {
+                console.log('Setting isListening to false due to error');
+                setIsListening(false);
+              }
+            } finally {
+              window.recognitionRestarting = false;
+            }
+          }, 500); // Add delay between restarts
+        } else {
+          console.log('Not restarting recognition - conditions not met');
+        }
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        if (event.error === 'no-speech') {
+          console.log('No speech detected, continuing...');
+          return;
+        }
+        if (event.error === 'aborted') {
+          console.log('Recognition aborted');
+          return;
+        }
+        if (event.error === 'not-allowed') {
+          setError('Microphone permission denied. Please allow microphone access.');
+          setIsListening(false);
+          return;
+        }
+        console.error('Unhandled error:', event.error);
+      };
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          console.log('Cleanup stop error:', e);
+        }
+      }
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+      }
+      window.recognitionRestarting = false;
+    };
+  }, []);
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* HEADER */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -656,7 +967,7 @@ export default function InterviewSimulator() {
         </div>
       </header>
 
-      {/* Error Alert */}
+      {/* ERROR ALERT */}
       {error && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4">
           <div className="max-w-7xl mx-auto flex items-start gap-3">
@@ -666,7 +977,7 @@ export default function InterviewSimulator() {
         </div>
       )}
 
-      {/* Settings Panel */}
+      {/* SETTINGS PANEL */}
       {showSettings && (
         <div className="bg-white border-b border-gray-200 shadow-sm">
           <div className="max-w-7xl mx-auto px-6 py-6">
@@ -685,57 +996,34 @@ export default function InterviewSimulator() {
                 placeholder="https://models.readyplayer.me/your-avatar-id.glb"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5c3aec] focus:border-transparent outline-none transition"
               />
-              <p className="text-xs text-gray-500 mt-2">Create your custom avatar at readyplayer.me</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Main Content */}
+      {/* MAIN CONTENT */}
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Welcome Screen */}
+        
+        {/* WELCOME SCREEN */}
         {!interviewStarted && (
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">Ready to Begin Your Interview?</h2>
               <p className="text-gray-600">
-                Complete {interviewQuestions.length} questions with our AI interviewer
+                Complete {INTERVIEW_QUESTIONS.length} questions with our AI interviewer
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-4 mb-8">
-              <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-                <div className="w-10 h-10 bg-[#5c3aec] bg-opacity-10 rounded-lg flex items-center justify-center mb-3">
-                  <Mic size={20} className="text-[#5c3aec]" />
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-1 text-sm">Voice Recognition</h3>
-                <p className="text-xs text-gray-600">Real-time transcription of your responses</p>
-              </div>
-              <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-                <div className="w-10 h-10 bg-[#5c3aec] bg-opacity-10 rounded-lg flex items-center justify-center mb-3">
-                  <User size={20} className="text-[#5c3aec]" />
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-1 text-sm">AI Interviewer</h3>
-                <p className="text-xs text-gray-600">Interactive avatar with voice synthesis</p>
-              </div>
-              <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-                <div className="w-10 h-10 bg-[#5c3aec] bg-opacity-10 rounded-lg flex items-center justify-center mb-3">
-                  <Camera size={20} className="text-[#5c3aec]" />
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-1 text-sm">Proctoring System</h3>
-                <p className="text-xs text-gray-600">Behavioral monitoring and analytics</p>
-              </div>
-            </div>
-
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-8">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-8">
               <div className="flex gap-3">
-                <AlertTriangle size={18} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                <AlertTriangle size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="font-semibold text-amber-900 mb-1.5 text-sm">Required Permissions</h4>
-                  <ul className="text-xs text-amber-800 space-y-1">
-                    <li>• Camera, screen recording, and microphone access required</li>
-                    <li>• Continuous monitoring throughout the interview session</li>
-                    <li>• All session data is recorded for analysis</li>
+                  <h4 className="font-semibold text-blue-900 mb-1.5 text-sm">Auto-Progress Feature</h4>
+                  <ul className="text-xs text-blue-800 space-y-1">
+                    <li>• AI will automatically speak each question</li>
+                    <li>• Recording starts automatically after each question</li>
+                    <li>• 3 seconds of silence will trigger auto-progress to next question</li>
+                    <li>• Hands-free interview experience!</li>
                   </ul>
                 </div>
               </div>
@@ -756,12 +1044,11 @@ export default function InterviewSimulator() {
                   <>Begin Interview</>
                 )}
               </button>
-              <p className="text-xs text-gray-500 mt-3">You will be prompted to grant permissions</p>
             </div>
           </div>
         )}
 
-        {/* Complete Screen */}
+        {/* COMPLETE SCREEN */}
         {interviewComplete && (
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-8">
@@ -789,21 +1076,11 @@ export default function InterviewSimulator() {
                     <p className="text-3xl font-bold text-gray-900">{sessionStats.answers?.averageResponseTime || 0}s</p>
                   </div>
                 </div>
-                <div className="grid md:grid-cols-2 gap-4 mt-4">
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600 mb-1">Total Words</p>
-                    <p className="text-xl font-semibold text-gray-900">{sessionStats.answers?.totalWords || 0}</p>
-                  </div>
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600 mb-1">Proctoring Flags</p>
-                    <p className="text-xl font-semibold text-gray-900">{sessionStats.session?.totalWarnings || 0}</p>
-                  </div>
-                </div>
               </div>
             )}
 
             {cheatingWarnings.length > 0 && (
-              <div className="bg-white rounded-xl border border-amber-200 shadow-sm p-6 mb-6">
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-6">
                 <div className="flex items-start gap-3 mb-4">
                   <AlertTriangle size={20} className="text-amber-600 mt-0.5" />
                   <div>
@@ -813,7 +1090,7 @@ export default function InterviewSimulator() {
                 </div>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {cheatingWarnings.map((warning, idx) => (
-                    <div key={idx} className="flex items-start gap-3 p-3 bg-amber-50 rounded-lg text-sm">
+                    <div key={idx} className="flex items-start gap-3 p-3 bg-white rounded-lg text-sm border border-amber-200">
                       <div className="flex-1">
                         <p className="font-medium text-gray-900">{warning.type}</p>
                         <p className="text-gray-600">Question {warning.question} at {warning.time}</p>
@@ -828,7 +1105,6 @@ export default function InterviewSimulator() {
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6 text-center">
                 <Video size={32} className="text-[#5c3aec] mx-auto mb-3" />
                 <h3 className="font-semibold text-gray-900 mb-2">Session Recording Available</h3>
-                <p className="text-sm text-gray-600 mb-4">Download your interview recording for review</p>
                 <button
                   onClick={downloadRecording}
                   className="inline-flex items-center gap-2 bg-[#5c3aec] hover:bg-[#4a2ec4] text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
@@ -851,44 +1127,49 @@ export default function InterviewSimulator() {
           </div>
         )}
 
-        {/* Active Interview */}
+        {/* ACTIVE INTERVIEW */}
         {interviewStarted && !interviewComplete && (
           <div className="space-y-4">
-            {/* Progress Bar */}
+            
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">Question {currentQuestion + 1} of {interviewQuestions.length}</span>
-                <span className="text-sm font-medium text-gray-700">{Math.round(((currentQuestion + 1) / interviewQuestions.length) * 100)}%</span>
+                <span className="text-sm font-medium text-gray-700">
+                  Question {currentQuestion + 1} of {INTERVIEW_QUESTIONS.length}
+                </span>
+                <span className="text-sm font-medium text-gray-700">
+                  {Math.round(((currentQuestion + 1) / INTERVIEW_QUESTIONS.length) * 100)}%
+                </span>
               </div>
               <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-[#5c3aec] transition-all duration-500 ease-out"
-                  style={{ width: `${((currentQuestion + 1) / interviewQuestions.length) * 100}%` }}
+                  style={{ width: `${((currentQuestion + 1) / INTERVIEW_QUESTIONS.length) * 100}%` }}
                 ></div>
               </div>
             </div>
 
-            {/* Main Interview Grid */}
             <div className="grid lg:grid-cols-3 gap-4">
-              {/* Left: AI Interviewer */}
+              
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold text-gray-900 text-sm">AI Interviewer</h3>
                   <div className="flex items-center gap-1.5">
                     <Volume2 size={14} className={isSpeaking ? 'text-[#5c3aec]' : 'text-gray-400'} />
-                    <span className="text-xs font-medium text-gray-600">{isSpeaking ? 'Speaking' : 'Idle'}</span>
+                    <span className="text-xs font-medium text-gray-600">
+                      {isSpeaking ? 'Speaking' : 'Idle'}
+                    </span>
                   </div>
                 </div>
+                
                 <div className="aspect-square bg-gray-50 rounded-xl overflow-hidden mb-3">
                   <AvatarDisplay avatarUrl={avatarUrl} isSpeaking={isSpeaking} />
                 </div>
                 
-                {/* Question Card */}
                 <div className="bg-gray-50 rounded-lg p-3">
                   <div className="flex items-start justify-between mb-2">
                     <h4 className="font-semibold text-gray-900 text-xs">Question</h4>
                     <button
-                      onClick={() => speakQuestion(interviewQuestions[currentQuestion])}
+                      onClick={() => speakQuestion(INTERVIEW_QUESTIONS[currentQuestion])}
                       disabled={isSpeaking}
                       className="flex items-center gap-1 text-xs font-medium text-[#5c3aec] hover:text-[#4a2ec4] disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
                     >
@@ -896,13 +1177,14 @@ export default function InterviewSimulator() {
                       Replay
                     </button>
                   </div>
-                  <p className="text-xs text-gray-800 leading-relaxed">{interviewQuestions[currentQuestion]}</p>
+                  <p className="text-xs text-gray-800 leading-relaxed">
+                    {INTERVIEW_QUESTIONS[currentQuestion]}
+                  </p>
                 </div>
               </div>
 
-              {/* Center: Your Camera and Response */}
               <div className="lg:col-span-2 space-y-4">
-                {/* User Camera */}
+                
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-semibold text-gray-900 text-sm">You</h3>
@@ -941,7 +1223,6 @@ export default function InterviewSimulator() {
                   </div>
                 </div>
 
-                {/* Answer Area */}
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-semibold text-gray-900 text-sm">Your Response</h3>
@@ -954,44 +1235,32 @@ export default function InterviewSimulator() {
                   </div>
                   <div className="bg-gray-50 rounded-lg p-3 min-h-24 max-h-32 overflow-y-auto">
                     <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
-                      {transcript || <span className="text-gray-400">Click "Start Recording" below to begin speaking...</span>}
+                      {transcript || <span className="text-gray-400">Listening... speak your answer</span>}
                     </p>
                   </div>
                 </div>
 
-                {/* Recording Controls - Prominent */}
-                <div className="bg-white rounded-xl border-2 border-[#5c3aec] shadow-lg p-5">
-                  <div className="flex gap-3">
-                    <button
-                      onClick={isListening ? stopListening : startListening}
-                      disabled={isSpeaking}
-                      className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-lg font-bold transition-all text-base ${
-                        isListening
-                          ? 'bg-red-600 hover:bg-red-700 text-white shadow-md'
-                          : 'bg-[#5c3aec] hover:bg-[#4a2ec4] text-white shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed'
-                      }`}
-                    >
-                      {isListening ? <MicOff size={22} /> : <Mic size={22} />}
-                      {isListening ? 'Stop Recording' : 'Start Recording'}
-                    </button>
-                    
-                    <button
-                      onClick={nextQuestion}
-                      disabled={!transcript.trim()}
-                      className="px-8 py-4 bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-300 rounded-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
-                    >
-                      {currentQuestion === interviewQuestions.length - 1 ? 'Complete' : 'Next →'}
-                    </button>
+                <div className="bg-blue-50 rounded-xl border-2 border-blue-200 shadow-sm p-4">
+                  <div className="flex items-start gap-3">
+                    <Mic size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-semibold text-blue-900 text-sm mb-1">Auto-Recording Active</h4>
+                      <p className="text-xs text-blue-800">
+                        Recording automatically started. Speak your answer naturally. The system will auto-progress 
+                        to the next question after 3 seconds of silence.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Transcript History - Collapsible */}
             {answers.length > 0 && (
               <details className="bg-white rounded-xl border border-gray-200 shadow-sm">
                 <summary className="p-4 cursor-pointer hover:bg-gray-50 rounded-xl transition-colors">
-                  <span className="font-semibold text-gray-900 text-sm">Previous Responses ({answers.length})</span>
+                  <span className="font-semibold text-gray-900 text-sm">
+                    Previous Responses ({answers.length})
+                  </span>
                 </summary>
                 <div className="px-4 pb-4 space-y-3 max-h-64 overflow-y-auto">
                   {answers.map((item, index) => (
@@ -1010,21 +1279,38 @@ export default function InterviewSimulator() {
         )}
       </main>
 
-      {/* Footer */}
       {!interviewStarted && (
         <footer className="bg-white border-t border-gray-200 mt-16">
           <div className="max-w-7xl mx-auto px-6 py-8">
             <h3 className="font-semibold text-gray-900 mb-4">How It Works</h3>
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h4 className="font-medium text-gray-900 mb-3">Getting Started</h4>
+                <h4 className="font-medium text-gray-900 mb-3">Auto-Interview Flow</h4>
                 <ol className="space-y-2 text-sm text-gray-600">
-                  <li className="flex gap-2"><span className="font-semibold text-gray-900">1.</span> Click "Begin Interview" to start</li>
-                  <li className="flex gap-2"><span className="font-semibold text-gray-900">2.</span> Grant camera and screen recording permissions</li>
-                  <li className="flex gap-2"><span className="font-semibold text-gray-900">3.</span> Listen to each question from the AI interviewer</li>
-                  <li className="flex gap-2"><span className="font-semibold text-gray-900">4.</span> Click "Start Recording" and speak your answer</li>
-                  <li className="flex gap-2"><span className="font-semibold text-gray-900">5.</span> Click "Stop Recording" when finished</li>
-                  <li className="flex gap-2"><span className="font-semibold text-gray-900">6.</span> Review your transcript and proceed to next question</li>
+                  <li className="flex gap-2">
+                    <span className="font-semibold text-gray-900">1.</span> 
+                    Click "Begin Interview" to start
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="font-semibold text-gray-900">2.</span> 
+                    Grant camera and screen recording permissions
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="font-semibold text-gray-900">3.</span> 
+                    AI speaks question, then recording starts automatically
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="font-semibold text-gray-900">4.</span> 
+                    Speak your answer naturally
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="font-semibold text-gray-900">5.</span> 
+                    System detects 3 seconds of silence and auto-progresses
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="font-semibold text-gray-900">6.</span> 
+                    Process repeats for all questions automatically
+                  </li>
                 </ol>
               </div>
               <div>
@@ -1058,4 +1344,6 @@ export default function InterviewSimulator() {
       )}
     </div>
   );
-}
+};
+
+export default InterviewPage;

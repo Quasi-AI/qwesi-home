@@ -1,17 +1,5 @@
 {
-  "node": {
-    "40c105ae4389d30afe8c469a2f3b6929ca6f55b701": {
-      "workers": {
-        "app/dashboard/interview/page": {
-          "moduleId": "[project]/.next-internal/server/app/dashboard/interview/page/actions.js { ACTIONS_MODULE0 => \"[project]/lib/tts.js [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/dashboard/interview/page": "action-browser"
-      }
-    }
-  },
+  "node": {},
   "edge": {},
   "encryptionKey": "pH5Blh6lku1kBDKhTYcb1bBeDCtR1AS42g9avGumRYs="
 }

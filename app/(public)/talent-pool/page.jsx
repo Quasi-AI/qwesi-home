@@ -7,6 +7,7 @@ import {
   Filter,
   MapPin,
   User,
+  FileText,
   Briefcase,
   Clock,
   ChevronRight,
@@ -27,7 +28,9 @@ import {
   CheckCircle,
   AlertCircle,
   ExternalLink,
-  Phone
+  Phone,
+  Download,
+  Eye
 } from 'lucide-react'
 import ChatComponent from '@/components/chat'
 import { toast } from 'react-toastify'
@@ -53,6 +56,7 @@ const TalentPool = () => {
   const [isSubmittingContact, setIsSubmittingContact] = useState(false)
   const [showChat, setShowChat] = useState(false)
   const [auth, setAuth] = useState(null)
+  const [showResumePreview, setShowResumePreview] = useState(false)
 
   useEffect(() => {
     try {
@@ -88,7 +92,6 @@ const TalentPool = () => {
   })
 
   // Computed values
-  // Remove client-side filtering and pagination, use server data directly
   const paginatedTalents = talents
 
   const uniqueExperienceLevels = useMemo(() => {
@@ -162,8 +165,7 @@ const TalentPool = () => {
           ['Docker', 'Kubernetes', 'CI/CD', 'AWS', 'Terraform']
         ][i % 5]
 
-        // Infer category based on experience and skills
-        let category = 'Technology' // default
+        let category = 'Technology'
         if (experience.includes('Developer') || experience.includes('Engineer') || experience.includes('Scientist') || skills.some(s => ['JavaScript', 'Python', 'React', 'Node.js', 'AWS', 'Docker', 'Kubernetes'].includes(s))) {
           category = 'Technology'
         } else if (experience.includes('Designer') || skills.some(s => ['Figma', 'Adobe Creative Suite', 'Prototyping'].includes(s))) {
@@ -195,7 +197,8 @@ const TalentPool = () => {
           contactAvailable: Math.random() > 0.3,
           profileImage: null,
           joinedDate: new Date(Date.now() - (i * 7 * 24 * 60 * 60 * 1000)).toISOString(),
-          location: ['San Francisco, CA', 'New York, NY', 'Toronto, CA', 'London, UK', 'Berlin, DE'][i % 5]
+          location: ['San Francisco, CA', 'New York, NY', 'Toronto, CA', 'London, UK', 'Berlin, DE'][i % 5],
+          resumeURL: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
         }
       })
 
@@ -211,7 +214,7 @@ const TalentPool = () => {
       setPopularSkills(mockPopularSkills)
       setTotalTalents(mockTalents.length)
       setTotalPages(Math.ceil(mockTalents.length / talentsPerPage))
-      setError(null) // Clear error when using fallback data
+      setError(null)
     } finally {
       setLoading(false)
       setSearchLoading(false)
@@ -264,7 +267,6 @@ const TalentPool = () => {
   }
 
   const saveTalent = (talent) => {
-    // Check authentication first
     try {
       const authRaw = localStorage.getItem('auth')
       const auth = authRaw ? JSON.parse(authRaw) : null
@@ -302,7 +304,6 @@ const TalentPool = () => {
   }
 
   const contactTalent = (talent) => {
-    // Check authentication first
     try {
       const authRaw = localStorage.getItem('auth')
       const auth = authRaw ? JSON.parse(authRaw) : null
@@ -320,7 +321,6 @@ const TalentPool = () => {
     setSelectedTalent(talent)
     setShowContactModal(true)
 
-    // Pre-fill form
     setContactForm(prev => ({
       ...prev,
       requesterName: '',
@@ -345,7 +345,6 @@ const TalentPool = () => {
     setIsSubmittingContact(true)
 
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000))
       toast.success(`Contact request sent to ${selectedTalent.name}!`)
       closeContactModal()
@@ -357,7 +356,6 @@ const TalentPool = () => {
   }
 
   const startChat = (talent) => {
-    // Check authentication first
     try {
       const authRaw = localStorage.getItem('auth')
       const auth = authRaw ? JSON.parse(authRaw) : null
@@ -382,8 +380,27 @@ const TalentPool = () => {
   }
 
   const handleMeetingScheduled = (meetingData) => {
-    console.log('Meeting scheduled:', meetingData)
-    // Handle meeting scheduled event
+    console.log("Meeting scheduled:", meetingData)
+  }
+
+  const openResumePreview = (talent) => {
+    if (!talent.resumeURL) {
+      toast.error('No resume available for this talent.')
+      return
+    }
+    setSelectedTalent(talent)
+    setShowResumePreview(true)
+  }
+
+  const closeResumePreview = () => {
+    setShowResumePreview(false)
+    setSelectedTalent(null)
+  }
+
+  const downloadResume = () => {
+    if (selectedTalent?.resumeURL) {
+      window.open(selectedTalent.resumeURL, '_blank')
+    }
   }
 
   // Pagination
@@ -419,7 +436,6 @@ const TalentPool = () => {
     }
   }, [totalPages, currentPage])
 
-  // Load saved talents from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('savedTalents')
     if (saved) {
@@ -624,18 +640,18 @@ const TalentPool = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-end gap-2 md:col-span-2 lg:col-span-2">
+                <div className="flex items-end gap-2 md:col-span-2 lg:col-span-1">
                   <button
                     onClick={clearFilters}
                     className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-semibold"
                   >
-                    Clear Filters
+                    Clear
                   </button>
                   <button
                     onClick={handleSearch}
                     className="flex-1 px-4 py-2 bg-[#5C3AEB] text-white rounded-lg hover:bg-[#342299] transition-colors text-sm font-semibold"
                   >
-                    Apply Filters
+                    Apply
                   </button>
                 </div>
               </div>
@@ -713,231 +729,240 @@ const TalentPool = () => {
           </div>
         )}
 
-       {/* Talents Grid - Updated Card Design */}
-      {!loading && !error && talents.length > 0 && (
-        <>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {paginatedTalents.map(talent => (
-              <div key={talent.id} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300">
+        {/* Talents Grid */}
+        {!loading && !error && talents.length > 0 && (
+          <>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {paginatedTalents.map(talent => (
+                <div key={talent.id} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300">
+                  {/* Talent Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <div className="relative flex-shrink-0">
+                        {talent.profileImage ? (
+                          <img
+                            src={talent.profileImage}
+                            alt={talent.name}
+                            className="w-12 h-12 rounded-xl object-cover"
+                            style={{ border: '2px solid #5c3aec20' }}
+                          />
+                        ) : (
+                          <div 
+                            className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-base"
+                            style={{ backgroundColor: '#5c3aec' }}
+                          >
+                            {getInitials(talent.name)}
+                          </div>
+                        )}
+                      </div>
 
-                {/* Talent Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className="relative flex-shrink-0">
-                      {talent.profileImage ? (
-                        <img
-                          src={talent.profileImage}
-                          alt={talent.name}
-                          className="w-12 h-12 rounded-xl object-cover"
-                          style={{ border: '2px solid #5c3aec20' }}
-                        />
-                      ) : (
-                        <div 
-                          className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-base"
-                          style={{ backgroundColor: '#5c3aec' }}
-                        >
-                          {getInitials(talent.name)}
-                        </div>
-                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-gray-900 text-base mb-1 truncate">{talent.name}</h3>
+                        <p className="text-gray-600 text-sm font-medium truncate">{talent.experience}</p>
+                        {talent.location && (
+                          <div className="flex items-center text-xs text-gray-500 mt-1">
+                            <MapPin className="w-3 h-3 mr-1" />
+                            <span className="truncate">{talent.location}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-gray-900 text-base mb-1 truncate">{talent.name}</h3>
-                      <p className="text-gray-600 text-sm font-medium truncate">{talent.experience}</p>
-                      {talent.location && (
-                        <div className="flex items-center text-xs text-gray-500 mt-1">
-                          <MapPin className="w-3 h-3 mr-1" />
-                          <span className="truncate">{talent.location}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col items-end gap-2">
-                    <button
-                      onClick={() => saveTalent(talent)}
-                      className={`p-2 rounded-lg transition-colors ${
-                        savedTalents.includes(talent.id || '')
-                          ? 'bg-red-50'
-                          : 'hover:bg-gray-50'
-                      }`}
-                    >
-                      <Heart
-                        fill={savedTalents.includes(talent.id || '') ? '#ef4444' : 'none'}
-                        className="w-4 h-4"
-                        style={{ color: savedTalents.includes(talent.id || '') ? '#ef4444' : '#9ca3af' }}
-                      />
-                    </button>
-
-                    <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${
-                      talent.contactAvailable
-                        ? 'bg-green-50 text-green-700'
-                        : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      {talent.contactAvailable && <CheckCircle className="w-3 h-3" />}
-                      <span>{talent.contactAvailable ? 'Available' : 'Private'}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Skills */}
-                {talent.skills && talent.skills.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Skills</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {talent.skills.slice(0, 4).map((skill, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 text-xs font-medium rounded-lg"
-                          style={{ 
-                            backgroundColor: '#5c3aec15',
-                            color: '#5c3aec',
-                            border: '1px solid #5c3aec30'
-                          }}
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                      {talent.skills.length > 4 && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg">
-                          +{talent.skills.length - 4}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Goals */}
-                {talent.goals && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Career Goals</h4>
-                    <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
-                      {truncateText(talent.goals, 120)}
-                    </p>
-                  </div>
-                )}
-
-                {/* Help Options */}
-                {talent.helpOptions && talent.helpOptions.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Looking For</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {talent.helpOptions.slice(0, 2).map((option, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 text-xs font-medium rounded-lg"
-                          style={{ 
-                            backgroundColor: '#5c3aec10',
-                            color: '#5c3aec',
-                            border: '1px solid #5c3aec20'
-                          }}
-                        >
-                          {option.replace('AI Coach (Interview Prep)', 'Interview Prep')}
-                        </span>
-                      ))}
-                      {talent.helpOptions.length > 2 && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg">
-                          +{talent.helpOptions.length - 2}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Footer */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <Calendar className="w-3 h-3" />
-                    <span>{formatDate(talent.joinedDate)}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => startChat(talent)}
-                      disabled={!talent.contactAvailable}
-                      className="p-2 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                      style={{ backgroundColor: '#5c3aec' }}
-                      title="Start Chat"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                    </button>
-
-                    <button
-                      onClick={() => contactTalent(talent)}
-                      disabled={!talent.contactAvailable}
-                      className="p-2 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                      style={{ backgroundColor: '#5c3aec' }}
-                      title="Send Email"
-                    >
-                      <Mail className="w-4 h-4" />
-                    </button>
-
-                    <button
-                      onClick={() => openTalentModal(talent)}
-                      className="text-sm font-semibold hover:underline transition-colors"
-                      style={{ color: '#5c3aec' }}
-                    >
-                      View
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Pagination - Updated */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-8">
-              <div className="text-sm text-gray-600">
-                Page {currentPage} of {totalPages}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={prevPage}
-                  disabled={currentPage === 1}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  Previous
-                </button>
-
-                <div className="flex gap-1">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    const page = currentPage <= 3 ? i + 1 :
-                              currentPage >= totalPages - 2 ? totalPages - 4 + i :
-                              currentPage - 2 + i
-                    return page > 0 && page <= totalPages ? (
+                    <div className="flex flex-col items-end gap-2">
                       <button
-                        key={page}
-                        onClick={() => goToPage(page)}
-                        className={`px-3 py-2 text-sm rounded-lg transition-colors ${
-                          page === currentPage
-                            ? 'text-white'
-                            : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
+                        onClick={() => saveTalent(talent)}
+                        className={`p-2 rounded-lg transition-colors ${
+                          savedTalents.includes(talent.id || '')
+                            ? 'bg-red-50'
+                            : 'hover:bg-gray-50'
                         }`}
-                        style={page === currentPage ? { backgroundColor: '#5c3aec' } : {}}
                       >
-                        {page}
+                        <Heart
+                          fill={savedTalents.includes(talent.id || '') ? '#ef4444' : 'none'}
+                          className="w-4 h-4"
+                          style={{ color: savedTalents.includes(talent.id || '') ? '#ef4444' : '#9ca3af' }}
+                        />
                       </button>
-                    ) : null
-                  })}
+
+                      <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${
+                        talent.contactAvailable
+                          ? 'bg-green-50 text-green-700'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {talent.contactAvailable && <CheckCircle className="w-3 h-3" />}
+                        <span>{talent.contactAvailable ? 'Available' : 'Private'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Skills */}
+                  {talent.skills && talent.skills.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold text-gray-700 mb-2">Skills</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {talent.skills.slice(0, 4).map((skill, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 text-xs font-medium rounded-lg"
+                            style={{ 
+                              backgroundColor: '#5c3aec15',
+                              color: '#5c3aec',
+                              border: '1px solid #5c3aec30'
+                            }}
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                        {talent.skills.length > 4 && (
+                          <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg">
+                            +{talent.skills.length - 4}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Goals */}
+                  {talent.goals && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold text-gray-700 mb-2">Career Goals</h4>
+                      <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
+                        {truncateText(talent.goals, 120)}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Help Options */}
+                  {talent.helpOptions && talent.helpOptions.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold text-gray-700 mb-2">Looking For</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {talent.helpOptions.slice(0, 2).map((option, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 text-xs font-medium rounded-lg"
+                            style={{ 
+                              backgroundColor: '#5c3aec10',
+                              color: '#5c3aec',
+                              border: '1px solid #5c3aec20'
+                            }}
+                          >
+                            {option.replace('AI Coach (Interview Prep)', 'Interview Prep')}
+                          </span>
+                        ))}
+                        {talent.helpOptions.length > 2 && (
+                          <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg">
+                            +{talent.helpOptions.length - 2}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <Calendar className="w-3 h-3" />
+                      <span>{formatDate(talent.joinedDate)}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {talent.resumeURL && (
+                        <button
+                          onClick={() => openResumePreview(talent)}
+                          className="p-2 text-white rounded-lg hover:opacity-90 transition-all"
+                          style={{ backgroundColor: '#5c3aec' }}
+                          title="View Resume"
+                        >
+                          <FileText className="w-4 h-4" />
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => startChat(talent)}
+                        disabled={!talent.contactAvailable}
+                        className="p-2 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        style={{ backgroundColor: '#5c3aec' }}
+                        title="Start Chat"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        onClick={() => contactTalent(talent)}
+                        disabled={!talent.contactAvailable}
+                        className="p-2 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        style={{ backgroundColor: '#5c3aec' }}
+                        title="Send Email"
+                      >
+                        <Mail className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        onClick={() => openTalentModal(talent)}
+                        className="text-sm font-semibold hover:underline transition-colors"
+                        style={{ color: '#5c3aec' }}
+                      >
+                        View
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-8">
+                <div className="text-sm text-gray-600">
+                  Page {currentPage} of {totalPages}
                 </div>
 
-                <button
-                  onClick={nextPage}
-                  disabled={currentPage === totalPages}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          )}
-        </>
-      )}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={prevPage}
+                    disabled={currentPage === 1}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Previous
+                  </button>
 
+                  <div className="flex gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      const page = currentPage <= 3 ? i + 1 :
+                                currentPage >= totalPages - 2 ? totalPages - 4 + i :
+                                currentPage - 2 + i
+                      return page > 0 && page <= totalPages ? (
+                        <button
+                          key={page}
+                          onClick={() => goToPage(page)}
+                          className={`px-3 py-2 text-sm rounded-lg transition-colors ${
+                            page === currentPage
+                              ? 'text-white'
+                              : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
+                          }`}
+                          style={page === currentPage ? { backgroundColor: '#5c3aec' } : {}}
+                        >
+                          {page}
+                        </button>
+                      ) : null
+                    })}
+                  </div>
+
+                  <button
+                    onClick={nextPage}
+                    disabled={currentPage === totalPages}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Contact Modal */}
@@ -1013,7 +1038,7 @@ const TalentPool = () => {
                     rows={4}
                     value={contactForm.message}
                     onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
-                    placeholder={`Tell ${selectedTalent.name} about the opportunity, your company, or why you'd like to connect...`}
+                    placeholder={`Tell ${selectedTalent.name} about the opportunity...`}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#5C3AEB] focus:ring-2 focus:ring-[#5C3AEB]/20 bg-white/80 backdrop-blur-sm transition-all resize-none"
                     required
                   />
@@ -1176,6 +1201,17 @@ const TalentPool = () => {
                   Close
                 </button>
                 <div className="flex gap-3">
+                  {viewingTalent.resumeURL && (
+                    <button
+                      onClick={() => {
+                        closeTalentModal()
+                        openResumePreview(viewingTalent)
+                      }}
+                      className="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-colors font-semibold"
+                    >
+                      View Resume
+                    </button>
+                  )}
                   <button
                     onClick={() => startChat(viewingTalent)}
                     disabled={!viewingTalent.contactAvailable}
@@ -1200,13 +1236,87 @@ const TalentPool = () => {
         </div>
       )}
 
+      {/* Resume Preview Modal */}
+      {showResumePreview && selectedTalent && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden shadow-2xl">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-[#5C3AEB] to-[#342299]">
+              <div className="flex items-center gap-3">
+                <FileText className="w-6 h-6 text-white" />
+                <div>
+                  <h2 className="text-xl font-bold text-white">
+                    {selectedTalent.name}'s Resume
+                  </h2>
+                  <p className="text-sm text-white/80">{selectedTalent.experience}</p>
+                </div>
+              </div>
+              <button
+                onClick={closeResumePreview}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <X className="w-6 h-6 text-white" />
+              </button>
+            </div>
+
+            {/* PDF Viewer */}
+            <div className="p-6 overflow-y-auto" style={{ height: 'calc(95vh - 160px)' }}>
+              {selectedTalent.resumeURL ? (
+                <iframe
+                  src={`${selectedTalent.resumeURL}#toolbar=0`}
+                  title="Resume Preview"
+                  className="w-full h-full border-2 border-gray-200 rounded-lg"
+                  style={{ minHeight: '600px' }}
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <FileText className="w-16 h-16 text-gray-300 mb-4" />
+                  <p className="text-gray-600 text-lg font-medium">No resume available</p>
+                  <p className="text-gray-500 text-sm mt-2">This talent hasn't uploaded a resume yet</p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={closeResumePreview}
+                className="px-6 py-2.5 text-gray-700 border-2 border-gray-300 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+              >
+                Close
+              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={downloadResume}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-colors font-medium shadow-sm"
+                >
+                  <Download className="w-4 h-4" />
+                  Download
+                </button>
+                <button
+                  onClick={() => {
+                    closeResumePreview()
+                    contactTalent(selectedTalent)
+                  }}
+                  disabled={!selectedTalent.contactAvailable}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#5C3AEB] to-[#342299] text-white rounded-lg hover:from-[#342299] hover:to-[#5C3AEB] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-sm"
+                >
+                  <Mail className="w-4 h-4" />
+                  Contact Talent
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Chat Component */}
       {showChat && selectedTalent && (
         <ChatComponent
           isOpen={showChat}
-          talent={selectedTalent}
-          currentUserId={auth?.user?.id || 'current-user-id'}
           onClose={handleChatClose}
+          recipientId={selectedTalent.id}
+          recipientName={selectedTalent.name}
           onMeetingScheduled={handleMeetingScheduled}
         />
       )}

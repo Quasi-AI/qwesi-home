@@ -3,10 +3,16 @@
     "[project]/app/(public)/page": [
       "static/media/QGYvz_MVcBeNP4NJtEtqUYLknw-s.p.07dd827d.woff2"
     ],
+    "[project]/app/(public)/talent-pool/page": [
+      "static/media/QGYvz_MVcBeNP4NJtEtqUYLknw-s.p.07dd827d.woff2"
+    ],
     "[project]/app/_not-found/page": [
       "static/media/QGYvz_MVcBeNP4NJtEtqUYLknw-s.p.07dd827d.woff2"
     ],
     "[project]/app/dashboard/interview/page": [
+      "static/media/QGYvz_MVcBeNP4NJtEtqUYLknw-s.p.07dd827d.woff2"
+    ],
+    "[project]/app/dashboard/job-seeker/page": [
       "static/media/QGYvz_MVcBeNP4NJtEtqUYLknw-s.p.07dd827d.woff2"
     ],
     "[project]/app/dashboard/page": [
