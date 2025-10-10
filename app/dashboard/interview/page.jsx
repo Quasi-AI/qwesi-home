@@ -386,16 +386,6 @@ const InterviewPage = () => {
     }
   };
 
-  const logState = () => {
-    console.log('=== CURRENT STATE ===');
-    console.log('isListening:', isListening);
-    console.log('interviewStarted:', interviewStarted);
-    console.log('interviewComplete:', interviewComplete);
-    console.log('currentQuestion:', currentQuestion);
-    console.log('transcript:', transcript);
-    console.log('lastTranscript:', lastTranscriptRef.current);
-    console.log('=====================');
-  };
 
   const startListening = () => {
     console.log('=== startListening called ===');
