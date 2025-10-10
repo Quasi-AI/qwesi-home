@@ -12,14 +12,14 @@ const API_BASE_URL = 'https://dark-caldron-448714-u5.uc.r.appspot.com';
 const SILENCE_TIMEOUT_MS = 3000;
 const AVATAR_DEFAULT_URL = 'https://models.readyplayer.me/68e257931df78dfe0f4b5b72.glb';
 
-const INTERVIEW_QUESTIONS = [
-  "Hello! Welcome to your interview. Can you tell me about yourself?",
-  "What are your greatest strengths and how do they relate to this position?",
-  "Can you describe a challenging situation you faced and how you handled it?",
-  "Where do you see yourself in five years?",
-  "Why are you interested in this position and our company?",
-  "Do you have any questions for me?"
-];
+const INTERVIEW_QUESTIONS = {
+  1: "Hello! Welcome to your interview. Can you tell me about yourself?",
+  2: "Can you describe a challenging situation you faced and how you handled it?",
+  3: "What are your greatest strengths and how do they relate to this position?",
+  4: "Where do you see yourself in five years?",
+  5: "Why are you interested in this position and our company?",
+  6: "Do you have any questions for me?"
+};
 
 // ============================================================================
 // 3D AVATAR COMPONENTS
@@ -114,10 +114,12 @@ const InterviewPage = () => {
   const [answers, setAnswers] = useState([]);
   const [transcript, setTranscript] = useState('');
   const [questionStartTime, setQuestionStartTime] = useState(null);
+  const [showNextButton, setShowNextButton] = useState(false);
 
   // STATE - Audio/Speech
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isSpeakingQuestion, setIsSpeakingQuestion] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
 
   // STATE - Recording
@@ -128,6 +130,7 @@ const InterviewPage = () => {
   // STATE - Proctoring
   const [cheatingWarnings, setCheatingWarnings] = useState([]);
   const [isLookingAway, setIsLookingAway] = useState(false);
+  const [networkErrorCount, setNetworkErrorCount] = useState(0);
 
   // STATE - UI
   const [showSettings, setShowSettings] = useState(false);
@@ -137,7 +140,6 @@ const InterviewPage = () => {
 
   // REFS
   const recognitionRef = useRef(null);
-  const synthRef = useRef(typeof window !== 'undefined' ? window.speechSynthesis : null);
   const timerRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const streamRef = useRef(null);
@@ -146,6 +148,9 @@ const InterviewPage = () => {
   const detectionIntervalRef = useRef(null);
   const silenceTimerRef = useRef(null);
   const lastTranscriptRef = useRef('');
+  const isProgressingRef = useRef(false);
+  const isSpeakingQuestionRef = useRef(false);
+  const isSpeakingRef = useRef(false);
 
   // ============================================================================
   // UTILITY FUNCTIONS
@@ -288,28 +293,97 @@ const InterviewPage = () => {
   // SPEECH FUNCTIONS
   // ============================================================================
   const speakQuestion = async (text) => {
-    if (!synthRef.current) return;
-    
+    // mark speaking both in state and ref so recognition handler can ignore TTS
+    isSpeakingRef.current = true;
     setIsSpeaking(true);
-    
-    return new Promise((resolve) => {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-      
-      utterance.onend = () => {
+    console.log('Speaking:', text);
+
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+    try {
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`TTS API failed: ${response.status}`);
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+
+      return new Promise((resolve) => {
+        audio.onended = () => {
+          console.log('Ended speaking question');
+          isSpeakingRef.current = false;
+          setIsSpeaking(false);
+          URL.revokeObjectURL(audioUrl);
+          resolve();
+        };
+
+        audio.onerror = (event) => {
+          console.error('Audio playback error');
+          isSpeakingRef.current = false;
+          setIsSpeaking(false);
+          URL.revokeObjectURL(audioUrl);
+          resolve();
+        };
+
+        audio.play().catch((error) => {
+          console.error('Audio play error:', error);
+          isSpeakingRef.current = false;
+          setIsSpeaking(false);
+          URL.revokeObjectURL(audioUrl);
+          resolve();
+        });
+      });
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      if (error.name === 'AbortError') {
+        console.error('TTS API request timed out');
+      } else {
+        console.error('Google TTS API failed, falling back to browser speech synthesis:', error);
+      }
+
+      // Fallback to browser speech synthesis
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        utterance.pitch = 1;
+
+        return new Promise((resolve) => {
+          utterance.onend = () => {
+            console.log('Ended speaking question (fallback)');
+            isSpeakingRef.current = false;
+            setIsSpeaking(false);
+            resolve();
+          };
+
+          utterance.onerror = (event) => {
+            console.error('Browser speech synthesis error:', event);
+            isSpeakingRef.current = false;
+            setIsSpeaking(false);
+            resolve();
+          };
+
+          window.speechSynthesis.speak(utterance);
+        });
+      } else {
+        console.error('Browser speech synthesis not supported');
+        isSpeakingRef.current = false;
         setIsSpeaking(false);
-        resolve();
-      };
-      
-      utterance.onerror = () => {
-        setIsSpeaking(false);
-        resolve();
-      };
-      
-      synthRef.current.speak(utterance);
-    });
+      }
+    }
   };
 
   const logState = () => {
@@ -358,147 +432,100 @@ const InterviewPage = () => {
     }
   };
 
-  const stopListeningAndProgress = async () => {
-      console.log('=== stopListeningAndProgress called ===');
-      
-      // Immediately set flag to prevent any restarts
-      setIsListening(false);
-      window.recognitionRestarting = false; // Clear any restart flags
-      
-      // Clear ALL timers immediately
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current);
-        silenceTimerRef.current = null;
-      }
-      
-      // Force stop recognition and clear any pending operations
-      if (recognitionRef.current) {
-        recognitionRef.current.onend = null; // Temporarily disable onend handler
-        try {
-          recognitionRef.current.abort(); // Use abort instead of stop for immediate termination
-          console.log('Recognition aborted');
-        } catch (e) {
-          console.log('Recognition abort error:', e);
-        }
-      }
+  const nextQuestion = async () => {
+    console.log('=== nextQuestion called ===');
 
-      const finalTranscript = lastTranscriptRef.current.trim();
-      console.log('Final transcript to save:', finalTranscript);
-      
-      if (!finalTranscript) {
-        console.log('No transcript to save, restarting listening...');
-        // Re-attach the onend handler before restarting
-        if (recognitionRef.current) {
-          recognitionRef.current.onend = () => {
-            console.log('Speech recognition ended, isListening:', isListening);
-            if (window.recognitionRestarting) return;
-            const shouldRestart = isListening && !interviewComplete && interviewStarted;
-            if (shouldRestart && recognitionRef.current) {
-              window.recognitionRestarting = true;
-              setTimeout(() => {
-                try {
-                  recognitionRef.current.start();
-                } catch (e) {
-                  if (e.message && !e.message.includes('already started')) {
-                    setIsListening(false);
-                  }
-                } finally {
-                  window.recognitionRestarting = false;
-                }
-              }, 500);
-            }
-          };
-        }
-        setTimeout(() => {
-          startListening();
-        }, 500);
-        return;
+    // Clear any existing silence timer
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+
+    // Prevent multiple simultaneous progressions
+    if (isProgressingRef.current) {
+      console.log('Already progressing, skipping duplicate call');
+      return;
+    }
+    isProgressingRef.current = true;
+
+    // Stop recognition
+    setIsListening(false);
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {
+        console.log('Stop recognition error:', e);
       }
-      
-      // Save the answer
-      const answerData = { 
-        question: INTERVIEW_QUESTIONS[currentQuestion], 
+    }
+
+    const finalTranscript = lastTranscriptRef.current.trim();
+    console.log('Final transcript to save:', finalTranscript);
+
+    if (finalTranscript) {
+      // Save the answer with current question
+      const answerData = {
+        question: INTERVIEW_QUESTIONS[currentQuestion + 1],
         answer: finalTranscript,
         timestamp: new Date().toLocaleTimeString()
       };
-      
+
       console.log('Saving answer:', answerData);
       setAnswers(prev => [...prev, answerData]);
-      
+
       const submittedAt = new Date().toISOString();
       await saveAnswer(
         currentQuestion + 1,
-        INTERVIEW_QUESTIONS[currentQuestion],
+        INTERVIEW_QUESTIONS[currentQuestion + 1],
         finalTranscript,
         questionStartTime,
         submittedAt
       );
+    }
 
-      // Move to next question or complete
-      if (currentQuestion < INTERVIEW_QUESTIONS.length - 1) {
-        const newQuestion = currentQuestion + 1;
-        console.log('Moving to question', newQuestion + 1);
-        
-        // Check if already speaking to prevent duplicate calls
-        if (isSpeakingQuestion) {
-          console.log('Already speaking a question, skipping duplicate call');
-          return;
-        }
-        
-        setCurrentQuestion(newQuestion);
-        setTranscript('');
-        lastTranscriptRef.current = '';
-        setQuestionStartTime(new Date().toISOString());
-        
-        // Re-initialize recognition for the new question
-        if (recognitionRef.current) {
-          recognitionRef.current.onend = () => {
-            console.log('Speech recognition ended, isListening:', isListening);
-            if (window.recognitionRestarting) return;
-            const shouldRestart = isListening && !interviewComplete && interviewStarted;
-            if (shouldRestart && recognitionRef.current) {
-              window.recognitionRestarting = true;
-              setTimeout(() => {
-                try {
-                  recognitionRef.current.start();
-                } catch (e) {
-                  if (e.message && !e.message.includes('already started')) {
-                    setIsListening(false);
-                  }
-                } finally {
-                  window.recognitionRestarting = false;
-                }
-              }, 500);
-            }
-          };
-        }
-        
-        // Set flag to prevent duplicate speech
-        setIsSpeakingQuestion(true);
-        
-        // Wait longer before speaking next question to ensure clean state
-        setTimeout(async () => {
-          console.log('Speaking next question...');
-          // Cancel any ongoing speech first
-          if (synthRef.current) {
-            synthRef.current.cancel();
-            synthRef.current.cancel(); // Double cancel to be sure
-          }
-          
-          await speakQuestion(INTERVIEW_QUESTIONS[newQuestion]);
-          setIsSpeakingQuestion(false);
-          
-          // Even longer delay before starting recognition
-          setTimeout(() => {
-            console.log('Starting listening for next answer...');
-            startListening();
-          }, 2500); // Increased to 2500ms
-        }, 2000); // Increased to 2000ms
-      } else {
-        console.log('Interview complete!');
-        setInterviewComplete(true);
-        completeSession();
+    // Move to next question or complete
+    if (currentQuestion < Object.keys(INTERVIEW_QUESTIONS).length - 1) {
+      const newQuestion = currentQuestion + 1;
+      console.log('Moving to question', newQuestion + 1);
+
+      // Check if already speaking to prevent duplicate calls
+      if (isSpeakingQuestionRef.current) {
+        console.log('Already speaking a question, skipping duplicate call');
+        return;
       }
+
+      setCurrentQuestion(newQuestion);
+      setTranscript('');
+      lastTranscriptRef.current = '';
+      setQuestionStartTime(new Date().toISOString());
+
+      // Set flag to prevent duplicate speech
+      setIsSpeakingQuestion(true);
+      isSpeakingQuestionRef.current = true;
+
+      // Determine the question to speak
+      const questionToSpeak = INTERVIEW_QUESTIONS[newQuestion + 1];
+
+      // Wait before speaking next question
+      setTimeout(async () => {
+        console.log('Speaking next question...');
+
+        await speakQuestion(questionToSpeak);
+        setIsSpeakingQuestion(false);
+        isSpeakingQuestionRef.current = false;
+        isProgressingRef.current = false; // Allow next progression
+
+        // Start listening for next answer
+        setTimeout(() => {
+          console.log('Starting listening for next answer...');
+          startListening();
+        }, 1000);
+      }, 1000);
+    } else {
+      console.log('Interview complete!');
+      setInterviewComplete(true);
+      isProgressingRef.current = false; // Reset progression flag
+      completeSession();
+    }
   };
 
   // ============================================================================
@@ -711,7 +738,7 @@ const InterviewPage = () => {
 
       // Speak first question
       console.log('Speaking first question...');
-      await speakQuestion(INTERVIEW_QUESTIONS[0]);
+      await speakQuestion(INTERVIEW_QUESTIONS[currentQuestion + 1]);
       
       // Wait a bit then start listening
       console.log('Starting speech recognition...');
@@ -732,6 +759,10 @@ const InterviewPage = () => {
     setTranscript('');
     lastTranscriptRef.current = '';
     setIsListening(false);
+    setIsSpeaking(false);
+    setIsSpeakingQuestion(false);
+    isSpeakingQuestionRef.current = false;
+    isProgressingRef.current = false;
     setInterviewStarted(false);
     setInterviewComplete(false);
     setElapsedTime(0);
@@ -742,7 +773,12 @@ const InterviewPage = () => {
     setSessionId(null);
     setSessionStats(null);
     setError(null);
-    if (synthRef.current) synthRef.current.cancel();
+
+    // Cancel any ongoing speech synthesis
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+
     if (isRecording) stopScreenRecording();
     if (cameraEnabled) stopCamera();
     if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
@@ -755,23 +791,18 @@ const InterviewPage = () => {
   // Check browser compatibility
   useEffect(() => {
     console.log('=== Browser compatibility check ===');
-    
+
     if (!window.MediaRecorder) {
       setError('Your browser does not support screen recording. Please use Chrome or Edge.');
       return;
     }
-    
-    if (typeof window !== 'undefined') {
-      synthRef.current = window.speechSynthesis;
-      console.log('Speech synthesis initialized');
-    }
-    
+
     // Check speech recognition support
-    const hasSpeechRecognition = typeof window !== 'undefined' && 
+    const hasSpeechRecognition = typeof window !== 'undefined' &&
       ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
-    
+
     console.log('Speech recognition supported:', hasSpeechRecognition);
-    
+
     if (!hasSpeechRecognition) {
       setError('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
       setSpeechSupported(false);
@@ -810,6 +841,12 @@ const InterviewPage = () => {
 
       recognitionRef.current.onresult = (event) => {
         console.log('Speech result received');
+
+        // If we're speaking the question, ignore any recognition results (prevents capturing the question audio)
+        if (isSpeakingRef.current) {
+          console.log('Ignoring speech result because TTS is playing');
+          return;
+        }
         let finalTranscript = '';
         let interimTranscript = '';
 
@@ -823,87 +860,51 @@ const InterviewPage = () => {
           }
         }
 
-        if (finalTranscript) {
-          setTranscript(prev => {
-            const updated = prev + finalTranscript;
-            lastTranscriptRef.current = updated;
-            console.log('Updated full transcript:', updated);
-            return updated;
-          });
-        } else if (interimTranscript) {
-          setTranscript(prev => {
-            const updated = lastTranscriptRef.current + interimTranscript;
-            return updated;
-          });
-        }
-
-        // Reset silence timer on ANY speech
-        if (silenceTimerRef.current) {
-          clearTimeout(silenceTimerRef.current);
-          console.log('Silence timer cleared');
-        }
-
-        // Set new silence detection timeout
-        console.log('Setting silence timer for', SILENCE_TIMEOUT_MS, 'ms');
-        silenceTimerRef.current = setTimeout(() => {
-          console.log('Silence timeout triggered!');
-          console.log('Current transcript:', lastTranscriptRef.current);
-          console.log('Is listening:', isListening);
-          
-          const currentTranscript = lastTranscriptRef.current.trim();
-          if (currentTranscript.length > 0) {
-            console.log('Valid transcript detected, auto-progressing...');
-            stopListeningAndProgress();
-          } else {
-            console.log('No transcript yet, continuing to listen...');
+        if (finalTranscript.trim().length > 0) {
+          // Clear any existing silence timer
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+            silenceTimerRef.current = null;
           }
-        }, SILENCE_TIMEOUT_MS);
+
+          // Append final transcript parts to lastTranscriptRef and state
+          const updated = (lastTranscriptRef.current || '') + finalTranscript;
+          lastTranscriptRef.current = updated;
+          setTranscript(updated);
+          console.log('Updated full transcript:', updated);
+
+          // Start silence timer for auto-progression
+          silenceTimerRef.current = setTimeout(() => {
+            if (!isProgressingRef.current) {
+              console.log('Silence timeout reached, auto-progressing...');
+              nextQuestion();
+            }
+          }, SILENCE_TIMEOUT_MS);
+        } else if (interimTranscript) {
+          // Clear silence timer when user is still speaking
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+            silenceTimerRef.current = null;
+          }
+
+          // Update transcript with interim result without modifying lastTranscriptRef
+          const interimUpdated = (lastTranscriptRef.current || '') + interimTranscript;
+          setTranscript(interimUpdated);
+        }
       };
 
       recognitionRef.current.onend = () => {
-        console.log('Speech recognition ended, isListening:', isListening);
-        
-        // Add a flag to prevent multiple simultaneous restarts
-        if (window.recognitionRestarting) {
-          console.log('Recognition restart already in progress, skipping...');
-          return;
-        }
-        
-        // Only restart if we're still supposed to be listening AND interview is active
-        const shouldRestart = isListening && !interviewComplete && interviewStarted;
-        console.log('Should restart recognition:', shouldRestart);
-        
-        if (shouldRestart && recognitionRef.current) {
-          window.recognitionRestarting = true;
-          
-          setTimeout(() => {
-            try {
-              console.log('Restarting recognition...');
-              recognitionRef.current.start();
-            } catch (e) {
-              console.error('Recognition restart error:', e);
-              // Only set error if it's not "already started"
-              if (e.message && !e.message.includes('already started')) {
-                console.log('Setting isListening to false due to error');
-                setIsListening(false);
-              }
-            } finally {
-              window.recognitionRestarting = false;
-            }
-          }, 500); // Add delay between restarts
-        } else {
-          console.log('Not restarting recognition - conditions not met');
-        }
+        console.log('Speech recognition ended');
+        setIsListening(false);
       };
 
       recognitionRef.current.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
         if (event.error === 'no-speech') {
           console.log('No speech detected, continuing...');
           return;
         }
         if (event.error === 'aborted') {
-          console.log('Recognition aborted');
+          console.log('Recognition aborted (intentional)');
           return;
         }
         if (event.error === 'not-allowed') {
@@ -911,7 +912,30 @@ const InterviewPage = () => {
           setIsListening(false);
           return;
         }
-        console.error('Unhandled error:', event.error);
+        if (event.error === 'network') {
+          console.error('Speech recognition network error');
+          setNetworkErrorCount(prev => {
+            const newCount = prev + 1;
+            const warning = {
+              time: new Date().toLocaleTimeString(),
+              type: 'Network connectivity issue',
+              question: currentQuestion + 1
+            };
+            setCheatingWarnings(prevWarnings => [...prevWarnings, warning]);
+            saveWarning('network_error', new Date().toISOString());
+
+            if (newCount >= 3) {
+              console.error('Too many network errors, ending interview');
+              setError('Network connectivity issues detected. Interview will be ended.');
+              setInterviewComplete(true);
+              completeSession();
+            }
+            return newCount;
+          });
+          setIsListening(false);
+          return;
+        }
+        console.error('Speech recognition error:', event.error);
       };
     }
 
@@ -1010,7 +1034,7 @@ const InterviewPage = () => {
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">Ready to Begin Your Interview?</h2>
               <p className="text-gray-600">
-                Complete {INTERVIEW_QUESTIONS.length} questions with our AI interviewer
+                Complete {Object.keys(INTERVIEW_QUESTIONS).length} questions with our AI interviewer
               </p>
             </div>
 
@@ -1134,16 +1158,16 @@ const InterviewPage = () => {
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">
-                  Question {currentQuestion + 1} of {INTERVIEW_QUESTIONS.length}
+                  Question {currentQuestion + 1} of {Object.keys(INTERVIEW_QUESTIONS).length}
                 </span>
                 <span className="text-sm font-medium text-gray-700">
-                  {Math.round(((currentQuestion + 1) / INTERVIEW_QUESTIONS.length) * 100)}%
+                  {Math.round(((currentQuestion + 1) / Object.keys(INTERVIEW_QUESTIONS).length) * 100)}%
                 </span>
               </div>
               <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-[#5c3aec] transition-all duration-500 ease-out"
-                  style={{ width: `${((currentQuestion + 1) / INTERVIEW_QUESTIONS.length) * 100}%` }}
+                  style={{ width: `${((currentQuestion + 1) / Object.keys(INTERVIEW_QUESTIONS).length) * 100}%` }}
                 ></div>
               </div>
             </div>
@@ -1169,7 +1193,7 @@ const InterviewPage = () => {
                   <div className="flex items-start justify-between mb-2">
                     <h4 className="font-semibold text-gray-900 text-xs">Question</h4>
                     <button
-                      onClick={() => speakQuestion(INTERVIEW_QUESTIONS[currentQuestion])}
+                    onClick={() => speakQuestion(INTERVIEW_QUESTIONS[currentQuestion + 1])}
                       disabled={isSpeaking}
                       className="flex items-center gap-1 text-xs font-medium text-[#5c3aec] hover:text-[#4a2ec4] disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
                     >
@@ -1178,7 +1202,7 @@ const InterviewPage = () => {
                     </button>
                   </div>
                   <p className="text-xs text-gray-800 leading-relaxed">
-                    {INTERVIEW_QUESTIONS[currentQuestion]}
+                    {INTERVIEW_QUESTIONS[currentQuestion + 1]}
                   </p>
                 </div>
               </div>

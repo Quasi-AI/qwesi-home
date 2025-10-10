@@ -1,4 +1,4 @@
-                                     import { useState, useEffect, useRef } from 'react';
+'use client';
 import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton"
 import PersonalActivityChart from "@/components/PersonalActivityChart"
 import {
@@ -38,7 +38,6 @@ export default function QwesiPersonalDashboard() {
     const getUserIdentifier = () => {
         if (user?.id) return { param: 'id', value: user.id }
         if (user?.phone) return { param: 'phone', value: user.phone }
-                                                           const [isSpeakingQuestion, setIsSpeakingQuestion] = useState(false);
         return null
     }
     const userIdentifier = useMemo(() => getUserIdentifier(), [user])

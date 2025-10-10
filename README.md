@@ -2,7 +2,7 @@
   <h1><img src="https://Qwesi.in/favicon.ico" width="20" height="20" alt="Qwesi Favicon">
    Qwesi</h1>
   <p>
-    An open-source job and scholarship platform built with Next.js and Tailwind CSS.
+    An AI-powered interview simulator and professional development platform built with Next.js and Tailwind CSS.
   </p>
   <p>
     <a href="https://github.com/GreatStackDev/Qwesi/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/GreatStackDev/Qwesi?style=for-the-badge" alt="License"></a>
@@ -25,19 +25,29 @@
 
 ## Features
 
-- **Job Portal:** Connect job seekers with employers through a comprehensive job listing platform.
-- **Scholarship Opportunities:** Discover and apply for various scholarships to support education.
-- **Talent Pool:** Showcase skills and connect with potential employers.
-- **Employer Dashboard:** Manage job postings, review applications, and find top talent.
-- **User Authentication:** Secure login and registration for personalized experiences.
-- **Subscription Management:** Access premium features with flexible subscription plans.
+- **AI Interview Simulator:** Practice interviews with a 3D AI avatar that speaks questions and analyzes responses
+- **Speech Recognition & Synthesis:** Real-time speech-to-text and text-to-speech using Google TTS API
+- **Screen Recording:** Automatic recording of interview sessions for review
+- **Proctoring System:** AI-powered monitoring to detect cheating behaviors
+- **Dashboard:** Comprehensive user dashboard for managing interview sessions and progress
+- **Real-time Analytics:** Performance metrics and feedback on interview responses
+- **3D Avatar Integration:** Interactive 3D avatars using Three.js and React Three Fiber
+- **Responsive Design:** Mobile-first design with Tailwind CSS
 
 ## 🛠️ Tech Stack <a name="-tech-stack"></a>
 
-- **Framework:** Next.js
+- **Framework:** Next.js 15.3.5
+- **Frontend:** React 19, TypeScript
 - **Styling:** Tailwind CSS
-- **UI Components:** Lucide React for icons
-- **State Management:** Redux Toolkit
+- **State Management:** Zustand, Redux Toolkit
+- **3D Graphics:** Three.js, React Three Fiber, React Three Drei
+- **AI/ML:** OpenAI API, Google TTS API
+- **Real-time:** Socket.io
+- **Authentication:** Firebase Auth
+- **Icons:** Lucide React
+- **Charts:** Recharts
+- **Maps:** Google Maps React Wrapper
+- **Notifications:** React Hot Toast, React Toastify
 
 ## 🚀 Getting Started <a name="-getting-started"></a>
 
