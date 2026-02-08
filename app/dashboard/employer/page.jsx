@@ -139,10 +139,6 @@ export default function AdminEmployers() {
         }
       })
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
       const data = await response.json()
       return data.success ? data.data || [] : []
     } catch (error) {
@@ -336,7 +332,33 @@ export default function AdminEmployers() {
       }
 
       const data = await response.json()
-      setEmployers(data.success ? data.data || [] : [])
+      
+      // Transform the jobs array into employer objects with counts
+      const jobs = data.success ? data.data || [] : []
+      const employersWithStats = jobs.map((job, index) => ({
+        _id: job._id || job.id || `job-${index}`,
+        id: job._id || job.id || `job-${index}`,
+        name: job.employer || job.title || 'Unknown Employer',
+        title: job.title || '',
+        employer: job.employer || '',
+        email: job.email || '',
+        location: job.location || '',
+        industry: job.sector || job.jobType || '',
+        contactName: job.contactName || '',
+        phone: job.phone || '',
+        logo: job.logo || '',
+        companySize: job.companySize || '',
+        status: job.status || 'pending',
+        isActive: job.isActive !== false,
+        totalJobs: 1,
+        totalApplications: job.totalApplications || 0,
+        averageRating: job.averageRating || 0,
+        lastLogin: job.lastLogin || null,
+        created_at: job.created_at || job.createdAt || new Date().toISOString(),
+        createdAt: job.created_at || job.createdAt || new Date().toISOString()
+      }))
+      
+      setEmployers(employersWithStats)
     } catch (error) {
       console.error('Fetch employers error:', error)
       setEmployers([])

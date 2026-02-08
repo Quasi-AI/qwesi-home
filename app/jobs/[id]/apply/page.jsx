@@ -262,7 +262,7 @@ const JobApplicationPage = () => {
 
       if (result.success) {
         toast.success('Application submitted successfully!')
-        router.push('/dashboard')
+        router.push('/jobs')
       } else {
         throw new Error(result.message || 'Failed to submit application')
       }
