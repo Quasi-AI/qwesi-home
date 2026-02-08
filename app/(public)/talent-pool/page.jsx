@@ -473,9 +473,9 @@ const TalentPool = () => {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       {/* Hero Section */}
-      <div className="bg-[#5C3AEB] text-white">
+      <div className="bg-[#5C3AEB] text-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
@@ -512,7 +512,7 @@ const TalentPool = () => {
       </div>
 
       {/* Quick Stats */}
-      <div className="bg-white border-b">
+      <div className="bg-white border-b overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
@@ -536,7 +536,7 @@ const TalentPool = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-hidden">
         {/* Filters Bar */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -734,9 +734,12 @@ const TalentPool = () => {
           <>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {paginatedTalents.map(talent => (
-                <div key={talent.id} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300">
+                <div 
+                  key={talent.id} 
+                  className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
+                >
                   {/* Talent Header */}
-                  <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-start justify-between mb-4 flex-shrink-0">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
                       <div className="relative flex-shrink-0">
                         {talent.profileImage ? (
@@ -967,107 +970,113 @@ const TalentPool = () => {
 
       {/* Contact Modal */}
       {showContactModal && selectedTalent && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white/95 backdrop-blur-xl rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden border border-gray-200/50">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">Contact {selectedTalent.name}</h3>
-                <div className="w-12 h-1 bg-gradient-to-r from-[#5C3AEB] to-[#00C4A7] rounded-full mt-2"></div>
+        <div className="fixed inset-0 z-[100] overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div 
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" 
+              onClick={closeContactModal}
+            ></div>
+            <div className="relative bg-white rounded-2xl max-w-2xl w-full overflow-hidden border border-gray-200/50 shadow-xl">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Contact {selectedTalent.name}</h3>
+                  <div className="w-12 h-1 bg-gradient-to-r from-[#5C3AEB] to-[#00C4A7] rounded-full mt-2"></div>
+                </div>
+                <button 
+                  onClick={closeContactModal}
+                  className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                >
+                  <X className="w-6 h-6 text-gray-500" />
+                </button>
               </div>
-              <button 
-                onClick={closeContactModal}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
-              >
-                <X className="w-6 h-6 text-gray-500" />
-              </button>
-            </div>
-            
-            <div className="p-6 max-h-[60vh] overflow-y-auto">
-              <form onSubmit={submitContactRequest} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div className="p-6 max-h-[60vh] overflow-y-auto">
+                <form onSubmit={submitContactRequest} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700">Your Name *</label>
+                      <input 
+                        type="text" 
+                        value={contactForm.requesterName}
+                        onChange={(e) => setContactForm(prev => ({ ...prev, requesterName: e.target.value }))}
+                        placeholder="Enter your full name"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#5C3AEB] focus:ring-2 focus:ring-[#5C3AEB]/20 bg-white/80 backdrop-blur-sm transition-all"
+                        required 
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700">Your Email *</label>
+                      <input 
+                        type="email" 
+                        value={contactForm.requesterEmail}
+                        onChange={(e) => setContactForm(prev => ({ ...prev, requesterEmail: e.target.value }))}
+                        placeholder="your.email@example.com"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#5C3AEB] focus:ring-2 focus:ring-[#5C3AEB]/20 bg-white/80 backdrop-blur-sm transition-all"
+                        required 
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">Your Name *</label>
+                    <label className="block text-sm font-semibold text-gray-700">Your Phone</label>
+                    <input 
+                      type="tel" 
+                      value={contactForm.requesterPhone}
+                      onChange={(e) => setContactForm(prev => ({ ...prev, requesterPhone: e.target.value }))}
+                      placeholder="Your phone number"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#5C3AEB] focus:ring-2 focus:ring-[#5C3AEB]/20 bg-white/80 backdrop-blur-sm transition-all"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-gray-700">Job Title/Position</label>
                     <input 
                       type="text" 
-                      value={contactForm.requesterName}
-                      onChange={(e) => setContactForm(prev => ({ ...prev, requesterName: e.target.value }))}
-                      placeholder="Enter your full name"
+                      value={contactForm.jobTitle}
+                      onChange={(e) => setContactForm(prev => ({ ...prev, jobTitle: e.target.value }))}
+                      placeholder="e.g., Software Developer, Marketing Manager"
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#5C3AEB] focus:ring-2 focus:ring-[#5C3AEB]/20 bg-white/80 backdrop-blur-sm transition-all"
-                      required 
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">Your Email *</label>
-                    <input 
-                      type="email" 
-                      value={contactForm.requesterEmail}
-                      onChange={(e) => setContactForm(prev => ({ ...prev, requesterEmail: e.target.value }))}
-                      placeholder="your.email@example.com"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#5C3AEB] focus:ring-2 focus:ring-[#5C3AEB]/20 bg-white/80 backdrop-blur-sm transition-all"
-                      required 
+                    <label className="block text-sm font-semibold text-gray-700">Message *</label>
+                    <textarea 
+                      rows={4}
+                      value={contactForm.message}
+                      onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
+                      placeholder={`Tell ${selectedTalent.name} about the opportunity...`}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#5C3AEB] focus:ring-2 focus:ring-[#5C3AEB]/20 bg-white/80 backdrop-blur-sm transition-all resize-none"
+                      required
                     />
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">Your Phone</label>
-                  <input 
-                    type="tel" 
-                    value={contactForm.requesterPhone}
-                    onChange={(e) => setContactForm(prev => ({ ...prev, requesterPhone: e.target.value }))}
-                    placeholder="Your phone number"
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#5C3AEB] focus:ring-2 focus:ring-[#5C3AEB]/20 bg-white/80 backdrop-blur-sm transition-all"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">Job Title/Position</label>
-                  <input 
-                    type="text" 
-                    value={contactForm.jobTitle}
-                    onChange={(e) => setContactForm(prev => ({ ...prev, jobTitle: e.target.value }))}
-                    placeholder="e.g., Software Developer, Marketing Manager"
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#5C3AEB] focus:ring-2 focus:ring-[#5C3AEB]/20 bg-white/80 backdrop-blur-sm transition-all"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">Message *</label>
-                  <textarea 
-                    rows={4}
-                    value={contactForm.message}
-                    onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
-                    placeholder={`Tell ${selectedTalent.name} about the opportunity...`}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#5C3AEB] focus:ring-2 focus:ring-[#5C3AEB]/20 bg-white/80 backdrop-blur-sm transition-all resize-none"
-                    required
-                  />
-                </div>
-
-                <div className="flex flex-col sm:flex-row justify-between gap-4 pt-4">
-                  <button 
-                    type="button" 
-                    onClick={closeContactModal}
-                    className="px-6 py-3 border-2 border-gray-200 text-gray-600 rounded-xl font-medium hover:border-gray-300 hover:text-gray-700 transition-all"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    disabled={isSubmittingContact}
-                    className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#5C3AEB] to-[#342299] text-white rounded-xl font-medium hover:from-[#342299] hover:to-[#5C3AEB] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105 flex-1"
-                  >
-                    {isSubmittingContact ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Sending...</span>
-                      </>
-                    ) : (
-                      <span>Send Contact Request</span>
-                    )}
-                  </button>
-                </div>
-              </form>
+                  <div className="flex flex-col sm:flex-row justify-between gap-4 pt-4">
+                    <button 
+                      type="button" 
+                      onClick={closeContactModal}
+                      className="px-6 py-3 border-2 border-gray-200 text-gray-600 rounded-xl font-medium hover:border-gray-300 hover:text-gray-700 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit" 
+                      disabled={isSubmittingContact}
+                      className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#5C3AEB] to-[#342299] text-white rounded-xl font-medium hover:from-[#342299] hover:to-[#5C3AEB] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105 flex-1"
+                    >
+                      {isSubmittingContact ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Sending...</span>
+                        </>
+                      ) : (
+                        <span>Send Contact Request</span>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>
@@ -1075,8 +1084,12 @@ const TalentPool = () => {
 
       {/* Talent Details Modal */}
       {viewingTalent && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 z-[100] overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div 
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+            ></div>
+            <div className="relative bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-xl">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4">
@@ -1231,6 +1244,7 @@ const TalentPool = () => {
                   </button>
                 </div>
               </div>
+            </div>
             </div>
           </div>
         </div>
