@@ -1,1 +1,1 @@
-self.__RSC_SERVER_MANIFEST="{\n  \"node\": {},\n  \"edge\": {},\n  \"encryptionKey\": \"0LNb1OhMw61E9AwGtarJM74DKJUWbsbqbg4FzTrY6og=\"\n}"
+self.__RSC_SERVER_MANIFEST="{\"node\":{\"4072f01c5fb2ebb1641c8c95b12861850dd1e1ee83\":{\"workers\":{\"app/api/tts/route\":{\"moduleId\":\"6726\",\"async\":false}},\"layer\":{\"app/api/tts/route\":\"rsc\"}}},\"edge\":{},\"encryptionKey\":\"process.env.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY\"}"
