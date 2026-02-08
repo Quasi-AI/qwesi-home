@@ -836,7 +836,7 @@ export default function AdminEmployers() {
       {showCreateModal && (
         <CreateEmployerModal 
           onClose={() => setShowCreateModal(false)} 
-          onSubmit={(formData) => createEmployer(employerId, formData)}
+          onSubmit={(formData) => createEmployer(formData)}
         />
       )}
       {showEditModal && (

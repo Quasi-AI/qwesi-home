@@ -1,11 +1,9 @@
 'use client'
-import React, { useState, useEffect, useCallback } from 'react'
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import React, { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import {
-  MapPin, Building, Clock, Heart, ArrowLeft, DollarSign, Target,
-  User, FileText, Upload, MessageSquare, Send, Globe, Loader2,
-  Building2, Users, Calendar, Award, Star, Briefcase, Mail, Phone,
-  XCircle, CheckCircle, AlertCircle
+  ArrowLeft, User, FileText, Upload, MessageSquare, Send, Loader2,
+  Briefcase, XCircle, CheckCircle, AlertCircle
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
@@ -17,7 +15,6 @@ import { readAuth } from '@/lib/auth'
 const JobApplicationPage = () => {
   const params = useParams()
   const router = useRouter()
-  const searchParams = useSearchParams()
   const jobId = params.id
 
   // Modal states
@@ -49,10 +46,8 @@ const JobApplicationPage = () => {
     const checkAuth = () => {
       const auth = readAuth()
       if (auth?.token) {
-        // User is logged in, ready to submit
         if (pendingSubmit) {
           setPendingSubmit(false)
-          // Trigger form submission
           const submitButton = document.querySelector('button[type="submit"]')
           if (submitButton) {
             submitButton.click()
@@ -61,16 +56,13 @@ const JobApplicationPage = () => {
       }
     }
 
-    // Listen for auth events
     const handleAuthLogin = () => {
-      console.log('Auth login event received')
       checkAuth()
     }
 
     window.addEventListener('auth:login-success', handleAuthLogin)
     window.addEventListener('auth:open-login', () => setShowLogin(true))
     
-    // Check auth on mount
     checkAuth()
 
     return () => {
@@ -120,7 +112,6 @@ const JobApplicationPage = () => {
       ...prev,
       [name]: value
     }))
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -132,7 +123,6 @@ const JobApplicationPage = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (file) {
-      // Check file size (5MB limit)
       if (file.size > 5 * 1024 * 1024) {
         setErrors(prev => ({
           ...prev,
@@ -141,7 +131,6 @@ const JobApplicationPage = () => {
         return
       }
 
-      // Check file type
       const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
       if (!allowedTypes.includes(file.type)) {
         setErrors(prev => ({
@@ -161,65 +150,75 @@ const JobApplicationPage = () => {
 
   const validateForm = () => {
     const newErrors = {}
+    let isValid = true
 
-    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required'
-    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required'
-    if (!formData.email.trim()) newErrors.email = 'Email is required'
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid'
-    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required'
-    if (!resume) newErrors.resume = 'Resume is required'
-    if (!formData.coverLetter.trim()) newErrors.coverLetter = 'Cover letter is required'
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'First name is required'
+      isValid = false
+    }
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'Last name is required'
+      isValid = false
+    }
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required'
+      isValid = false
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address'
+      isValid = false
+    }
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required'
+      isValid = false
+    }
+    if (!resume) {
+      newErrors.resume = 'Resume is required'
+      isValid = false
+    }
+    if (!formData.coverLetter.trim()) {
+      newErrors.coverLetter = 'Cover letter is required'
+      isValid = false
+    } else if (formData.coverLetter.trim().length < 50) {
+      newErrors.coverLetter = 'Please provide at least 50 characters'
+      isValid = false
+    }
 
     setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+    return isValid
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Form submit triggered')
 
     if (!validateForm()) {
-      console.log('Form validation failed')
       toast.error('Please fill in all required fields')
       return
     }
-    console.log('Form validation passed')
 
-    // Check authentication
     const authRaw = localStorage.getItem('auth')
     const auth = authRaw ? JSON.parse(authRaw) : null
-    console.log('Auth data:', auth)
     
     if (!auth?.token) {
-      console.log('No auth token found, setting pending submit and opening login')
       setPendingSubmit(true)
       setShowLogin(true)
       return
     }
-    console.log('Auth token found, proceeding with submission')
 
     setSubmitting(true)
 
     try {
-      console.log('Starting API call...')
       const formDataToSend = new FormData()
 
-      // Add form data
       Object.keys(formData).forEach(key => {
         formDataToSend.append(key, formData[key])
       })
 
-      // Add job ID
       formDataToSend.append('jobId', jobId)
 
-      // Add resume file
       if (resume) {
         formDataToSend.append('resume', resume)
       }
 
-      console.log('FormData prepared, making API call to:', `${API_ROUTES.BASE_URL}applications/submit`)
-
-      // Send the application to the API - using the correct endpoint from ApplicationModal
       const response = await fetch(`${API_ROUTES.BASE_URL}applications/submit`, {
         method: 'POST',
         headers: {
@@ -228,15 +227,12 @@ const JobApplicationPage = () => {
         body: formDataToSend
       })
 
-      console.log('API response status:', response.status)
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
       }
 
       const result = await response.json()
-      console.log('API result:', result)
 
       if (result.success) {
         toast.success('Application submitted successfully!')
@@ -319,78 +315,98 @@ const JobApplicationPage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  First Name *
+                <label className={`block text-sm font-medium mb-2 ${errors.firstName ? 'text-red-600' : 'text-gray-700'}`}>
+                  First Name {errors.firstName && <span className="text-red-500">*</span>}
                 </label>
                 <input
                   type="text"
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#5C3AEB] focus:border-transparent ${
-                    errors.firstName ? 'border-red-300' : 'border-gray-300'
+                  className={`w-full px-4 py-3 border rounded-lg transition-colors ${
+                    errors.firstName 
+                      ? 'border-red-500 bg-red-50 focus:ring-2 focus:ring-red-300 focus:border-transparent' 
+                      : 'border-gray-300 focus:ring-2 focus:ring-[#5C3AEB] focus:border-transparent'
                   }`}
                   placeholder="Enter your first name"
                 />
                 {errors.firstName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                  <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                    <XCircle className="w-4 h-4" />
+                    {errors.firstName}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Last Name *
+                <label className={`block text-sm font-medium mb-2 ${errors.lastName ? 'text-red-600' : 'text-gray-700'}`}>
+                  Last Name {errors.lastName && <span className="text-red-500">*</span>}
                 </label>
                 <input
                   type="text"
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#5C3AEB] focus:border-transparent ${
-                    errors.lastName ? 'border-red-300' : 'border-gray-300'
+                  className={`w-full px-4 py-3 border rounded-lg transition-colors ${
+                    errors.lastName 
+                      ? 'border-red-500 bg-red-50 focus:ring-2 focus:ring-red-300 focus:border-transparent' 
+                      : 'border-gray-300 focus:ring-2 focus:ring-[#5C3AEB] focus:border-transparent'
                   }`}
                   placeholder="Enter your last name"
                 />
                 {errors.lastName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+                  <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                    <XCircle className="w-4 h-4" />
+                    {errors.lastName}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address *
+                <label className={`block text-sm font-medium mb-2 ${errors.email ? 'text-red-600' : 'text-gray-700'}`}>
+                  Email Address {errors.email && <span className="text-red-500">*</span>}
                 </label>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#5C3AEB] focus:border-transparent ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
+                  className={`w-full px-4 py-3 border rounded-lg transition-colors ${
+                    errors.email 
+                      ? 'border-red-500 bg-red-50 focus:ring-2 focus:ring-red-300 focus:border-transparent' 
+                      : 'border-gray-300 focus:ring-2 focus:ring-[#5C3AEB] focus:border-transparent'
                   }`}
                   placeholder="your.email@example.com"
                 />
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                  <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                    <XCircle className="w-4 h-4" />
+                    {errors.email}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number *
+                <label className={`block text-sm font-medium mb-2 ${errors.phone ? 'text-red-600' : 'text-gray-700'}`}>
+                  Phone Number {errors.phone && <span className="text-red-500">*</span>}
                 </label>
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#5C3AEB] focus:border-transparent ${
-                    errors.phone ? 'border-red-300' : 'border-gray-300'
+                  className={`w-full px-4 py-3 border rounded-lg transition-colors ${
+                    errors.phone 
+                      ? 'border-red-500 bg-red-50 focus:ring-2 focus:ring-red-300 focus:border-transparent' 
+                      : 'border-gray-300 focus:ring-2 focus:ring-[#5C3AEB] focus:border-transparent'
                   }`}
                   placeholder="+1 (555) 123-4567"
                 />
                 {errors.phone && (
-                  <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                  <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                    <XCircle className="w-4 h-4" />
+                    {errors.phone}
+                  </p>
                 )}
               </div>
             </div>
@@ -404,10 +420,14 @@ const JobApplicationPage = () => {
             </h2>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Resume/CV * (PDF or Word document, max 5MB)
+              <label className={`block text-sm font-medium mb-2 ${errors.resume ? 'text-red-600' : 'text-gray-700'}`}>
+                Resume/CV * {errors.resume && <span className="text-red-500">(Required)</span>}
               </label>
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-[#5C3AEB] transition-colors">
+              <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition-colors ${
+                errors.resume 
+                  ? 'border-red-500 bg-red-50' 
+                  : 'border-gray-300 hover:border-[#5C3AEB]'
+              }`}>
                 <div className="space-y-1 text-center">
                   <Upload className="mx-auto h-12 w-12 text-gray-400" />
                   <div className="flex text-sm text-gray-600">
@@ -437,7 +457,10 @@ const JobApplicationPage = () => {
                 </div>
               )}
               {errors.resume && (
-                <p className="mt-1 text-sm text-red-600">{errors.resume}</p>
+                <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                  <XCircle className="w-4 h-4" />
+                  {errors.resume}
+                </p>
               )}
             </div>
           </div>
@@ -450,21 +473,26 @@ const JobApplicationPage = () => {
             </h2>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Why are you interested in this position? *
+              <label className={`block text-sm font-medium mb-2 ${errors.coverLetter ? 'text-red-600' : 'text-gray-700'}`}>
+                Why are you interested in this position? * {errors.coverLetter && <span className="text-red-500">(Required)</span>}
               </label>
               <textarea
                 name="coverLetter"
                 value={formData.coverLetter}
                 onChange={handleInputChange}
                 rows={6}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#5C3AEB] focus:border-transparent ${
-                  errors.coverLetter ? 'border-red-300' : 'border-gray-300'
+                className={`w-full px-4 py-3 border rounded-lg transition-colors ${
+                  errors.coverLetter 
+                    ? 'border-red-500 bg-red-50 focus:ring-2 focus:ring-red-300 focus:border-transparent' 
+                    : 'border-gray-300 focus:ring-2 focus:ring-[#5C3AEB] focus:border-transparent'
                 }`}
                 placeholder="Tell us about yourself, your experience, and why you're interested in this role..."
               />
               {errors.coverLetter && (
-                <p className="mt-1 text-sm text-red-600">{errors.coverLetter}</p>
+                <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                  <XCircle className="w-4 h-4" />
+                  {errors.coverLetter}
+                </p>
               )}
             </div>
           </div>
@@ -612,9 +640,7 @@ const JobApplicationPage = () => {
           setShowSignup(true)
         }}
         onLoggedIn={() => {
-          // Dispatch custom event for other components
           window.dispatchEvent(new Event('auth:login-success'))
-          // Auto-submit after successful login
           if (pendingSubmit) {
             setPendingSubmit(false)
             const submitButton = document.querySelector('button[type="submit"]')
@@ -639,3 +665,4 @@ const JobApplicationPage = () => {
 }
 
 export default JobApplicationPage
+
