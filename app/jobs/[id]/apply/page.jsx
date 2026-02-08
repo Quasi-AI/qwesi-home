@@ -209,12 +209,38 @@ const JobApplicationPage = () => {
     try {
       const formDataToSend = new FormData()
 
-      Object.keys(formData).forEach(key => {
-        formDataToSend.append(key, formData[key])
-      })
+      // Prepare applicant details object
+      const applicantDetails = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        coverLetter: formData.coverLetter,
+        experience: formData.experience,
+        portfolio: formData.portfolio,
+        linkedin: formData.linkedin,
+        github: formData.github,
+        expectedSalary: formData.expectedSalary,
+        availability: formData.availability
+      }
 
+      // Prepare job details object
+      const jobDetails = job ? {
+        jobId: jobId,
+        jobTitle: job.title,
+        jobEmployer: job.employer,
+        jobLocation: job.location,
+        jobSalary: job.salary,
+        jobType: job.jobType,
+        jobDescription: job.job_description
+      } : { jobId: jobId }
+
+      // Add both objects as JSON strings
       formDataToSend.append('jobId', jobId)
+      formDataToSend.append('applicantDetails', JSON.stringify(applicantDetails))
+      formDataToSend.append('jobDetails', JSON.stringify(jobDetails))
 
+      // Add resume file
       if (resume) {
         formDataToSend.append('resume', resume)
       }
