@@ -320,7 +320,6 @@ const Navbar = () => {
     }
 
     const navLinks = [
-        { href: '/', label: 'Home' },
         { href: '/jobs', label: 'Jobs' },
         { href: '/talent-pool', label: 'Talent' },
         { href: '/scholarships', label: 'Scholarships' },

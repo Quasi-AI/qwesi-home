@@ -1,12 +1,15 @@
 {
   "app": {
-    "[project]/app/(public)/page": [
+    "[project]/app/(public)/jobs/page": [
       "static/media/QGYvz_MVcBeNP4NJtEtqUYLknw-s.p.07dd827d.woff2"
     ],
-    "[project]/app/_not-found/page": [
+    "[project]/app/(public)/talent-pool/page": [
       "static/media/QGYvz_MVcBeNP4NJtEtqUYLknw-s.p.07dd827d.woff2"
     ],
-    "[project]/app/dashboard/interview/page": [
+    "[project]/app/jobs/[id]/apply/page": [
+      "static/media/QGYvz_MVcBeNP4NJtEtqUYLknw-s.p.07dd827d.woff2"
+    ],
+    "[project]/app/jobs/[id]/page": [
       "static/media/QGYvz_MVcBeNP4NJtEtqUYLknw-s.p.07dd827d.woff2"
     ]
   },

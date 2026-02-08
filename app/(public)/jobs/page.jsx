@@ -11,8 +11,7 @@ import Link from 'next/link'
 import { API_ROUTES } from '@/lib/apiRoutes'
 import JobCard from '@/components/JobCard'
 import LoaderSkeleton from '@/components/SkeletonLoader'
-import JobViewModal from '@/modals/JobViewModal'
-import ApplicationModal from '@/modals/ApplicationModal'
+
 
 const JobsPage = () => {
   // State management
@@ -37,11 +36,7 @@ const JobsPage = () => {
     salary_range: ''
   })
 
-  // Modal states
-  const [showJobViewModal, setShowJobViewModal] = useState(false)
-  const [showApplicationModalNew, setShowApplicationModalNew] = useState(false)
-  const [selectedJobForView, setSelectedJobForView] = useState(null)
-  const [selectedJobForApplication, setSelectedJobForApplication] = useState(null)
+
 
 
 
@@ -263,46 +258,7 @@ const JobsPage = () => {
     }
   }
 
-  // Modal handlers
-  const handleViewJobDetails = (job) => {
-    setSelectedJobForView(job)
-    setShowJobViewModal(true)
-  }
 
-  const handleApplyToJob = (job) => {
-    const authRaw = localStorage.getItem('auth')
-    const auth = authRaw ? JSON.parse(authRaw) : null
-    if (!auth?.token) {
-      // trigger navbar to open login
-      if (typeof window !== 'undefined') window.dispatchEvent(new Event('auth:open-login'))
-      return
-    }
-    setSelectedJobForApplication(job)
-    setShowApplicationModalNew(true)
-  }
-
-  const closeJobViewModal = () => {
-    setShowJobViewModal(false)
-    setSelectedJobForView(null)
-  }
-
-  const closeApplicationModalNew = () => {
-    setShowApplicationModalNew(false)
-    setSelectedJobForApplication(null)
-  }
-
-  // Event listeners for custom events
-  useEffect(() => {
-    const handleOpenJobApplication = (event) => {
-      handleApplyToJob(event.detail)
-    }
-
-    window.addEventListener('open-job-application', handleOpenJobApplication)
-
-    return () => {
-      window.removeEventListener('open-job-application', handleOpenJobApplication)
-    }
-  }, [])
 
   // Effects
   useEffect(() => {
@@ -548,7 +504,7 @@ const JobsPage = () => {
             <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {paginatedJobs.map(job => (
                 <div key={job._id} className="group bg-white border border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-[#5C3AEB] hover:shadow-lg transition-all duration-300 flex flex-col">
-                  <JobCard job={job} onViewDetails={handleViewJobDetails} onApply={handleApplyToJob} />
+                  <JobCard job={job} />
                 </div>
               ))}
             </div>
@@ -608,19 +564,7 @@ const JobsPage = () => {
         )}
       </div>
 
-      {/* Job View Modal */}
-      <JobViewModal
-        job={selectedJobForView}
-        isOpen={showJobViewModal}
-        onClose={closeJobViewModal}
-      />
 
-      {/* Application Modal */}
-      <ApplicationModal
-        job={selectedJobForApplication}
-        isOpen={showApplicationModalNew}
-        onClose={closeApplicationModalNew}
-      />
     </div>
   )
 }

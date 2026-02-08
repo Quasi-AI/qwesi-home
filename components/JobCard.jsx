@@ -1,6 +1,8 @@
 'use client'
 import React from 'react'
 import { MapPin, Building, Clock, Heart, ArrowRight, DollarSign, Target } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 
 const JobCard = ({ job, onViewDetails, onApply }) => {
@@ -109,20 +111,20 @@ const JobCard = ({ job, onViewDetails, onApply }) => {
 
       {/* Actions */}
       <div className="flex items-center justify-between mt-auto">
-        <button
-          onClick={handleViewDetails}
+        <Link
+          href={`/jobs/${job._id}`}
           className="text-sm font-semibold text-[#5C3AEB] hover:text-[#342299] transition-colors flex items-center gap-1"
         >
           <span>View Details</span>
           <ArrowRight className="w-3 h-3" />
-        </button>
+        </Link>
 
-        <button
-          onClick={handleApply}
+        <Link
+          href={`/jobs/${job._id}?apply=true`}
           className="px-4 py-2 bg-[#5C3AEB] text-white text-sm font-semibold rounded-lg hover:bg-[#342299] transition-colors"
         >
           Apply Now
-        </button>
+        </Link>
       </div>
     </div>
   )
